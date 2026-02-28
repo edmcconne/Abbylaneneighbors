@@ -487,12 +487,13 @@ var DOC_NAME = "Abby Lane Lawsuit - Master Document";
 // Leave blank if not yet created - external users will see a request button.
 var EXT_LINK = "https://1drv.ms/f/c/f48a627c72e8b791/IgCvDbT-EoaXTqPoCDfA031mAfkLaZ1aGQfpakM9Oxa5SyA";
 var EXT_EXPIRY = "";  // e.g. "Mar 07 2026"
-var REVIEWER_TOKEN = "0A1B2C";  // Change this after each use
+var REVIEWER_TOKEN      = "0A1B2C";  // Current token — user enters this
+var REVIEWER_TOKEN_NEXT = "1B2C3D";  // Next token — paste into your reply to user, then swap values above
 
 var USERS = [
   { name:"Edward McConnell",     email:"edmcconne"      +"@"+"gmail.com",              dateSigned:"Feb 26 2026", signature:"Edward McConnell",     hasAccess:true,  microsoftAccount:true  },
   { name:"EdView",               email:"abbylaneneighbors"+"@"+"gmail.com",            dateSigned:"Feb 26 2026", signature:"EdView",               hasAccess:true,  microsoftAccount:true  },
-  { name:"EdExt",                email:""       +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:false },
+  { name:"EdExt",                email:"edext18"       +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:false },
   { name:"Ashley Rich Cornicello",email:"ashley"        +"@"+"collegiatesealers.com",  dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true  },
   { name:"Brenda Gilbert",       email:"bcg3812"        +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true  },
   { name:"Jim Breeden",          email:"jcb"            +"@"+"lawbreeden.com",         dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true  },
@@ -711,7 +712,7 @@ function verifyReviewerToken() {
 
 function notifyReviewerAccess(name, email) {
   var subject = encodeURIComponent('Reviewer Access Used — ' + name);
-  var body = encodeURIComponent('Hi,\n\nThe reviewer copy has been accessed.\n\nName: ' + name + '\nEmail: ' + email + '\nTime: ' + new Date().toLocaleString() + '\n\nPlease update the reviewer copy and generate a new access code.');
+  var body = encodeURIComponent('Reviewer copy has been accessed.\n\nName: ' + name + '\nEmail: ' + email + '\nTime: ' + new Date().toLocaleString() + '\n\n---\nNext token to send user in reply: ' + REVIEWER_TOKEN_NEXT + '\nAfter replying, update portal CONFIG:\n  REVIEWER_TOKEN = "' + REVIEWER_TOKEN_NEXT + '"\n  REVIEWER_TOKEN_NEXT = "<generate new value>"');
   window.open('mailto:' + REQ + '?subject=' + subject + '&body=' + body, '_blank');
   document.getElementById('reviewer-notify-confirm').style.display = 'block';
 }
