@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abby Lane Neighbors — Confidentiality Acknowledgment</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:    #0f1e2e;
+    --navy2:   #162840;
+    --gold:    #c9a84c;
+    --gold2:   #e8c96a;
+    --cream:   #f5f0e8;
+    --paper:   #faf7f2;
+    --ink:     #1a1a2e;
+    --muted:   #6b7280;
+    --border:  #d4c5a9;
+    --success: #2d6a4f;
+    --danger:  #8b1a1a;
+    --shadow:  0 4px 24px rgba(15,30,46,0.13);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Source Serif 4', Georgia, serif;
+    background: var(--navy);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 0 60px;
+  }
+  .site-header {
+    width: 100%;
+    background: var(--navy2);
+    border-bottom: 2px solid var(--gold);
+    padding: 22px 40px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 40px;
+  }
+  .site-header .seal {
+    width: 52px; height: 52px;
+    border: 2px solid var(--gold);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gold); font-size: 22px; flex-shrink: 0;
+  }
+  .site-header h1 {
+    font-family: 'Playfair Display', serif;
+    color: var(--cream);
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .site-header p {
+    color: var(--gold);
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 300;
+    margin-top: 2px;
+  }
+  .card {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 680px;
+    padding: 44px 48px;
+    margin: 0 20px;
+  }
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: var(--navy);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .card-subtitle {
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .field { margin-bottom: 22px; }
+  .field label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--navy);
+    margin-bottom: 7px;
+  }
+  .field select,
+  .field input[type="text"],
+  .field input[type="email"],
+  .field input[type="date"] {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: white;
+    font-family: 'Source Serif 4', serif;
+    font-size: 0.95rem;
+    color: var(--ink);
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .field select:focus, .field input:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
+  }
+  .field select {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+  .check-section {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    margin-bottom: 22px;
+    overflow: hidden;
+  }
+  .check-section-title {
+    background: var(--navy);
+    color: var(--cream);
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 9px 16px;
+    font-weight: 600;
+  }
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 13px 16px;
+    border-bottom: 1px solid #f0ebe0;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .check-item:last-child { border-bottom: none; }
+  .check-item:hover { background: #fdf9f2; }
+  .check-item input[type="checkbox"] {
+    width: 18px; height: 18px;
+    margin-top: 1px; flex-shrink: 0;
+    accent-color: var(--navy);
+    cursor: pointer;
+  }
+  .check-item span { font-size: 0.9rem; line-height: 1.5; color: var(--ink); }
+  .check-item.readonly { cursor: default; }
+  .check-item.readonly:hover { background: white; }
+  .ro-field {
+    display: flex;
+    padding: 11px 0;
+    border-bottom: 1px solid #f0ebe0;
+    font-size: 0.92rem;
+  }
+  .ro-field:last-child { border-bottom: none; }
+  .ro-label {
+    width: 120px; flex-shrink: 0;
+    color: var(--muted);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding-top: 2px;
+  }
+  .ro-value { color: var(--ink); }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 13px 28px;
+    border-radius: 3px;
+    font-family: 'Source Serif 4', serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+  .btn-primary { background: var(--navy); color: var(--cream); }
+  .btn-primary:hover { background: var(--navy2); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15,30,46,0.25); }
+  .btn-gold { background: var(--gold); color: var(--navy); }
+  .btn-gold:hover { background: var(--gold2); transform: translateY(-1px); }
+  .btn-outline { background: transparent; color: var(--navy); border: 1.5px solid var(--navy); }
+  .btn-outline:hover { background: var(--navy); color: var(--cream); }
+  .btn-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
+  .alert {
+    padding: 13px 16px;
+    border-radius: 3px;
+    font-size: 0.88rem;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .alert-warn  { background: #fef9ec; border-left: 3px solid var(--gold);    color: #5c4a12; }
+  .alert-success { background: #ecf7f0; border-left: 3px solid var(--success); color: #1a4a30; }
+  .alert-info  { background: #eef2f8; border-left: 3px solid #3b6cbd;        color: #1e3a6e; }
+  .alert-error { background: #fdf0f0; border-left: 3px solid var(--danger);  color: var(--danger); }
+  .doc-link-box {
+    background: linear-gradient(135deg, var(--navy) 0%, #1a3a5c 100%);
+    border-radius: 4px;
+    padding: 28px 30px;
+    text-align: center;
+    margin-top: 28px;
+  }
+  .doc-link-box .icon { font-size: 2.2rem; margin-bottom: 10px; }
+  .doc-link-box h3 { font-family: 'Playfair Display', serif; color: var(--cream); font-size: 1.15rem; margin-bottom: 8px; }
+  .doc-link-box p { color: var(--gold); font-size: 0.83rem; margin-bottom: 18px; font-style: italic; }
+  .privilege-banner {
+    background: var(--navy);
+    color: var(--gold);
+    text-align: center;
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 8px 20px;
+    margin-bottom: 24px;
+    border-radius: 2px;
+  }
+  .step-badge {
+    display: inline-block;
+    background: var(--gold);
+    color: var(--navy);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+  }
+  .sig-note { font-size: 0.78rem; color: var(--muted); font-style: italic; margin-top: 5px; }
+  .pending-box {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 20px 22px;
+    margin-top: 20px;
+    font-size: 0.88rem;
+    line-height: 1.7;
+  }
+  .footer-note {
+    margin-top: 24px;
+    font-size: 0.78rem;
+    color: rgba(245,240,232,0.4);
+    text-align: center;
+    font-style: italic;
+  }
+  .screen { display: none; }
+  .screen.active { display: block; }
+  @media (max-width: 600px) {
+    .card { padding: 28px 22px; }
+    .site-header { padding: 16px 20px; }
+    .site-header h1 { font-size: 1.1rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="seal">&#9878;</div>
+  <div>
+    <h1>Abby Lane Neighbors</h1>
+    <p>Attorney-Client Privilege &middot; Confidential Materials</p>
+  </div>
+</header>
+
+<!-- SCREEN 1: IDENTITY -->
+<div id="screen-identity" class="screen active">
+  <div class="card">
+    <div class="step-badge">Step 1 of 2</div>
+    <h2 class="card-title">Identity Verification</h2>
+    <p class="card-subtitle">Select your name and enter your email address to continue. New members should use the button at the bottom.</p>
+    <div class="field">
+      <label for="sel-name">Your Name</label>
+      <select id="sel-name">
+        <option value="">-- Select your name --</option>
+        <option value="0">Edward McConnell</option>
+        <option value="1">EdView</option>
+        <option value="2">EdExt</option>
+        <option value="3">Ashley Rich Cornicello</option>
+        <option value="4">Brenda Gilbert</option>
+        <option value="5">Jim Breeden</option>
+        <option value="6">Katie McConnell</option>
+        <option value="7">Morris Martin</option>
+        <option value="8">Richard Cornicello</option>
+        <option value="9">Robin Spence</option>
+        <option value="10">Shirley Mo Martin</option>
+        <option value="11">Bill and Merrill Noel</option>
+        <option value="12">Spence Lundie</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="inp-email">Your Email Address</label>
+      <input type="email" id="inp-email" placeholder="yourname@example.com" autocomplete="email">
+    </div>
+    <div id="identity-error" class="alert alert-error" style="display:none"></div>
+    <div id="identity-followup" class="alert alert-warn" style="display:none">
+      The owner has been notified. You will receive an email once the portal has been updated with your email address. Return here afterwards to complete your acknowledgment form.
+      <br><br>
+      <em>You may now close this browser tab.</em>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="verifyIdentity()">&#128274; Verify and Continue</button>
+    </div>
+    <hr class="divider">
+    <div class="alert alert-info">
+      <strong>New member?</strong> If your name is not in the list, click below to request access.
+    </div>
+    <button class="btn btn-outline" onclick="showScreen('screen-newuser')">&#9993; Request Access as New Member</button>
+  </div>
+  <p class="footer-note">This portal is restricted to authorized members of the Abby Lane Neighbors group.</p>
+</div>
+
+<!-- SCREEN 2: RETURNING USER -->
+<div id="screen-returning" class="screen">
+  <div class="card">
+    <div class="privilege-banner">&#9878; Attorney-Client Privilege &mdash; Confidential</div>
+    <div class="step-badge">Acknowledged</div>
+    <h2 class="card-title">Your Acknowledgment</h2>
+    <p class="card-subtitle">Your confidentiality acknowledgment is on file. Review it below and proceed to the document.</p>
+    <div id="returning-form-display"></div>
+    <div id="doc-access-box"></div>
+    <hr class="divider">
+    <button class="btn btn-outline" onclick="showScreen('screen-identity')" style="font-size:0.82rem;padding:9px 18px;">&#8592; Back to Login</button>
+  </div>
+</div>
+
+<!-- SCREEN 3: NEW USER -->
+<div id="screen-newuser" class="screen">
+  <div class="card">
+    <div class="privilege-banner">&#9878; Attorney-Client Privilege &mdash; Confidential</div>
+    <div class="step-badge">New Member Request</div>
+    <h2 class="card-title">Acknowledgment and Access Request</h2>
+    <p class="card-subtitle">Complete this form to request access. You will receive a one-time access link once your submission is received.</p>
+    <div class="field">
+      <label for="new-name">Full Name *</label>
+      <input type="text" id="new-name" placeholder="Your full legal name">
+    </div>
+    <div class="field">
+      <label for="new-email">Email Address *</label>
+      <input type="email" id="new-email" placeholder="yourname@example.com">
+    </div>
+    <div class="field">
+      <label for="new-date">Today's Date *</label>
+      <input type="date" id="new-date">
+    </div>
+    <div class="check-section">
+      <div class="check-section-title">I acknowledge and agree to all of the following:</div>
+      <label class="check-item"><input type="checkbox" class="new-check"><span>1 &mdash; Maintain strict confidentiality of all materials</span></label>
+      <label class="check-item"><input type="checkbox" class="new-check"><span>2 &mdash; Not forward, share, or discuss materials outside the authorized group</span></label>
+      <label class="check-item"><input type="checkbox" class="new-check"><span>3 &mdash; Use Track Changes for all document edits</span></label>
+      <label class="check-item"><input type="checkbox" class="new-check"><span>4 &mdash; Immediately notify the owner if materials are accidentally shared</span></label>
+      <label class="check-item"><input type="checkbox" class="new-check"><span>5 &mdash; Not save materials to unsecured locations</span></label>
+      <label class="check-item"><input type="checkbox" class="new-check"><span>6 &mdash; I have read and agree to all terms and am submitting this form</span></label>
+    </div>
+    <div class="field">
+      <label for="new-sig">Electronic Signature *</label>
+      <input type="text" id="new-sig" placeholder="Type your full name as your signature">
+      <p class="sig-note">Typing your name constitutes your electronic signature.</p>
+    </div>
+    <div id="newuser-error" class="alert alert-error" style="display:none"></div>
+    <div class="btn-row">
+      <button class="btn btn-gold" onclick="submitNewUser()">&#128203; Copy Acknowledgment and Open Email</button>
+    </div>
+    <div id="newuser-confirm" class="alert alert-success" style="display:none;margin-top:14px;">
+      Your acknowledgment has been copied to your clipboard. An email window should open &mdash; paste your acknowledgment into the body and click Send.
+    </div>
+    <div id="newuser-pending" class="pending-box" style="display:none">
+      <strong>What happens next:</strong><br>
+      1. Paste your acknowledgment into the email that opened and click Send.<br>
+      2. Once received, you will be sent a one-time access link to the document.<br>
+      3. If you have a Microsoft account, permanent access will be arranged.<br><br>
+      <strong>To receive permanent document access:</strong><br>
+      Please ensure you have a free Microsoft account using the same email address you entered on this form. If you do not have one, create one free at <a href="https://account.microsoft.com" target="_blank">account.microsoft.com</a> using that same email address.
+    </div>
+    <hr class="divider">
+    <button class="btn btn-outline" onclick="showScreen('screen-identity')" style="font-size:0.82rem;padding:9px 18px;">&#8592; Back</button>
+  </div>
+</div>
+
+<!-- SCREEN 4: KNOWN USER NOT YET ACKNOWLEDGED -->
+<div id="screen-known-user" class="screen">
+  <div class="card">
+    <div class="privilege-banner">&#9878; Attorney-Client Privilege &mdash; Confidential</div>
+    <div class="step-badge">Step 2 of 2 &mdash; Complete Your Acknowledgment</div>
+    <h2 class="card-title">Confidentiality Acknowledgment</h2>
+    <p class="card-subtitle">You have been pre-authorized. Please complete this acknowledgment to gain access to the document.</p>
+    <div class="alert alert-info">Your name and email are pre-filled. Please review, complete the form, and submit.</div>
+    <div class="field">
+      <label for="ku-name">Full Name</label>
+      <input type="text" id="ku-name" readonly style="background:#f5f0e8;color:var(--muted);cursor:not-allowed;">
+    </div>
+    <div class="field">
+      <label for="ku-email">Email Address</label>
+      <input type="email" id="ku-email" readonly style="background:#f5f0e8;color:var(--muted);cursor:not-allowed;">
+    </div>
+    <input type="hidden" id="ku-microsoft" value="true">
+    </div>
+    <div class="field">
+      <label for="ku-date">Today's Date *</label>
+      <input type="date" id="ku-date">
+    </div>
+    <div class="check-section">
+      <div class="check-section-title">I acknowledge and agree to all of the following:</div>
+      <label class="check-item"><input type="checkbox" class="ku-check"><span>1 &mdash; Maintain strict confidentiality of all materials</span></label>
+      <label class="check-item"><input type="checkbox" class="ku-check"><span>2 &mdash; Not forward, share, or discuss materials outside the authorized group</span></label>
+      <label class="check-item"><input type="checkbox" class="ku-check"><span>3 &mdash; Use Track Changes for all document edits</span></label>
+      <label class="check-item"><input type="checkbox" class="ku-check"><span>4 &mdash; Immediately notify the owner if materials are accidentally shared</span></label>
+      <label class="check-item"><input type="checkbox" class="ku-check"><span>5 &mdash; Not save materials to unsecured locations</span></label>
+      <label class="check-item"><input type="checkbox" class="ku-check"><span>6 &mdash; I have read and agree to all terms and am submitting this form</span></label>
+    </div>
+    <div class="field">
+      <label for="ku-sig">Electronic Signature *</label>
+      <input type="text" id="ku-sig" placeholder="Type your full name as your signature">
+      <p class="sig-note">Typing your name constitutes your electronic signature.</p>
+    </div>
+    <div id="ku-error" class="alert alert-error" style="display:none"></div>
+    <div class="btn-row">
+      <button class="btn btn-gold" onclick="submitKnownUser()">&#128203; Copy Acknowledgment and Open Email</button>
+    </div>
+    <div id="ku-confirm" class="alert alert-success" style="display:none;margin-top:14px;">
+      Your acknowledgment has been copied to your clipboard. An email window should open &mdash; paste your acknowledgment into the body and click Send.
+    </div>
+    <div id="ku-pending" class="pending-box" style="display:none">
+      <strong>What happens next:</strong><br>
+      1. Paste your acknowledgment into the email that opened and click Send.<br>
+      2. Once received, you will be granted access and can log back in here to reach the document.<br><br>
+      <strong>To receive permanent document access:</strong><br>
+      Please ensure you have a free Microsoft account using the same email address you entered on this form. If you do not have one, create one free at <a href="https://account.microsoft.com" target="_blank">account.microsoft.com</a> using that same email address.
+    </div>
+    <hr class="divider">
+    <button class="btn btn-outline" onclick="showScreen('screen-identity')" style="font-size:0.82rem;padding:9px 18px;">&#8592; Back</button>
+  </div>
+</div>
+
+<!-- SCREEN 5: PENDING APPROVAL -->
+<div id="screen-pending" class="screen">
+  <div class="card">
+    <div class="step-badge">Pending Approval</div>
+    <h2 class="card-title">Access Pending</h2>
+    <p class="card-subtitle">Your acknowledgment has been received. Access has not yet been granted.</p>
+    <div class="alert alert-warn">
+      Your request is under review. You will be contacted with an access link once processed. Please check your email at <strong id="pending-email-display"></strong>.
+    </div>
+    <div class="pending-box">
+      <strong>In the meantime:</strong><br>
+      If you believe your access should already be active, please contact abbylaneneighbors at gmail dot com directly.
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="showScreen('screen-identity')" style="font-size:0.82rem;padding:9px 18px;">&#8592; Back to Login</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// OWNER CONFIGURATION
+// To add a user: copy a user block, fill in name and email,
+// leave dateSigned and signature blank, set hasAccess to false.
+// After they acknowledge and you grant OneDrive access:
+//   set hasAccess to true, fill in dateSigned and signature.
+// microsoftAccount: true  = gets permanent document link
+// microsoftAccount: false = gets weekly external link
+// ============================================================
+
+var REQ = "abbylaneneighbors" + "@" + "gmail.com";
+var DOC_LINK = "https://1drv.ms/w/c/f48a627c72e8b791/IQB39KvXo4FAQY0m4_nmzKm5AXnoxW2_turLT1f4sf2o91c";
+var DOC_NAME = "Abby Lane Lawsuit - Master Document";
+
+// Update every Monday with a new 7-day OneDrive anyone link.
+// Leave blank if not yet created - external users will see a request button.
+var EXT_LINK = "https://1drv.ms/f/c/f48a627c72e8b791/IgCvDbT-EoaXTqPoCDfA031mAfkLaZ1aGQfpakM9Oxa5SyA";
+var EXT_EXPIRY = "";  // e.g. "Mar 07 2026"
+var REVIEWER_TOKEN = "0A1B2C";  // Change this after each use
+
+var USERS = [
+  { name:"Edward McConnell",     email:"edmcconne"      +"@"+"gmail.com",              dateSigned:"Feb 26 2026", signature:"Edward McConnell",     hasAccess:true,  microsoftAccount:true  },
+  { name:"EdView",               email:"abbylaneneighbors"+"@"+"gmail.com",            dateSigned:"Feb 26 2026", signature:"EdView",               hasAccess:true,  microsoftAccount:true  },
+  { name:"EdExt",                email:"edext18"       +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:false },
+  { name:"Ashley Rich Cornicello",email:"ashley"        +"@"+"collegiatesealers.com",  dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true  },
+  { name:"Brenda Gilbert",       email:"bcg3812"        +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true  },
+  { name:"Jim Breeden",          email:"jcb"            +"@"+"lawbreeden.com",         dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true  },
+  { name:"Katie McConnell",      email:"ktmc"           +"@"+"mail.com",               dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true  },
+  { name:"Morris Martin",        email:"martinmo404"    +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true  },
+  { name:"Richard Cornicello",   email:"rich"           +"@"+"collegiatesealers.com",  dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true  },
+  { name:"Robin Spence",         email:"baltirobin"     +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true  },
+  { name:"Shirley Mo Martin",    email:"srmartin736"    +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true  },
+  { name:"Bill and Merrill Noel",email:"splicer22"      +"@"+"aol.com",                dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true  },
+  { name:"Spence Lundie",        email:"spencelundie"   +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true  }
+];
+
+// ============================================================
+// PAGE INIT
+// ============================================================
+(function init() {
+  var dateEl = document.getElementById('new-date');
+  if (dateEl) {
+    var t = new Date();
+    var mm = String(t.getMonth()+1).padStart(2,'0');
+    var dd = String(t.getDate()).padStart(2,'0');
+    dateEl.value = t.getFullYear() + '-' + mm + '-' + dd;
+  }
+})();
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function notifyOwnerMismatch(mailto) {
+  window.open(mailto, '_blank');
+  document.getElementById('identity-error').style.display = 'none';
+  document.getElementById('identity-followup').style.display = 'block';
+}
+
+function showScreen(id) {
+  var screens = document.querySelectorAll('.screen');
+  for (var i = 0; i < screens.length; i++) {
+    screens[i].classList.remove('active');
+  }
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function showErr(elId, msg) {
+  var el = document.getElementById(elId);
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+// ============================================================
+// VERIFY IDENTITY
+// ============================================================
+function verifyIdentity() {
+  document.getElementById('identity-error').style.display = 'none';
+
+  var sel = document.getElementById('sel-name');
+  var emailInput = document.getElementById('inp-email');
+  var idx = parseInt(sel.value);
+  var enteredEmail = emailInput.value.trim().toLowerCase();
+
+  if (sel.value === '' || isNaN(idx)) {
+    showErr('identity-error', 'Please select your name from the list.');
+    return;
+  }
+  if (!enteredEmail) {
+    showErr('identity-error', 'Please enter your email address.');
+    return;
+  }
+  if (idx < 0 || idx >= USERS.length) {
+    showErr('identity-error', 'Selection error. Please try again.');
+    return;
+  }
+
+  var user = USERS[idx];
+
+  if (!user || !user.email) {
+    showErr('identity-error', 'No record found. If you are new, please use the Request Access button below.');
+    return;
+  }
+
+  if (user.email.toLowerCase() !== enteredEmail) {
+    var errEl = document.getElementById('identity-error');
+    var mailto = 'mailto:' + REQ +
+      '?subject=' + encodeURIComponent('Email Update Request — ' + user.name) +
+      '&body=' + encodeURIComponent('Hi,\n\nI am trying to access the portal but my email address does not match your records.\n\nMy name on the list: ' + user.name + '\nEmail I am trying to use: ' + enteredEmail + '\n\nPlease update my record so I can access the portal.');
+    errEl.innerHTML = 'Email address does not match our records for this name. Please check and try again, or <a href="#" onclick="notifyOwnerMismatch(\'' + mailto.replace(/'/g, "\\'") + '\')" style="color:#8b1a1a;font-weight:bold;">click here to notify the owner</a> — your name and the email you entered will be included automatically.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  // Route by status
+  if (!user.hasAccess && !user.dateSigned) {
+    // Pre-added, not yet acknowledged
+    document.getElementById('ku-name').value = user.name;
+    document.getElementById('ku-email').value = user.email;
+    document.getElementById('ku-microsoft').value = user.microsoftAccount ? 'true' : 'false';
+    var t = new Date();
+    var mm = String(t.getMonth()+1).padStart(2,'0');
+    var dd = String(t.getDate()).padStart(2,'0');
+    document.getElementById('ku-date').value = t.getFullYear() + '-' + mm + '-' + dd;
+    var checks = document.querySelectorAll('.ku-check');
+    for (var i = 0; i < checks.length; i++) { checks[i].checked = false; }
+    document.getElementById('ku-sig').value = '';
+    document.getElementById('ku-error').style.display = 'none';
+    document.getElementById('ku-confirm').style.display = 'none';
+    document.getElementById('ku-pending').style.display = 'none';
+    showScreen('screen-known-user');
+    return;
+  }
+
+  if (!user.hasAccess && user.dateSigned) {
+    // Submitted, waiting for approval
+    document.getElementById('pending-email-display').textContent = user.email;
+    showScreen('screen-pending');
+    return;
+  }
+
+  // Full access
+  buildReturningView(user);
+  showScreen('screen-returning');
+}
+
+// ============================================================
+// BUILD RETURNING USER VIEW
+// ============================================================
+function buildReturningView(user) {
+  var checks = [
+    '1 - Maintain strict confidentiality of all materials',
+    '2 - Not forward, share, or discuss materials outside the authorized group',
+    '3 - Use Track Changes for all document edits',
+    '4 - Immediately notify the owner if materials are accidentally shared',
+    '5 - Not save materials to unsecured locations',
+    '6 - Copied and emailed this acknowledgment form'
+  ];
+  var checkHtml = '';
+  for (var i = 0; i < checks.length; i++) {
+    checkHtml += '<div class="check-item readonly"><input type="checkbox" checked disabled style="accent-color:var(--success)"><span style="color:#2d6a4f">' + checks[i] + '</span></div>';
+  }
+
+  document.getElementById('returning-form-display').innerHTML =
+    '<div class="check-section">' +
+      '<div class="check-section-title">Submission Details</div>' +
+      '<div style="padding:10px 16px;">' +
+        '<div class="ro-field"><span class="ro-label">Name</span><span class="ro-value">' + safeText(user.name) + '</span></div>' +
+        '<div class="ro-field"><span class="ro-label">Date Signed</span><span class="ro-value">' + safeText(user.dateSigned) + '</span></div>' +
+        '<div class="ro-field"><span class="ro-label">Signature</span><span class="ro-value">' + safeText(user.signature) + '</span></div>' +
+        '<div class="ro-field"><span class="ro-label">Email</span><span class="ro-value">' + safeText(user.email) + '</span></div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="check-section">' +
+      '<div class="check-section-title">Acknowledged Items - All Confirmed</div>' +
+      checkHtml +
+    '</div>';
+
+  var docHtml = '';
+  if (user.microsoftAccount) {
+    docHtml =
+      '<div class="doc-link-box">' +
+        '<div class="icon">&#128196;</div>' +
+        '<h3>' + safeText(DOC_NAME) + '</h3>' +
+        '<p>Your acknowledgment is on file. Click below to access the document.</p>' +
+        '<a href="' + DOC_LINK + '" target="_blank" class="btn btn-gold">&#128279; Open Document</a>' +
+      '</div>';
+  } else if (EXT_LINK) {
+    var tokenMailBody = encodeURIComponent('Your reviewer access code is: ' + REVIEWER_TOKEN + '\n\nReturn to the portal and enter this code to access the reviewer copy of the document.\n\nIMPORTANT: When you receive this email in your inbox, please forward it to ' + REQ + ' so the owner can confirm your access.');
+    var tokenMailSubject = encodeURIComponent('Abby Lane Neighbors - Reviewer Access Code');
+    docHtml =
+      '<div class="doc-link-box">' +
+        '<div class="icon">&#128196;</div>' +
+        '<h3>' + safeText(DOC_NAME) + '</h3>' +
+        '<p>Your acknowledgment is on file. Click below to send yourself an access code, then enter it to open the reviewer copy.</p>' +
+        '<div style="margin:16px 0;">' +
+          '<a href="mailto:' + safeText(user.email) + '?cc=' + REQ + '&subject=' + tokenMailSubject + '&body=' + tokenMailBody + '" target="_blank" class="btn btn-gold" style="margin-bottom:12px;">&#9993; Send Me an Access Code</a>' +
+        '</div>' +
+        '<p style="color:var(--gold);font-size:0.83rem;font-style:italic;margin-bottom:12px;">After sending and receiving the email, forward it to ' + REQ + ' then enter the code below:</p>' +
+        '<div style="margin:8px 0;">' +
+          '<input type="text" id="reviewer-token-input" placeholder="Enter access code" style="padding:10px 14px;font-size:1rem;border:1px solid #d4c5a9;border-radius:3px;width:200px;margin-right:10px;">' +
+          '<button onclick="verifyReviewerToken()" class="btn btn-gold" style="padding:10px 18px;">&#128274; Submit</button>' +
+        '</div>' +
+        '<div id="reviewer-token-error" style="color:#8b1a1a;font-size:0.85rem;display:none;margin-top:8px;"></div>' +
+        '<div id="reviewer-link-box" style="display:none;margin-top:16px;">' +
+          '<p style="color:var(--gold);font-size:0.83rem;font-style:italic;margin-bottom:12px;">Access code accepted. Click below to open the reviewer copy of the document.</p>' +
+          '<a href="' + EXT_LINK + '" target="_blank" class="btn btn-gold" onclick="notifyReviewerAccess(\'' + safeText(user.name) + '\',\'' + safeText(user.email) + '\')">&#128279; Open Reviewer Copy</a>' +
+          '<div id="reviewer-notify-confirm" style="color:var(--gold);font-size:0.83rem;display:none;margin-top:10px;">Owner has been notified of your access.</div>' +
+        '</div>' +
+      '</div>';
+
+  } else {
+    docHtml =
+      '<div class="doc-link-box">' +
+        '<div class="icon">&#9203;</div>' +
+        '<h3>Document Access Temporarily Unavailable</h3>' +
+        '<p>Your acknowledgment is on file but the access link needs to be refreshed. Click below to notify the administrator.</p>' +
+        '<a href="mailto:' + REQ + '?subject=Document%20Access%20Request%20-%20' + encodeURIComponent(user.name) + '&body=' + encodeURIComponent('Hi,\n\nI am requesting a current access link to the Abby Lane Neighbors lawsuit document.\n\nName: ' + user.name + '\nEmail: ' + user.email + '\n\nNOTE: I would like to set up permanent access. I have / will create a free Microsoft account at https://account.microsoft.com\nMy Microsoft account email is: ___________________________') + '" class="btn btn-gold">&#9993; Request New Access Link</a>' +
+      '</div>';
+  }
+  document.getElementById('doc-access-box').innerHTML = docHtml;
+}
+
+function verifyReviewerToken() {
+  var input = document.getElementById('reviewer-token-input').value.trim().toUpperCase();
+  var errEl = document.getElementById('reviewer-token-error');
+  if (!input) {
+    errEl.textContent = 'Please enter the access code.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (input !== REVIEWER_TOKEN.toUpperCase()) {
+    errEl.textContent = 'Access code is incorrect. Please check and try again, or contact the owner.';
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+  document.getElementById('reviewer-link-box').style.display = 'block';
+}
+
+function notifyReviewerAccess(name, email) {
+  var subject = encodeURIComponent('Reviewer Access Used — ' + name);
+  var body = encodeURIComponent('Hi,\n\nThe reviewer copy has been accessed.\n\nName: ' + name + '\nEmail: ' + email + '\nTime: ' + new Date().toLocaleString() + '\n\nPlease update the reviewer copy and generate a new access code.');
+  window.open('mailto:' + REQ + '?subject=' + subject + '&body=' + body, '_blank');
+  document.getElementById('reviewer-notify-confirm').style.display = 'block';
+}
+
+// ============================================================
+// SUBMIT NEW USER
+// ============================================================
+function submitNewUser() {
+  document.getElementById('newuser-error').style.display = 'none';
+  document.getElementById('newuser-confirm').style.display = 'none';
+  document.getElementById('newuser-pending').style.display = 'none';
+
+  var name  = document.getElementById('new-name').value.trim();
+  var email = document.getElementById('new-email').value.trim();
+  var date  = document.getElementById('new-date').value;
+  var sig   = document.getElementById('new-sig').value.trim();
+  var checks = document.querySelectorAll('.new-check');
+  var allChecked = true;
+  for (var i = 0; i < checks.length; i++) { if (!checks[i].checked) { allChecked = false; break; } }
+
+  if (!name)  { showErr('newuser-error', 'Please enter your full name.'); return; }
+  if (!email || email.indexOf('@') < 0) { showErr('newuser-error', 'Please enter a valid email address.'); return; }
+  if (!date)  { showErr('newuser-error', 'Please enter today\'s date.'); return; }
+  if (!allChecked) { showErr('newuser-error', 'Please check all six acknowledgment boxes.'); return; }
+  if (!sig)   { showErr('newuser-error', 'Please type your full name as your signature.'); return; }
+
+  var niceDate = formatDate(date);
+  var body = buildAckText(name, email, niceDate, sig, true, false);
+  copyToClipboard(body);
+  var subject = encodeURIComponent('Access Request and Acknowledgment - ' + name);
+  window.open('mailto:' + REQ + '?subject=' + subject, '_blank');
+  document.getElementById('newuser-confirm').style.display = 'block';
+  document.getElementById('newuser-pending').style.display = 'block';
+}
+
+// ============================================================
+// SUBMIT KNOWN USER
+// ============================================================
+function submitKnownUser() {
+  document.getElementById('ku-error').style.display = 'none';
+  document.getElementById('ku-confirm').style.display = 'none';
+  document.getElementById('ku-pending').style.display = 'none';
+
+  var name  = document.getElementById('ku-name').value.trim();
+  var email = document.getElementById('ku-email').value.trim();
+  var date  = document.getElementById('ku-date').value;
+  var sig   = document.getElementById('ku-sig').value.trim();
+  var checks = document.querySelectorAll('.ku-check');
+  var allChecked = true;
+  for (var i = 0; i < checks.length; i++) { if (!checks[i].checked) { allChecked = false; break; } }
+
+  if (!date)  { showErr('ku-error', 'Please enter today\'s date.'); return; }
+  if (!allChecked) { showErr('ku-error', 'Please check all six acknowledgment boxes.'); return; }
+  if (!sig)   { showErr('ku-error', 'Please type your full name as your signature.'); return; }
+
+  var niceDate = formatDate(date);
+  var body = buildAckText(name, email, niceDate, sig, false, document.getElementById('ku-microsoft').value === 'true');
+  copyToClipboard(body);
+  var subject = encodeURIComponent('Acknowledgment Submission - ' + name);
+  window.open('mailto:' + REQ + '?subject=' + subject, '_blank');
+  document.getElementById('ku-confirm').style.display = 'block';
+  document.getElementById('ku-pending').style.display = 'block';
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function buildAckText(name, email, date, sig, isNew, hasMicrosoft) {
+  return 'ATTORNEY-CLIENT PRIVILEGE ACKNOWLEDGMENT' +
+    (isNew ? '\nACCESS REQUEST' : '') +
+    '\n\nName: ' + name +
+    '\nEmail: ' + email +
+    '\nDate: ' + date +
+    '\nMicrosoft Account: ' + (hasMicrosoft ? 'YES' : 'NO - use temporary link') +
+    '\n\nI acknowledge and agree to:\n' +
+    '\n1. Maintain strict confidentiality of all materials: YES' +
+    '\n2. Not forward, share, or discuss materials outside authorized group: YES' +
+    '\n3. Use Track Changes for all document edits: YES' +
+    '\n4. Immediately notify owner if materials are accidentally shared: YES' +
+    '\n5. Not save materials to unsecured locations: YES' +
+    '\n6. I have submitted this acknowledgment form: YES' +
+    '\n\nSignature: ' + sig +
+    (isNew ? '\n\n---\nThis is an access request for the Abby Lane Neighbors lawsuit document.\nPlease reply with a one-time access link.' : '');
+}
+
+function formatDate(dateStr) {
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var d = new Date(dateStr + 'T00:00:00');
+  return months[d.getMonth()] + ' ' + String(d.getDate()).padStart(2,'0') + ' ' + d.getFullYear();
+}
+
+function copyToClipboard(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).catch(function() { fallbackCopy(text); });
+  } else {
+    fallbackCopy(text);
+  }
+}
+
+function fallbackCopy(text) {
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try { document.execCommand('copy'); } catch(e) {}
+  document.body.removeChild(ta);
+}
+
+function safeText(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+</body>
+</html>
