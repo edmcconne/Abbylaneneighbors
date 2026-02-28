@@ -310,6 +310,11 @@
       <input type="email" id="inp-email" placeholder="yourname@example.com" autocomplete="email">
     </div>
     <div id="identity-error" class="alert alert-error" style="display:none"></div>
+    <div id="identity-followup" class="alert alert-warn" style="display:none">
+      The owner has been notified. You will receive an email once the portal has been updated with your email address. Return here afterwards to complete your acknowledgment form.
+      <br><br>
+      <button class="btn btn-outline" onclick="window.close()" style="font-size:0.82rem;padding:9px 18px;">Close this page</button>
+    </div>
     <div class="btn-row">
       <button class="btn btn-primary" onclick="verifyIdentity()">&#128274; Verify and Continue</button>
     </div>
@@ -515,6 +520,12 @@ var USERS = [
 // ============================================================
 // NAVIGATION
 // ============================================================
+function notifyOwnerMismatch(mailto) {
+  window.open(mailto, '_blank');
+  document.getElementById('identity-error').style.display = 'none';
+  document.getElementById('identity-followup').style.display = 'block';
+}
+
 function showScreen(id) {
   var screens = document.querySelectorAll('.screen');
   for (var i = 0; i < screens.length; i++) {
@@ -566,7 +577,7 @@ function verifyIdentity() {
     var mailto = 'mailto:' + REQ +
       '?subject=' + encodeURIComponent('Email Update Request — ' + user.name) +
       '&body=' + encodeURIComponent('Hi,\n\nI am trying to access the portal but my email address does not match your records.\n\nMy name on the list: ' + user.name + '\nEmail I am trying to use: ' + enteredEmail + '\n\nPlease update my record so I can access the portal.');
-    errEl.innerHTML = 'Email address does not match our records for this name. Please check and try again, or <a href="' + mailto + '" target="_blank" style="color:#8b1a1a;font-weight:bold;">click here to notify the owner</a> — your name and the email you entered will be included automatically.';
+    errEl.innerHTML = 'Email address does not match our records for this name. Please check and try again, or <a href="#" onclick="notifyOwnerMismatch(\'' + mailto.replace(/'/g, "\\'") + '\')" style="color:#8b1a1a;font-weight:bold;">click here to notify the owner</a> — your name and the email you entered will be included automatically.';
     errEl.style.display = 'block';
     return;
   }
