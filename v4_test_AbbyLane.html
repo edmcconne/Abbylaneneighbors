@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AbbyLane Test v4</title>
+</head>
+<body>
+<h2>Identity Test</h2>
+
+<label>Name:<br>
+<select id="sel-name">
+  <option value="">-- Select --</option>
+  <option value="0">Edward McConnell</option>
+  <option value="1">EdView</option>
+</select>
+</label>
+<br><br>
+
+<label>Email:<br>
+<input type="text" id="inp-email" placeholder="your email">
+</label>
+<br><br>
+
+<button onclick="verifyIdentity()">Verify</button>
+<br><br>
+
+<div id="result" style="color:red;font-weight:bold;"></div>
+<div id="screen-returning" style="display:none;color:green;">
+  <h3>SUCCESS - Returning User Screen</h3>
+  <p id="ret-name"></p>
+</div>
+
+<script>
+var USERS = [
+  { name:"Edward McConnell", email:"edmcconne" + "@" + "gmail.com", hasAccess:true, dateSigned:"Feb 26 2026", signature:"Edward McConnell", microsoftAccount:true },
+  { name:"EdView",           email:"abbylaneneighbors" + "@" + "gmail.com", hasAccess:true, dateSigned:"Feb 26 2026", signature:"EdView", microsoftAccount:true }
+];
+
+function verifyIdentity() {
+  var result = document.getElementById('result');
+  result.textContent = 'Button clicked - running...';
+
+  var sel = document.getElementById('sel-name');
+  var emailInput = document.getElementById('inp-email');
+
+  result.textContent = 'Got elements...';
+
+  var idx = parseInt(sel.value);
+  var enteredEmail = emailInput.value.trim().toLowerCase();
+
+  result.textContent = 'idx=' + idx + ' email=' + enteredEmail;
+
+  if (sel.value === '' || isNaN(idx)) {
+    result.textContent = 'ERROR: Please select name';
+    return;
+  }
+  if (!enteredEmail) {
+    result.textContent = 'ERROR: Please enter email';
+    return;
+  }
+
+  var user = USERS[idx];
+  result.textContent = 'User found: ' + user.name + ' stored email: ' + user.email;
+
+  if (user.email.toLowerCase() !== enteredEmail) {
+    result.textContent = 'ERROR: Email mismatch. Entered: ' + enteredEmail + ' Expected: ' + user.email.toLowerCase();
+    return;
+  }
+
+  result.textContent = 'Email matched! Showing returning screen...';
+  document.getElementById('screen-returning').style.display = 'block';
+  document.getElementById('ret-name').textContent = 'Welcome, ' + user.name;
+}
+</script>
+</body>
+</html>
