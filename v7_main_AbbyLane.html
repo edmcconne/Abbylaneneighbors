@@ -483,27 +483,50 @@ var REQ = "abbylaneneighbors" + "@" + "gmail.com";
 var DOC_LINK = "https://1drv.ms/w/c/f48a627c72e8b791/IQB39KvXo4FAQY0m4_nmzKm5AXnoxW2_turLT1f4sf2o91c";
 var DOC_NAME = "Abby Lane Lawsuit - Master Document";
 
-// Update every Monday with a new 7-day OneDrive anyone link.
-// Leave blank if not yet created - external users will see a request button.
 var EXT_LINK = "https://1drv.ms/f/c/f48a627c72e8b791/IgCvDbT-EoaXTqPoCDfA031mAfkLaZ1aGQfpakM9Oxa5SyA";
-var EXT_EXPIRY = "";  // e.g. "Mar 07 2026"
-var REVIEWER_TOKEN      = "0A1B2C";  // Current token — user enters this
-var REVIEWER_TOKEN_NEXT = "1B2C3D";  // Next token — paste into your reply to user, then swap values above
+var EXT_EXPIRY = "";
+var TOKEN_LOOKUP_LINK = "https://1drv.ms/x/c/f48a627c72e8b791/IQArQUdKgeAsTIpdvK4r5r3rAXsxwc_1iF2kxo16LhSi3PQ?e=sDhAyp";
+
+// Token chain — each entry is [input, response]
+// Generated from pi-transform spreadsheet. Cycles back to top when exhausted.
+var TOKEN_TABLE = [
+  ["0A1B2C","0B0B00"],
+  ["0B0B00","0A0F03"],
+  ["0A0F03","0D040F"],
+  ["0D040F","080F0A"],
+  ["080F0A","080B0F"],
+  ["080B0F","030005"],
+  ["030005","0D0C09"],
+  ["0D0C09","080C0C"],
+  ["080C0C","0B080A"],
+  ["0B080A","06070C"],
+  ["06070C","0C0507"],
+  ["0C0507","0B0E0C"],
+  ["0B0E0C","0F0704"],
+  ["0F0704","00080F"],
+  ["00080F","0A0C05"],
+  ["0A0C05","00010A"],
+  ["00010A","0A0B0A"],
+  ["0A0B0A","010C05"],
+  ["010C05","030203"],
+  ["030203","030301"],
+  ["030301","000C0E"]
+];
 
 var USERS = [
-  { name:"Edward McConnell",     email:"edmcconne"      +"@"+"gmail.com",              dateSigned:"Feb 26 2026", signature:"Edward McConnell",     hasAccess:true,  microsoftAccount:true  },
-  { name:"EdView",               email:"abbylaneneighbors"+"@"+"gmail.com",            dateSigned:"Feb 26 2026", signature:"EdView",               hasAccess:true,  microsoftAccount:true  },
-  { name:"EdExt",                email:""       +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:false },
-  { name:"Ashley Rich Cornicello",email:"ashley"        +"@"+"collegiatesealers.com",  dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true  },
-  { name:"Brenda Gilbert",       email:"bcg3812"        +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true  },
-  { name:"Jim Breeden",          email:"jcb"            +"@"+"lawbreeden.com",         dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true  },
-  { name:"Katie McConnell",      email:"ktmc"           +"@"+"mail.com",               dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true  },
-  { name:"Morris Martin",        email:"martinmo404"    +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true  },
-  { name:"Richard Cornicello",   email:"rich"           +"@"+"collegiatesealers.com",  dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true  },
-  { name:"Robin Spence",         email:"baltirobin"     +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true  },
-  { name:"Shirley Mo Martin",    email:"srmartin736"    +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true  },
-  { name:"Bill and Merrill Noel",email:"splicer22"      +"@"+"aol.com",                dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true  },
-  { name:"Spence Lundie",        email:"spencelundie"   +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true  }
+  { name:"Edward McConnell",     email:"edmcconne"      +"@"+"gmail.com",              dateSigned:"Feb 26 2026", signature:"Edward McConnell",     hasAccess:true,  microsoftAccount:true,  tokenPointer:0 },
+  { name:"EdView",               email:"abbylaneneighbors"+"@"+"gmail.com",            dateSigned:"Feb 26 2026", signature:"EdView",               hasAccess:true,  microsoftAccount:true,  tokenPointer:0 },
+  { name:"EdExt",                email:"edext18"        +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:false, tokenPointer:0 },
+  { name:"Ashley Rich Cornicello",email:"ashley"        +"@"+"collegiatesealers.com",  dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0 },
+  { name:"Brenda Gilbert",       email:"bcg3812"        +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0 },
+  { name:"Jim Breeden",          email:"jcb"            +"@"+"lawbreeden.com",         dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0 },
+  { name:"Katie McConnell",      email:"ktmc"           +"@"+"mail.com",               dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0 },
+  { name:"Morris Martin",        email:"martinmo404"    +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0 },
+  { name:"Richard Cornicello",   email:"rich"           +"@"+"collegiatesealers.com",  dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0 },
+  { name:"Robin Spence",         email:"baltirobin"     +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0 },
+  { name:"Shirley Mo Martin",    email:"srmartin736"    +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0 },
+  { name:"Bill and Merrill Noel",email:"splicer22"      +"@"+"aol.com",                dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0 },
+  { name:"Spence Lundie",        email:"spencelundie"   +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0 }
 ];
 
 // ============================================================
@@ -620,6 +643,7 @@ function verifyIdentity() {
 // BUILD RETURNING USER VIEW
 // ============================================================
 function buildReturningView(user) {
+  _reviewerUser = user;
   var checks = [
     '1 - Maintain strict confidentiality of all materials',
     '2 - Not forward, share, or discuss materials outside the authorized group',
@@ -658,28 +682,71 @@ function buildReturningView(user) {
         '<a href="' + DOC_LINK + '" target="_blank" class="btn btn-gold">&#128279; Open Document</a>' +
       '</div>';
   } else if (EXT_LINK) {
-    var tokenMailBody = encodeURIComponent('Your reviewer access code is: ' + REVIEWER_TOKEN + '\n\nReturn to the portal and enter this code to access the reviewer copy of the document.\n\nIMPORTANT: When you receive this email in your inbox, please forward it to ' + REQ + ' so the owner can confirm your access.');
+    var ptr = user.tokenPointer || 0;
+    var currentToken = TOKEN_TABLE[ptr % TOKEN_TABLE.length][0];
     var tokenMailSubject = encodeURIComponent('Abby Lane Neighbors - Reviewer Access Code');
-    docHtml =
-      '<div class="doc-link-box">' +
-        '<div class="icon">&#128196;</div>' +
-        '<h3>' + safeText(DOC_NAME) + '</h3>' +
-        '<p>Your acknowledgment is on file. Click below to send yourself an access code, then enter it to open the reviewer copy.</p>' +
-        '<div style="margin:16px 0;">' +
-          '<a href="mailto:' + safeText(user.email) + '?cc=' + REQ + '&subject=' + tokenMailSubject + '&body=' + tokenMailBody + '" target="_blank" class="btn btn-gold" style="margin-bottom:12px;">&#9993; Send Me an Access Code</a>' +
-        '</div>' +
-        '<p style="color:var(--gold);font-size:0.83rem;font-style:italic;margin-bottom:12px;">After sending and receiving the email, forward it to ' + REQ + ' then enter the code below:</p>' +
-        '<div style="margin:8px 0;">' +
-          '<input type="text" id="reviewer-token-input" placeholder="Enter access code" style="padding:10px 14px;font-size:1rem;border:1px solid #d4c5a9;border-radius:3px;width:200px;margin-right:10px;">' +
-          '<button onclick="verifyReviewerToken()" class="btn btn-gold" style="padding:10px 18px;">&#128274; Submit</button>' +
-        '</div>' +
-        '<div id="reviewer-token-error" style="color:#8b1a1a;font-size:0.85rem;display:none;margin-top:8px;"></div>' +
-        '<div id="reviewer-link-box" style="display:none;margin-top:16px;">' +
-          '<p style="color:var(--gold);font-size:0.83rem;font-style:italic;margin-bottom:12px;">Access code accepted. Click below to open the reviewer copy of the document.</p>' +
-          '<a href="' + EXT_LINK + '" target="_blank" class="btn btn-gold" onclick="notifyReviewerAccess(\'' + safeText(user.name) + '\',\'' + safeText(user.email) + '\')">&#128279; Open Reviewer Copy</a>' +
-          '<div id="reviewer-notify-confirm" style="color:var(--gold);font-size:0.83rem;display:none;margin-top:10px;">Owner has been notified of your access.</div>' +
-        '</div>' +
-      '</div>';
+    var tokenMailBody = encodeURIComponent(
+      'Your reviewer access code is: ' + currentToken +
+      '\n\nSteps:\n' +
+      '1. Forward this email to ' + REQ + ' so the owner can confirm your access.\n' +
+      '2. Open the token lookup spreadsheet: ' + TOKEN_LOOKUP_LINK + '\n' +
+      '3. Enter the code above into the spreadsheet to get your portal entry code.\n' +
+      '4. Return to the portal and enter the portal entry code to access the reviewer copy.'
+    );
+
+    if (ptr === 0) {
+      // First visit — send token directly
+      docHtml =
+        '<div class="doc-link-box">' +
+          '<div class="icon">&#128196;</div>' +
+          '<h3>' + safeText(DOC_NAME) + '</h3>' +
+          '<p>Your acknowledgment is on file. Click below to send yourself an access code. You will use this code to retrieve your portal entry code from a lookup spreadsheet.</p>' +
+          '<div style="margin:16px 0;">' +
+            '<a href="mailto:' + safeText(user.email) + '?cc=' + REQ + '&subject=' + tokenMailSubject + '&body=' + tokenMailBody + '" target="_blank" class="btn btn-gold" style="margin-bottom:12px;">&#9993; Send Me an Access Code</a>' +
+          '</div>' +
+          '<p style="color:var(--gold);font-size:0.83rem;font-style:italic;margin-bottom:6px;">After sending, receiving, and forwarding the email — open the lookup spreadsheet, enter your access code, and note the portal entry code. Then enter it below:</p>' +
+          '<div style="margin:8px 0;">' +
+            '<input type="text" id="reviewer-token-input" placeholder="Enter portal entry code" style="padding:10px 14px;font-size:1rem;border:1px solid #d4c5a9;border-radius:3px;width:220px;margin-right:10px;">' +
+            '<button onclick="verifyReviewerToken()" class="btn btn-gold" style="padding:10px 18px;">&#128274; Submit</button>' +
+          '</div>' +
+          '<div id="reviewer-token-error" style="color:#8b1a1a;font-size:0.85rem;display:none;margin-top:8px;"></div>' +
+          '<div id="reviewer-link-box" style="display:none;margin-top:16px;">' +
+            '<p style="color:var(--gold);font-size:0.83rem;font-style:italic;margin-bottom:12px;">Entry code accepted. Click below to open the reviewer copy.</p>' +
+            '<a href="' + EXT_LINK + '" target="_blank" class="btn btn-gold" onclick="notifyReviewerAccess(\'' + safeText(user.name) + '\',\'' + safeText(user.email) + '\',' + ptr + ')">&#128279; Open Reviewer Copy</a>' +
+            '<div id="reviewer-notify-confirm" style="color:var(--gold);font-size:0.83rem;display:none;margin-top:10px;">Owner has been notified of your access.</div>' +
+          '</div>' +
+        '</div>';
+    } else {
+      // Subsequent visit — verify last token first, then send next
+      docHtml =
+        '<div class="doc-link-box">' +
+          '<div class="icon">&#128196;</div>' +
+          '<h3>' + safeText(DOC_NAME) + '</h3>' +
+          '<p>Welcome back. To continue, please enter the access code from your last session email.</p>' +
+          '<div style="margin:8px 0;">' +
+            '<input type="text" id="reviewer-last-token-input" placeholder="Enter last session code" style="padding:10px 14px;font-size:1rem;border:1px solid #d4c5a9;border-radius:3px;width:220px;margin-right:10px;">' +
+            '<button onclick="verifyLastToken()" class="btn btn-gold" style="padding:10px 18px;">&#128274; Verify</button>' +
+          '</div>' +
+          '<div id="reviewer-last-token-error" style="color:#8b1a1a;font-size:0.85rem;display:none;margin-top:8px;"></div>' +
+          '<div id="reviewer-next-step" style="display:none;margin-top:20px;">' +
+            '<p>Verified. Click below to send yourself the next access code.</p>' +
+            '<div style="margin:12px 0;">' +
+              '<a href="mailto:' + safeText(user.email) + '?cc=' + REQ + '&subject=' + tokenMailSubject + '&body=' + tokenMailBody + '" target="_blank" class="btn btn-gold" style="margin-bottom:12px;">&#9993; Send Me an Access Code</a>' +
+            '</div>' +
+            '<p style="color:var(--gold);font-size:0.83rem;font-style:italic;margin-bottom:6px;">After sending, receiving, and forwarding — open the lookup spreadsheet, enter your code, and enter the portal entry code below:</p>' +
+            '<div style="margin:8px 0;">' +
+              '<input type="text" id="reviewer-token-input" placeholder="Enter portal entry code" style="padding:10px 14px;font-size:1rem;border:1px solid #d4c5a9;border-radius:3px;width:220px;margin-right:10px;">' +
+              '<button onclick="verifyReviewerToken()" class="btn btn-gold" style="padding:10px 18px;">&#128274; Submit</button>' +
+            '</div>' +
+            '<div id="reviewer-token-error" style="color:#8b1a1a;font-size:0.85rem;display:none;margin-top:8px;"></div>' +
+            '<div id="reviewer-link-box" style="display:none;margin-top:16px;">' +
+              '<p style="color:var(--gold);font-size:0.83rem;font-style:italic;margin-bottom:12px;">Entry code accepted. Click below to open the reviewer copy.</p>' +
+              '<a href="' + EXT_LINK + '" target="_blank" class="btn btn-gold" onclick="notifyReviewerAccess(\'' + safeText(user.name) + '\',\'' + safeText(user.email) + '\',' + ptr + ')">&#128279; Open Reviewer Copy</a>' +
+              '<div id="reviewer-notify-confirm" style="color:var(--gold);font-size:0.83rem;display:none;margin-top:10px;">Owner has been notified of your access.</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+    }
 
   } else {
     docHtml =
@@ -693,16 +760,32 @@ function buildReturningView(user) {
   document.getElementById('doc-access-box').innerHTML = docHtml;
 }
 
-function verifyReviewerToken() {
-  var input = document.getElementById('reviewer-token-input').value.trim().toUpperCase();
-  var errEl = document.getElementById('reviewer-token-error');
-  if (!input) {
-    errEl.textContent = 'Please enter the access code.';
+// Current user reference set during buildReturningView
+var _reviewerUser = null;
+
+function verifyLastToken() {
+  var input = document.getElementById('reviewer-last-token-input').value.trim().toUpperCase();
+  var errEl = document.getElementById('reviewer-last-token-error');
+  if (!input) { errEl.textContent = 'Please enter your last session code.'; errEl.style.display = 'block'; return; }
+  var ptr = _reviewerUser ? (_reviewerUser.tokenPointer || 0) : 0;
+  var lastToken = TOKEN_TABLE[(ptr - 1 + TOKEN_TABLE.length) % TOKEN_TABLE.length][0].toUpperCase();
+  if (input !== lastToken) {
+    errEl.textContent = 'Code does not match. Please check and try again.';
     errEl.style.display = 'block';
     return;
   }
-  if (input !== REVIEWER_TOKEN.toUpperCase()) {
-    errEl.textContent = 'Access code is incorrect. Please check and try again, or contact the owner.';
+  errEl.style.display = 'none';
+  document.getElementById('reviewer-next-step').style.display = 'block';
+}
+
+function verifyReviewerToken() {
+  var input = document.getElementById('reviewer-token-input').value.trim().toUpperCase();
+  var errEl = document.getElementById('reviewer-token-error');
+  if (!input) { errEl.textContent = 'Please enter the portal entry code.'; errEl.style.display = 'block'; return; }
+  var ptr = _reviewerUser ? (_reviewerUser.tokenPointer || 0) : 0;
+  var expectedResponse = TOKEN_TABLE[ptr % TOKEN_TABLE.length][1].toUpperCase();
+  if (input !== expectedResponse) {
+    errEl.textContent = 'Entry code is incorrect. Please check the lookup spreadsheet and try again.';
     errEl.style.display = 'block';
     return;
   }
@@ -710,9 +793,17 @@ function verifyReviewerToken() {
   document.getElementById('reviewer-link-box').style.display = 'block';
 }
 
-function notifyReviewerAccess(name, email) {
+function notifyReviewerAccess(name, email, ptr) {
+  var nextPtr = (ptr + 1) % TOKEN_TABLE.length;
+  var nextToken = TOKEN_TABLE[nextPtr][0];
   var subject = encodeURIComponent('Reviewer Access Used — ' + name);
-  var body = encodeURIComponent('Reviewer copy has been accessed.\n\nName: ' + name + '\nEmail: ' + email + '\nTime: ' + new Date().toLocaleString() + '\n\n---\nNext token to send user in reply: ' + REVIEWER_TOKEN_NEXT + '\nAfter replying, update portal CONFIG:\n  REVIEWER_TOKEN = "' + REVIEWER_TOKEN_NEXT + '"\n  REVIEWER_TOKEN_NEXT = "<generate new value>"');
+  var body = encodeURIComponent(
+    'Reviewer copy has been accessed.\n\n' +
+    'Name: ' + name + '\nEmail: ' + email + '\nTime: ' + new Date().toLocaleString() +
+    '\n\n---\nPortal CONFIG update needed:\n' +
+    '  For user "' + name + '" set tokenPointer: ' + nextPtr +
+    '\n\nNext session token for this user: ' + nextToken
+  );
   window.open('mailto:' + REQ + '?subject=' + subject + '&body=' + body, '_blank');
   document.getElementById('reviewer-notify-confirm').style.display = 'block';
 }
