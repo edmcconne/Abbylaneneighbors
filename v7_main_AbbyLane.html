@@ -322,7 +322,7 @@
     <div class="alert alert-info">
       <strong>New member?</strong> If your name is not in the list, click below to request access.
     </div>
-    <button class="btn btn-outline" onclick="showScreen('screen-newuser')">&#9993; Request Access as New Member</button>
+    <a class="btn btn-outline" href="javascript:void(0)" onclick="window.open(BLANK_FORM_LINK,'_blank')">&#9993; Request Access as New Member</a>
   </div>
   <p class="footer-note">This portal is restricted to authorized members of the Abby Lane Neighbors group.</p>
 </div>
@@ -400,49 +400,16 @@
     <div class="privilege-banner">&#9878; Attorney-Client Privilege &mdash; Confidential</div>
     <div class="step-badge">Step 2 of 2 &mdash; Complete Your Acknowledgment</div>
     <h2 class="card-title">Confidentiality Acknowledgment</h2>
-    <p class="card-subtitle">You have been pre-authorized. Please complete this acknowledgment to gain access to the document.</p>
-    <div class="alert alert-info">Your name and email are pre-filled. Please review, complete the form, and submit.</div>
-    <div class="field">
-      <label for="ku-name">Full Name</label>
-      <input type="text" id="ku-name" readonly style="background:#f5f0e8;color:var(--muted);cursor:not-allowed;">
-    </div>
-    <div class="field">
-      <label for="ku-email">Email Address</label>
-      <input type="email" id="ku-email" readonly style="background:#f5f0e8;color:var(--muted);cursor:not-allowed;">
-    </div>
-    <input type="hidden" id="ku-microsoft" value="true">
-    </div>
-    <div class="field">
-      <label for="ku-date">Today's Date *</label>
-      <input type="date" id="ku-date">
-    </div>
-    <div class="check-section">
-      <div class="check-section-title">I acknowledge and agree to all of the following:</div>
-      <label class="check-item"><input type="checkbox" class="ku-check"><span>1 &mdash; Maintain strict confidentiality of all materials</span></label>
-      <label class="check-item"><input type="checkbox" class="ku-check"><span>2 &mdash; Not forward, share, or discuss materials outside the authorized group</span></label>
-      <label class="check-item"><input type="checkbox" class="ku-check"><span>3 &mdash; Use Track Changes for all document edits</span></label>
-      <label class="check-item"><input type="checkbox" class="ku-check"><span>4 &mdash; Immediately notify the owner if materials are accidentally shared</span></label>
-      <label class="check-item"><input type="checkbox" class="ku-check"><span>5 &mdash; Not save materials to unsecured locations</span></label>
-      <label class="check-item"><input type="checkbox" class="ku-check"><span>6 &mdash; I have read and agree to all terms and am submitting this form</span></label>
-    </div>
-    <div class="field">
-      <label for="ku-sig">Electronic Signature *</label>
-      <input type="text" id="ku-sig" placeholder="Type your full name as your signature">
-      <p class="sig-note">Typing your name constitutes your electronic signature.</p>
-    </div>
-    <div id="ku-error" class="alert alert-error" style="display:none"></div>
-    <div class="btn-row">
-      <button class="btn btn-gold" onclick="submitKnownUser()">&#128203; Copy Acknowledgment and Open Email</button>
-    </div>
-    <div id="ku-confirm" class="alert alert-success" style="display:none;margin-top:14px;">
-      Your acknowledgment has been copied to your clipboard. An email window should open &mdash; paste your acknowledgment into the body and click Send.
-    </div>
-    <div id="ku-pending" class="pending-box" style="display:none">
+    <p class="card-subtitle">You have been pre-authorized. Please open your acknowledgment form, complete it, and submit.</p>
+    <div class="alert alert-info">Your personal acknowledgment form will open in a new tab. Complete all fields and follow the instructions to submit it to the owner.</div>
+    <div id="known-user-form-box" style="margin-top:24px;text-align:center;"></div>
+    <div class="pending-box" style="margin-top:20px;">
       <strong>What happens next:</strong><br>
-      1. Paste your acknowledgment into the email that opened and click Send.<br>
-      2. Once received, you will be granted access and can log back in here to reach the document.<br><br>
+      1. Complete all fields in your acknowledgment form and click the submit link inside the form.<br>
+      2. Once the owner receives your submission, access will be granted.<br>
+      3. Return here and log in to reach the document.<br><br>
       <strong>To receive permanent document access:</strong><br>
-      Please ensure you have a free Microsoft account using the same email address you entered on this form. If you do not have one, create one free at <a href="https://account.microsoft.com" target="_blank">account.microsoft.com</a> using that same email address.
+      Please ensure you have a free Microsoft account using the same email address on your form. If you do not have one, create one free at <a href="https://account.microsoft.com" target="_blank">account.microsoft.com</a>.
     </div>
     <hr class="divider">
     <button class="btn btn-outline" onclick="showScreen('screen-identity')" style="font-size:0.82rem;padding:9px 18px;">&#8592; Back</button>
@@ -486,6 +453,7 @@ var DOC_NAME = "Abby Lane Lawsuit - Master Document";
 var EXT_LINK = "https://1drv.ms/f/c/f48a627c72e8b791/IgCvDbT-EoaXTqPoCDfA031mAfkLaZ1aGQfpakM9Oxa5SyA";
 var EXT_EXPIRY = "";
 var TOKEN_LOOKUP_LINK = "https://1drv.ms/x/c/f48a627c72e8b791/IQArQUdKgeAsTIpdvK4r5r3rAXsxwc_1iF2kxo16LhSi3PQ?e=sDhAyp";
+var BLANK_FORM_LINK = "https://1drv.ms/x/c/f48a627c72e8b791/IQB2LqW7rZBITpqKohwXjIX6AfefV4QornXrx_dxOoYWhMw";  // For new/unrecognized users
 
 // Token chain — each entry is [input, response]
 // Generated from pi-transform spreadsheet. Cycles back to top when exhausted.
@@ -514,19 +482,19 @@ var TOKEN_TABLE = [
 ];
 
 var USERS = [
-  { name:"Edward McConnell",     email:"edmcconne"      +"@"+"gmail.com",              dateSigned:"Feb 26 2026", signature:"Edward McConnell",     hasAccess:true,  microsoftAccount:true,  tokenPointer:0 },
-  { name:"EdView",               email:"abbylaneneighbors"+"@"+"gmail.com",            dateSigned:"Feb 26 2026", signature:"EdView",               hasAccess:true,  microsoftAccount:true,  tokenPointer:0 },
-  { name:"EdExt",                email:""        +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:false, tokenPointer:0 },
-  { name:"Ashley Rich Cornicello",email:"ashley"        +"@"+"collegiatesealers.com",  dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0 },
-  { name:"Brenda Gilbert",       email:"bcg3812"        +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0 },
-  { name:"Jim Breeden",          email:"jcb"            +"@"+"lawbreeden.com",         dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0 },
-  { name:"Katie McConnell",      email:"ktmc"           +"@"+"mail.com",               dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0 },
-  { name:"Morris Martin",        email:"martinmo404"    +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0 },
-  { name:"Richard Cornicello",   email:"rich"           +"@"+"collegiatesealers.com",  dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0 },
-  { name:"Robin Spence",         email:"baltirobin"     +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0 },
-  { name:"Shirley Mo Martin",    email:"srmartin736"    +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0 },
-  { name:"Bill and Merrill Noel",email:"splicer22"      +"@"+"aol.com",                dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0 },
-  { name:"Spence Lundie",        email:"spencelundie"   +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0 }
+  { name:"Edward McConnell",     email:"edmcconne"      +"@"+"gmail.com",              dateSigned:"Feb 26 2026", signature:"Edward McConnell",     hasAccess:true,  microsoftAccount:true,  tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQBhAUhxF0O2Sb1kH5prpWcTAW04t86Oo7pMOiEjvaoHgn8" },
+  { name:"EdView",               email:"abbylaneneighbors"+"@"+"gmail.com",            dateSigned:"Feb 26 2026", signature:"EdView",               hasAccess:true,  microsoftAccount:true,  tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQDKpVIkkpGsQ5mcg8WQA6i8AXhNPuuOUQO1TBbaKSz2Lgk" },
+  { name:"EdExt",                email:"edext18"        +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:false, tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQBBHBC-7QlPS6DV-J8CJzp7Afdb4UThh39UpIXVyJLC1yY" },
+  { name:"Ashley Rich Cornicello",email:"ashley"        +"@"+"collegiatesealers.com",  dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQBcHn41T78ZTKN2tlwtfq1PAW_jk2hMnkSOZU4LQa1URgI" },
+  { name:"Brenda Gilbert",       email:"bcg3812"        +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQD787DjQ4XAQaXEsAon4GFkAZkEi7GtqqEnsnklA08GR-c" },
+  { name:"Jim Breeden",          email:"jcb"            +"@"+"lawbreeden.com",         dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQCg03xfk-C2RLhlVdFZOKAlAdjR2CLwhXbNvHwTeNKIF5U" },
+  { name:"Katie McConnell",      email:"ktmc"           +"@"+"mail.com",               dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQAQ8guQiMgBSZrNKN_7u_DDAfad6mzGc2WZaV7KST_o3C0" },
+  { name:"Morris Martin",        email:"martinmo404"    +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQD_aYbT7o8bTYg_Byx6vGBcAakXiGfpS26RcQA5xVo4Epg" },
+  { name:"Richard Cornicello",   email:"rich"           +"@"+"collegiatesealers.com",  dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQA-ebztiUcvSpMpU07KN67uAdTKKfRZzNn1a1Gu-_TTZjo" },
+  { name:"Robin Spence",         email:"baltirobin"     +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQDblEu5G231SZ6c7o3AQgnYAeuHu4J6h8gpOvLsc6JMVBk" },
+  { name:"Shirley Mo Martin",    email:"srmartin736"    +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQCum3poDa9xQ4_mx5LQrXAZAWaC69tjXExdc20nN0-T4kE" },
+  { name:"Bill and Merrill Noel",email:"splicer22"      +"@"+"aol.com",                dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQAHggrjppBpSorw10BLsr7gAUCh4krINwJuMVNCY8f9tyA" },
+  { name:"Spence Lundie",        email:"spencelundie"   +"@"+"gmail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQA_ucEzNfUzRofDPXuJsPVyAUmZT0xBfYHUGE1hcDeC82U" }
 ];
 
 // ============================================================
@@ -593,7 +561,7 @@ function verifyIdentity() {
   var user = USERS[idx];
 
   if (!user || !user.email) {
-    showErr('identity-error', 'No record found. If you are new, please use the Request Access button below.');
+    showErr('identity-error', 'Email address not recognized. If you are a new member, please <a href="' + BLANK_FORM_LINK + '" target="_blank" style="color:#8b1a1a;font-weight:bold;">open the blank acknowledgment form</a> to request access.');
     return;
   }
 
@@ -609,20 +577,11 @@ function verifyIdentity() {
 
   // Route by status
   if (!user.hasAccess && !user.dateSigned) {
-    // Pre-added, not yet acknowledged
-    document.getElementById('ku-name').value = user.name;
-    document.getElementById('ku-email').value = user.email;
-    document.getElementById('ku-microsoft').value = user.microsoftAccount ? 'true' : 'false';
-    var t = new Date();
-    var mm = String(t.getMonth()+1).padStart(2,'0');
-    var dd = String(t.getDate()).padStart(2,'0');
-    document.getElementById('ku-date').value = t.getFullYear() + '-' + mm + '-' + dd;
-    var checks = document.querySelectorAll('.ku-check');
-    for (var i = 0; i < checks.length; i++) { checks[i].checked = false; }
-    document.getElementById('ku-sig').value = '';
-    document.getElementById('ku-error').style.display = 'none';
-    document.getElementById('ku-confirm').style.display = 'none';
-    document.getElementById('ku-pending').style.display = 'none';
+    // Pre-added, not yet acknowledged — send to their individual form
+    var formBox = document.getElementById('known-user-form-box');
+    var link = user.formLink || BLANK_FORM_LINK;
+    formBox.innerHTML =
+      '<a href="' + link + '" target="_blank" class="btn btn-gold" style="display:inline-flex;margin:0 auto;">&#128203; Open My Acknowledgment Form</a>';
     showScreen('screen-known-user');
     return;
   }
