@@ -1,145 +1,257 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+
+<html lang="en">
+
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2685.4">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
-  </style>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Abby Lane Neighbors — Document Access</title>
+
+<style>
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+
+    font-family: Arial, sans-serif;
+
+    background: #0f1e2e;
+
+    color: #f5f0e8;
+
+    min-height: 100vh;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 24px;
+
+  }
+
+  .card {
+
+    background: #1a2e42;
+
+    border: 1px solid #c9a84c;
+
+    border-radius: 6px;
+
+    padding: 40px 36px;
+
+    max-width: 480px;
+
+    width: 100%;
+
+    text-align: center;
+
+  }
+
+  h1 { font-size: 1.4rem; color: #c9a84c; margin-bottom: 8px; }
+
+  .subtitle { font-size: 0.9rem; color: #a09880; margin-bottom: 32px; }
+
+  label { display: block; text-align: left; font-size: 0.85rem; color: #c9a84c; margin-bottom: 6px; }
+
+  input[type="email"] {
+
+    width: 100%;
+
+    padding: 12px 14px;
+
+    font-size: 1rem;
+
+    background: #0f1e2e;
+
+    border: 1px solid #c9a84c;
+
+    border-radius: 4px;
+
+    color: #f5f0e8;
+
+    margin-bottom: 16px;
+
+    outline: none;
+
+  }
+
+  input[type="email"]:focus { border-color: #e8c96a; }
+
+  .btn {
+
+    display: inline-block;
+
+    background: #c9a84c;
+
+    color: #0f1e2e;
+
+    font-weight: bold;
+
+    font-size: 0.95rem;
+
+    padding: 12px 28px;
+
+    border: none;
+
+    border-radius: 4px;
+
+    cursor: pointer;
+
+    text-decoration: none;
+
+    width: 100%;
+
+  }
+
+  .btn:hover { background: #e8c96a; }
+
+  .result { margin-top: 28px; padding: 20px; border-radius: 4px; font-size: 0.95rem; line-height: 1.6; }
+
+  .result.found { background: #1e3a28; border: 1px solid #2d6a4f; }
+
+  .result.not-found { background: #2e1a1a; border: 1px solid #8b1a1a; }
+
+  .result a { color: #c9a84c; }
+
+  .divider { border: none; border-top: 1px solid #2a3f55; margin: 18px 0; }
+
+</style>
+
 </head>
+
 <body>
-<p class="p1">&lt;!DOCTYPE html&gt;</p>
-<p class="p1">&lt;html lang="en"&gt;</p>
-<p class="p1">&lt;head&gt;</p>
-<p class="p1">&lt;meta charset="UTF-8"&gt;</p>
-<p class="p1">&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
-<p class="p1">&lt;title&gt;Abby Lane Neighbors — Document Access&lt;/title&gt;</p>
-<p class="p1">&lt;style&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>* { box-sizing: border-box; margin: 0; padding: 0; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>body {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>font-family: Arial, sans-serif;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>background: #0f1e2e;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>color: #f5f0e8;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>min-height: 100vh;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>align-items: center;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>justify-content: center;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>padding: 24px;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.card {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>background: #1a2e42;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>border: 1px solid #c9a84c;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>border-radius: 6px;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>padding: 40px 36px;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>max-width: 480px;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>text-align: center;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>h1 { font-size: 1.4rem; color: #c9a84c; margin-bottom: 8px; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.subtitle { font-size: 0.9rem; color: #a09880; margin-bottom: 32px; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>label { display: block; text-align: left; font-size: 0.85rem; color: #c9a84c; margin-bottom: 6px; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>input[type="email"] {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>padding: 12px 14px;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>font-size: 1rem;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>background: #0f1e2e;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>border: 1px solid #c9a84c;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>border-radius: 4px;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>color: #f5f0e8;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>margin-bottom: 16px;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>outline: none;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>input[type="email"]:focus { border-color: #e8c96a; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.btn {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>display: inline-block;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>background: #c9a84c;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>color: #0f1e2e;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>font-weight: bold;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>font-size: 0.95rem;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>padding: 12px 28px;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>border: none;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>border-radius: 4px;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>cursor: pointer;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>text-decoration: none;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.btn:hover { background: #e8c96a; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.result { margin-top: 28px; padding: 20px; border-radius: 4px; font-size: 0.95rem; line-height: 1.6; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.result.found { background: #1e3a28; border: 1px solid #2d6a4f; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.result.not-found { background: #2e1a1a; border: 1px solid #8b1a1a; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.result a { color: #c9a84c; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.divider { border: none; border-top: 1px solid #2a3f55; margin: 18px 0; }</p>
-<p class="p1">&lt;/style&gt;</p>
-<p class="p1">&lt;/head&gt;</p>
-<p class="p1">&lt;body&gt;</p>
-<p class="p1">&lt;div class="card"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;h1&gt;Abby Lane Neighbors&lt;/h1&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;p class="subtitle"&gt;Acknowledgment Document Access&lt;/p&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;label for="email"&gt;Enter your email address&lt;/label&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;input type="email" id="email" placeholder="you@example.com" onkeydown="if(event.key==='Enter')lookup()"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;button class="btn" onclick="lookup()"&gt;&amp;#128269; Find My Form&lt;/button&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="result"&gt;&lt;/div&gt;</p>
-<p class="p1">&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;script&gt;</p>
-<p class="p1">var WORKBOOK_URL = "PASTE_WORKBOOK_URL_HERE";</p>
-<p class="p1">var OWNER_EMAIL = "abbylaneneighbors@gmail.com";</p>
-<p class="p2"><br></p>
-<p class="p1">var USERS = [</p>
-<p class="p1"><span class="Apple-converted-space">  </span>{ email: "edmcconne@gmail.com", <span class="Apple-converted-space">            </span>tab: "Ed McConnell" },</p>
-<p class="p1"><span class="Apple-converted-space">  </span>{ email: "abbylaneneighbors@gmail.com", <span class="Apple-converted-space">    </span>tab: "EdView" },</p>
-<p class="p1"><span class="Apple-converted-space">  </span>{ email: "edext18@gmail.com", <span class="Apple-converted-space">              </span>tab: "EdExt" },</p>
-<p class="p1"><span class="Apple-converted-space">  </span>{ email: "ashley@collegiatesealers.com",<span class="Apple-converted-space">    </span>tab: "Ashley Rich Cornicello" },</p>
-<p class="p1"><span class="Apple-converted-space">  </span>{ email: "bcg3812@gmail.com", <span class="Apple-converted-space">              </span>tab: "Brenda Gilbert" },</p>
-<p class="p1"><span class="Apple-converted-space">  </span>{ email: "jcb@lawbreeden.com",<span class="Apple-converted-space">              </span>tab: "Jim Breeden" },</p>
-<p class="p1"><span class="Apple-converted-space">  </span>{ email: "ktmc@mail.com", <span class="Apple-converted-space">                  </span>tab: "Katie McConnell" },</p>
-<p class="p1"><span class="Apple-converted-space">  </span>{ email: "martinmo404@gmail.com", <span class="Apple-converted-space">          </span>tab: "Morris Martin" },</p>
-<p class="p1"><span class="Apple-converted-space">  </span>{ email: "rich@collegiatesealers.com",<span class="Apple-converted-space">      </span>tab: "Richard Cornicello" },</p>
-<p class="p1"><span class="Apple-converted-space">  </span>{ email: "baltirobin@gmail.com",<span class="Apple-converted-space">            </span>tab: "Robin Spence" },</p>
-<p class="p1"><span class="Apple-converted-space">  </span>{ email: "srmartin736@gmail.com", <span class="Apple-converted-space">          </span>tab: "Shirley Mo Martin" },</p>
-<p class="p1"><span class="Apple-converted-space">  </span>{ email: "splicer22@aol.com", <span class="Apple-converted-space">              </span>tab: "Bill and Merrill Noel" },</p>
-<p class="p1"><span class="Apple-converted-space">  </span>{ email: "spencelundie@gmail.com",<span class="Apple-converted-space">          </span>tab: "Spence Lundie" },</p>
-<p class="p1">];</p>
-<p class="p2"><br></p>
-<p class="p1">function lookup() {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>var input = document.getElementById("email").value.trim().toLowerCase();</p>
-<p class="p1"><span class="Apple-converted-space">  </span>var resultEl = document.getElementById("result");</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (!input) {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>resultEl.innerHTML = '&lt;div class="result not-found"&gt;Please enter your email address.&lt;/div&gt;';</p>
-<p class="p1"><span class="Apple-converted-space">    </span>return;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>var user = USERS.find(function(u) { return u.email === input; });</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (user) {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>resultEl.innerHTML =</p>
-<p class="p1"><span class="Apple-converted-space">      </span>'&lt;div class="result found"&gt;' +</p>
-<p class="p1"><span class="Apple-converted-space">        </span>'&lt;div&gt;&amp;#10003; Email recognized. Your form is on the &lt;strong&gt;' + user.tab + '&lt;/strong&gt; tab.&lt;/div&gt;' +</p>
-<p class="p1"><span class="Apple-converted-space">        </span>'&lt;hr class="divider"&gt;' +</p>
-<p class="p1"><span class="Apple-converted-space">        </span>'&lt;p style="margin-bottom:14px;font-size:0.88rem;color:#a09880;"&gt;Click below to open the workbook, then select the &lt;strong style="color:#c9a84c;"&gt;' + user.tab + '&lt;/strong&gt; tab at the bottom of the screen.&lt;/p&gt;' +</p>
-<p class="p1"><span class="Apple-converted-space">        </span>'&lt;a href="' + WORKBOOK_URL + '" target="_blank" class="btn"&gt;&amp;#128279; Open Acknowledgment Workbook&lt;/a&gt;' +</p>
-<p class="p1"><span class="Apple-converted-space">      </span>'&lt;/div&gt;';</p>
-<p class="p1"><span class="Apple-converted-space">  </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>var subject = encodeURIComponent("Document Access Request");</p>
-<p class="p1"><span class="Apple-converted-space">    </span>var body = encodeURIComponent("Hi,\n\nI am trying to access the Abby Lane Neighbors acknowledgment document but my email address was not recognized.\n\nMy email: " + input + "\n\nPlease advise.");</p>
-<p class="p1"><span class="Apple-converted-space">    </span>resultEl.innerHTML =</p>
-<p class="p1"><span class="Apple-converted-space">      </span>'&lt;div class="result not-found"&gt;' +</p>
-<p class="p1"><span class="Apple-converted-space">        </span>'&lt;div&gt;&amp;#10007; Email address not recognized.&lt;/div&gt;' +</p>
-<p class="p1"><span class="Apple-converted-space">        </span>'&lt;hr class="divider"&gt;' +</p>
-<p class="p1"><span class="Apple-converted-space">        </span>'&lt;p style="margin-bottom:14px;font-size:0.88rem;color:#a09880;"&gt;If you believe this is an error, please contact the owner to be added to the access list.&lt;/p&gt;' +</p>
-<p class="p1"><span class="Apple-converted-space">        </span>'&lt;a href="mailto:' + OWNER_EMAIL + '?subject=' + subject + '&amp;body=' + body + '" class="btn"&gt;&amp;#9993; Contact Owner&lt;/a&gt;' +</p>
-<p class="p1"><span class="Apple-converted-space">      </span>'&lt;/div&gt;';</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p1">}</p>
-<p class="p1">&lt;/script&gt;</p>
-<p class="p1">&lt;/body&gt;</p>
-<p class="p1">&lt;/html&gt;</p>
+
+<div class="card">
+
+  <h1>Abby Lane Neighbors</h1>
+
+  <p class="subtitle">Acknowledgment Document Access</p>
+
+
+
+  <label for="email">Enter your email address</label>
+
+  <input type="email" id="email" placeholder="you@example.com" onkeydown="if(event.key==='Enter')lookup()">
+
+  <button class="btn" onclick="lookup()">&#128269; Find My Form</button>
+
+
+
+  <div id="result"></div>
+
+</div>
+
+
+
+<script>
+
+var WORKBOOK_URL = "PASTE_WORKBOOK_URL_HERE";
+
+var OWNER_EMAIL = "abbylaneneighbors@gmail.com";
+
+
+
+var USERS = [
+
+  { email: "edmcconne@gmail.com",             tab: "Ed McConnell" },
+
+  { email: "abbylaneneighbors@gmail.com",     tab: "EdView" },
+
+  { email: "edext18@gmail.com",               tab: "EdExt" },
+
+  { email: "ashley@collegiatesealers.com",    tab: "Ashley Rich Cornicello" },
+
+  { email: "bcg3812@gmail.com",               tab: "Brenda Gilbert" },
+
+  { email: "jcb@lawbreeden.com",              tab: "Jim Breeden" },
+
+  { email: "ktmc@mail.com",                   tab: "Katie McConnell" },
+
+  { email: "martinmo404@gmail.com",           tab: "Morris Martin" },
+
+  { email: "rich@collegiatesealers.com",      tab: "Richard Cornicello" },
+
+  { email: "baltirobin@gmail.com",            tab: "Robin Spence" },
+
+  { email: "srmartin736@gmail.com",           tab: "Shirley Mo Martin" },
+
+  { email: "splicer22@aol.com",               tab: "Bill and Merrill Noel" },
+
+  { email: "spencelundie@gmail.com",          tab: "Spence Lundie" },
+
+];
+
+
+
+function lookup() {
+
+  var input = document.getElementById("email").value.trim().toLowerCase();
+
+  var resultEl = document.getElementById("result");
+
+
+
+  if (!input) {
+
+    resultEl.innerHTML = '<div class="result not-found">Please enter your email address.</div>';
+
+    return;
+
+  }
+
+
+
+  var user = USERS.find(function(u) { return u.email === input; });
+
+
+
+  if (user) {
+
+    resultEl.innerHTML =
+
+      '<div class="result found">' +
+
+        '<div>&#10003; Email recognized. Your form is on the <strong>' + user.tab + '</strong> tab.</div>' +
+
+        '<hr class="divider">' +
+
+        '<p style="margin-bottom:14px;font-size:0.88rem;color:#a09880;">Click below to open the workbook, then select the <strong style="color:#c9a84c;">' + user.tab + '</strong> tab at the bottom of the screen.</p>' +
+
+        '<a href="' + WORKBOOK_URL + '" target="_blank" class="btn">&#128279; Open Acknowledgment Workbook</a>' +
+
+      '</div>';
+
+  } else {
+
+    var subject = encodeURIComponent("Document Access Request");
+
+    var body = encodeURIComponent("Hi,\n\nI am trying to access the Abby Lane Neighbors acknowledgment document but my email address was not recognized.\n\nMy email: " + input + "\n\nPlease advise.");
+
+    resultEl.innerHTML =
+
+      '<div class="result not-found">' +
+
+        '<div>&#10007; Email address not recognized.</div>' +
+
+        '<hr class="divider">' +
+
+        '<p style="margin-bottom:14px;font-size:0.88rem;color:#a09880;">If you believe this is an error, please contact the owner to be added to the access list.</p>' +
+
+        '<a href="mailto:' + OWNER_EMAIL + '?subject=' + subject + '&body=' + body + '" class="btn">&#9993; Contact Owner</a>' +
+
+      '</div>';
+
+  }
+
+}
+
+</script>
+
 </body>
-</html>
+
+</html
