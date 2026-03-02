@@ -283,12 +283,14 @@
 <!-- SCREEN 1: IDENTITY -->
 <div id="screen-identity" class="screen active">
   <div class="card">
-    <div class="step-badge">Step 1 of 2</div>
-    <h2 class="card-title">Identity Verification</h2>
-    <p class="card-subtitle">Select your name and enter your email address to continue. New members should use the button at the bottom.</p>
+    <div class="privilege-banner">&#9878; Attorney-Client Privilege &mdash; Confidential</div>
+    <h2 class="card-title" style="font-size:1.35rem;margin-bottom:4px;">Abby Lane Neighbors</h2>
+    <p class="card-subtitle" style="margin-bottom:20px;">Document Access Portal</p>
+    <div class="step-badge">Step 1 of 2 &mdash; Identity Verification</div>
+
     <div class="field">
       <label for="sel-name">Your Name</label>
-      <select id="sel-name">
+      <select id="sel-name" onchange="onNameChange()">
         <option value="">-- Select your name --</option>
         <option value="0">Edward McConnell</option>
         <option value="1">EdView</option>
@@ -303,26 +305,38 @@
         <option value="10">Shirley Mo Martin</option>
         <option value="11">Bill and Merrill Noel</option>
         <option value="12">Spence Lundie</option>
+        <option value="new">New User</option>
       </select>
     </div>
+
+    <!-- New User name field — hidden until New User selected -->
+    <div class="field" id="new-user-name-field" style="display:none;">
+      <label for="inp-new-name">Your Full Name</label>
+      <input type="text" id="inp-new-name" placeholder="Enter your full name" autocomplete="name">
+    </div>
+
     <div class="field">
       <label for="inp-email">Your Email Address</label>
-      <input type="email" id="inp-email" placeholder="yourname@example.com" autocomplete="email">
+      <input type="email" id="inp-email" placeholder="yourname@example.com" autocomplete="email" oninput="onEmailInput()">
     </div>
+
     <div id="identity-error" class="alert alert-error" style="display:none"></div>
     <div id="identity-followup" class="alert alert-warn" style="display:none">
-      The owner has been notified. You will receive an email once the portal has been updated with your email address. Return here afterwards to complete your acknowledgment form.
+      Your request has been sent to the owner. You will receive an email once your account has been set up. Return here afterwards to complete your acknowledgment form.
       <br><br>
       <em>You may now close this browser tab.</em>
     </div>
-    <div class="btn-row">
+
+    <!-- Verify button — hidden until known name + email entered -->
+    <div class="btn-row" id="btn-verify-row" style="display:none;">
       <button class="btn btn-primary" onclick="verifyIdentity()">&#128274; Verify and Continue</button>
     </div>
-    <hr class="divider">
-    <div class="alert alert-info">
-      <strong>New member?</strong> If your name is not in the list, click below to request access.
+
+    <!-- Request Access button — hidden until New User + name + email entered -->
+    <div class="btn-row" id="btn-request-row" style="display:none;">
+      <button class="btn btn-gold" onclick="requestNewAccess()">&#9993; Send Access Request to Owner</button>
     </div>
-    <a class="btn btn-outline" href="javascript:void(0)" onclick="window.open(BLANK_FORM_LINK,'_blank')">&#9993; Request Access as New Member</a>
+
   </div>
   <p class="footer-note">This portal is restricted to authorized members of the Abby Lane Neighbors group.</p>
 </div>
@@ -535,10 +549,92 @@ function showErr(elId, msg) {
 }
 
 // ============================================================
-// VERIFY IDENTITY
+// IDENTITY SCREEN — DYNAMIC BUTTON VISIBILITY
+// ============================================================
+function onNameChange() {
+  var sel = document.getElementById('sel-name').value;
+  var newNameField = document.getElementById('new-user-name-field');
+  var verifyRow    = document.getElementById('btn-verify-row');
+  var requestRow   = document.getElementById('btn-request-row');
+  var errEl        = document.getElementById('identity-error');
+  var followup     = document.getElementById('identity-followup');
+
+  errEl.style.display = 'none';
+  followup.style.display = 'none';
+
+  if (sel === 'new') {
+    newNameField.style.display = 'block';
+    verifyRow.style.display    = 'none';
+    // Show request button only if email already filled
+    requestRow.style.display = shouldShowRequest() ? 'flex' : 'none';
+  } else if (sel === '') {
+    newNameField.style.display = 'none';
+    verifyRow.style.display    = 'none';
+    requestRow.style.display   = 'none';
+  } else {
+    newNameField.style.display = 'none';
+    requestRow.style.display   = 'none';
+    // Show verify button only if email already filled
+    verifyRow.style.display = shouldShowVerify() ? 'flex' : 'none';
+  }
+}
+
+function onEmailInput() {
+  var sel = document.getElementById('sel-name').value;
+  if (sel === 'new') {
+    document.getElementById('btn-request-row').style.display = shouldShowRequest() ? 'flex' : 'none';
+  } else if (sel !== '') {
+    document.getElementById('btn-verify-row').style.display = shouldShowVerify() ? 'flex' : 'none';
+  }
+  // Re-show verify button if email changed after a mismatch error
+  var errEl = document.getElementById('identity-error');
+  if (errEl.style.display !== 'none' && sel !== '' && sel !== 'new') {
+    document.getElementById('btn-verify-row').style.display = shouldShowVerify() ? 'flex' : 'none';
+  }
+}
+
+function shouldShowVerify() {
+  var email = document.getElementById('inp-email').value.trim();
+  return email.length > 0 && email.indexOf('@') > 0;
+}
+
+function shouldShowRequest() {
+  var email   = document.getElementById('inp-email').value.trim();
+  var newName = document.getElementById('inp-new-name').value.trim();
+  return email.length > 0 && email.indexOf('@') > 0 && newName.length > 0;
+}
+
+function requestNewAccess() {
+  var name  = document.getElementById('inp-new-name').value.trim();
+  var email = document.getElementById('inp-email').value.trim();
+  if (!name)  { showErr('identity-error', 'Please enter your full name.'); return; }
+  if (!email || email.indexOf('@') < 0) { showErr('identity-error', 'Please enter a valid email address.'); return; }
+
+  var subject = encodeURIComponent('New Member Access Request — ' + name);
+  var body    = encodeURIComponent(
+    'A new member is requesting access to the Abby Lane Neighbors portal.\n\n' +
+    'Name:  ' + name  + '\n' +
+    'Email: ' + email + '\n\n' +
+    'Action needed:\n' +
+    '1. Create an individual acknowledgment spreadsheet for this user.\n' +
+    '2. Add them to the portal USERS array in CONFIG.\n' +
+    '3. Set up OneDrive sharing with appropriate permissions.\n' +
+    '4. Notify the user to return to the portal to complete their acknowledgment.'
+  );
+
+  window.open('mailto:' + REQ + '?subject=' + subject + '&body=' + body, '_blank');
+
+  document.getElementById('btn-request-row').style.display = 'none';
+  document.getElementById('identity-followup').style.display = 'block';
+}
+
+// ============================================================
+// VERIFY IDENTITY — hide verify button after click, re-show on email change
+// ============================================================
 // ============================================================
 function verifyIdentity() {
   document.getElementById('identity-error').style.display = 'none';
+  document.getElementById('btn-verify-row').style.display = 'none';
 
   var sel = document.getElementById('sel-name');
   var emailInput = document.getElementById('inp-email');
@@ -547,21 +643,25 @@ function verifyIdentity() {
 
   if (sel.value === '' || isNaN(idx)) {
     showErr('identity-error', 'Please select your name from the list.');
+    document.getElementById('btn-verify-row').style.display = 'flex';
     return;
   }
   if (!enteredEmail) {
     showErr('identity-error', 'Please enter your email address.');
+    document.getElementById('btn-verify-row').style.display = 'flex';
     return;
   }
   if (idx < 0 || idx >= USERS.length) {
     showErr('identity-error', 'Selection error. Please try again.');
+    document.getElementById('btn-verify-row').style.display = 'flex';
     return;
   }
 
   var user = USERS[idx];
 
   if (!user || !user.email) {
-    showErr('identity-error', 'Email address not recognized. If you are a new member, please <a href="' + BLANK_FORM_LINK + '" target="_blank" style="color:#8b1a1a;font-weight:bold;">open the blank acknowledgment form</a> to request access.');
+    showErr('identity-error', 'Email address not recognized. Select "New User" from the dropdown to request access.');
+    document.getElementById('btn-verify-row').style.display = 'flex';
     return;
   }
 
@@ -570,8 +670,9 @@ function verifyIdentity() {
     var mailto = 'mailto:' + REQ +
       '?subject=' + encodeURIComponent('Email Update Request — ' + user.name) +
       '&body=' + encodeURIComponent('Hi,\n\nI am trying to access the portal but my email address does not match your records.\n\nMy name on the list: ' + user.name + '\nEmail I am trying to use: ' + enteredEmail + '\n\nPlease update my record so I can access the portal.');
-    errEl.innerHTML = 'Email address does not match our records for this name. Please check and try again, or <a href="#" onclick="notifyOwnerMismatch(\'' + mailto.replace(/'/g, "\\'") + '\')" style="color:#8b1a1a;font-weight:bold;">click here to notify the owner</a> — your name and the email you entered will be included automatically.';
+    errEl.innerHTML = 'Email address does not match our records for this name. Please correct it above (the Verify button will reappear), or <a href="#" onclick="notifyOwnerMismatch(\'' + mailto.replace(/'/g, "\\'") + '\')" style="color:#8b1a1a;font-weight:bold;">click here to notify the owner</a> — your name and the email you entered will be included automatically.';
     errEl.style.display = 'block';
+    // Verify button stays hidden — reappears via onEmailInput when user corrects email
     return;
   }
 
