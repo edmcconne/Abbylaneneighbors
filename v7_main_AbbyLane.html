@@ -623,6 +623,19 @@ function verifyPassword(plain, stored) {
           formBox.innerHTML = '<a href="' + link + '" target="_blank" class="btn btn-gold" style="display:inline-flex;margin:0 auto;">&#128203; Open My Acknowledgment Form</a>';
           showScreen('screen-known-user');
           return;
+        } else if (sess.screen === 'screen-newuser') {
+          // Restore known user to newuser form
+          _isKnownUser = true;
+          document.getElementById('new-name').value  = user.name;
+          document.getElementById('new-email').value = user.email;
+          var t2 = new Date();
+          document.getElementById('new-date').value = t2.getFullYear() + '-' +
+            String(t2.getMonth()+1).padStart(2,'0') + '-' + String(t2.getDate()).padStart(2,'0');
+          document.getElementById('newuser-step-badge').textContent = 'Step 2 of 2 \u2014 Acknowledgment Form';
+          document.getElementById('newuser-subtitle').textContent = 'You have been pre-authorized. Please complete the acknowledgment form below to activate your access.';
+          document.getElementById('newuser-prefill-note').textContent = 'Your name and email have been pre-filled from your account. Please verify they are correct before submitting.';
+          showScreen('screen-newuser');
+          return;
         }
       }
     }
@@ -841,10 +854,26 @@ function submitNewUser() {
     );
   }
 
-  openMailto('mailto:' + REQ + '?subject=' + subject + '&body=' + body);
+  var mailtoUrl = 'mailto:' + REQ + '?subject=' + subject + '&body=' + body;
 
-  document.getElementById('newuser-confirm').style.display = 'block';
-  document.getElementById('newuser-pending').style.display = 'block';
+  // Show clickable send link rather than auto-firing iframe (more reliable on macOS Chrome)
+  var confirmEl = document.getElementById('newuser-confirm');
+  confirmEl.innerHTML = 'Your form is complete. <strong>Click the button below to open your email client and send your acknowledgment to the owner.</strong>';
+  confirmEl.style.display = 'block';
+
+  var pendingEl = document.getElementById('newuser-pending');
+  pendingEl.innerHTML =
+    '<div style="text-align:center;margin-bottom:16px;">' +
+      '<a href="' + mailtoUrl + '" class="btn btn-gold" style="display:inline-flex;">&#9993; Open Email Client &amp; Send</a>' +
+    '</div>' +
+    '<strong>What happens next:</strong><br>' +
+    '1. Click the button above — your email client will open with the form pre-filled.<br>' +
+    '2. Click Send in your email client.<br>' +
+    '3. The owner will review and contact you with next steps.<br><br>' +
+    '<strong>To receive permanent document access:</strong><br>' +
+    'Please ensure you have a free Microsoft account using the same email address you entered above. ' +
+    'If you do not have one, create one free at <a href="https://account.microsoft.com" target="_blank">account.microsoft.com</a>.';
+  pendingEl.style.display = 'block';
 }
 
 // ============================================================
