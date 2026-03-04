@@ -490,32 +490,10 @@ var BLANK_FORM_LINK  = "https://1drv.ms/x/c/f48a627c72e8b791/IQB2LqW7rZBITpqKohw
 // Must match cell B6 in AbbyLane_PasswordTool.xlsx
 var PASSWORD_KEY = "ALN2026";
 
-// -- Token Chain --
-// Each entry is [input_token, response_token].
-// Generated from pi-transform spreadsheet. Cycles back to top when exhausted.
-var TOKEN_TABLE = [
-  ["0A1B2C","0B0B00"],
-  ["0B0B00","0A0F03"],
-  ["0A0F03","0D040F"],
-  ["0D040F","080F0A"],
-  ["080F0A","080B0F"],
-  ["080B0F","030005"],
-  ["030005","0D0C09"],
-  ["0D0C09","080C0C"],
-  ["080C0C","0B080A"],
-  ["0B080A","06070C"],
-  ["06070C","0C0507"],
-  ["0C0507","0B0E0C"],
-  ["0B0E0C","0F0704"],
-  ["0F0704","00080F"],
-  ["00080F","0A0C05"],
-  ["0A0C05","00010A"],
-  ["00010A","0A0B0A"],
-  ["0A0B0A","010C05"],
-  ["010C05","030203"],
-  ["030203","030301"],
-  ["030301","000C0E"]
-];
+// -- Token Authentication --
+// Pi-transform: any valid 6-char hex input token computes its response token directly.
+// No pre-built table needed. Matches formula in AbbyLane_TokenLookup_v3.xlsx.
+// Token pair changes each hour automatically based on time-of-day.
 
 // -- User Registry --
 // microsoftAccount: true  = MS-authenticated, gets permanent document link
@@ -544,6 +522,40 @@ var USERS = [
 // ██   CONFIG — PARAMETERS END                             ██
 // ██                                                        ██
 // ████████████████████████████████████████████████████████████
+
+// ============================================================
+// TOKEN UTILITIES  (code — do not move to CONFIG block)
+// ============================================================
+function piTransform(hexIn) {
+  // Replicates pi-transform formula from AbbyLane_TokenLookup_v3.xlsx
+  var C = parseInt(hexIn, 16);
+  var D = C / Math.PI;
+  var E = D - Math.floor(D);
+  var F = Math.floor(E * 4096);
+  var G = Math.floor(F / 256);
+  var H = F - G * 256;
+  var I = Math.floor(H / 16);
+  var K = H - I * 16;
+  function hp(n) { return n.toString(16).toUpperCase().padStart(2,'0'); }
+  return hp(G) + hp(I) + hp(K);
+}
+
+function getHourSeed(hour) {
+  // Deterministic 6-char hex seed from hour (0-23)
+  return (hour * 0x111111).toString(16).toUpperCase().padStart(6,'0').slice(0,6);
+}
+
+function getExpectedResponse() {
+  return piTransform(getHourSeed(new Date().getHours()));
+}
+
+function getPrevExpectedResponse() {
+  return piTransform(getHourSeed((new Date().getHours() - 1 + 24) % 24));
+}
+
+function getCurrentAccessCode() {
+  return getHourSeed(new Date().getHours());
+}
 
 // ============================================================
 // MAIL UTILITIES  (code — do not move to CONFIG block)
@@ -926,9 +938,7 @@ function buildReturningView(user) {
         '<a href="' + DOC_LINK + '" target="_blank" class="btn btn-gold">&#128279; Open Document</a>' +
       '</div>';
   } else if (EXT_LINK) {
-    var ptr = Math.floor(new Date().getHours() / 24 * TOKEN_TABLE.length);
-    var ptrPrev = (ptr - 1 + TOKEN_TABLE.length) % TOKEN_TABLE.length;
-    var currentToken = TOKEN_TABLE[ptr % TOKEN_TABLE.length][0];
+    var currentToken = getCurrentAccessCode();
     var tokenMailSubject = encodeURIComponent('Abby Lane Neighbors - Reviewer Access Code');
     var tokenMailBody = encodeURIComponent(
       'Your reviewer access code is: ' + currentToken +
@@ -979,10 +989,8 @@ function verifyReviewerToken() {
   var input    = document.getElementById('reviewer-token-input').value.trim().toUpperCase();
   var errEl    = document.getElementById('reviewer-token-error');
   if (!input)  { errEl.textContent = 'Please enter the portal entry code.'; errEl.style.display = 'block'; return; }
-  var ptr      = Math.floor(new Date().getHours() / 24 * TOKEN_TABLE.length);
-  var ptrPrev  = (ptr - 1 + TOKEN_TABLE.length) % TOKEN_TABLE.length;
-  var expected     = TOKEN_TABLE[ptr     % TOKEN_TABLE.length][1].toUpperCase();
-  var expectedPrev = TOKEN_TABLE[ptrPrev % TOKEN_TABLE.length][1].toUpperCase();
+  var expected     = getExpectedResponse();
+  var expectedPrev = getPrevExpectedResponse();
   if (input !== expected && input !== expectedPrev) {
     errEl.textContent = 'Entry code is incorrect. Please check the lookup spreadsheet and try again.';
     errEl.style.display = 'block';
