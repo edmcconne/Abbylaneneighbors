@@ -577,6 +577,7 @@ function verifyPassword(plain, stored) {
 // PAGE INIT
 // ============================================================
 (function init() {
+  // Set today's date on new user form
   var dateEl = document.getElementById('new-date');
   if (dateEl) {
     var t = new Date();
@@ -584,6 +585,36 @@ function verifyPassword(plain, stored) {
     var dd = String(t.getDate()).padStart(2,'0');
     dateEl.value = t.getFullYear() + '-' + mm + '-' + dd;
   }
+
+  // Restore session if portal was reloaded mid-session (e.g. email link opened in same tab)
+  try {
+    var saved = sessionStorage.getItem('aln_session');
+    if (saved) {
+      var sess = JSON.parse(saved);
+      // Find user in USERS array
+      var user = null;
+      for (var i = 0; i < USERS.length; i++) {
+        if (USERS[i].email.toLowerCase() === sess.email) { user = USERS[i]; break; }
+      }
+      if (user && sess.screen) {
+        if (sess.screen === 'screen-returning') {
+          buildReturningView(user);
+          showScreen('screen-returning');
+          return;
+        } else if (sess.screen === 'screen-pending') {
+          document.getElementById('pending-email-display').textContent = user.email;
+          showScreen('screen-pending');
+          return;
+        } else if (sess.screen === 'screen-known-user') {
+          var formBox = document.getElementById('known-user-form-box');
+          var link = user.formLink || BLANK_FORM_LINK;
+          formBox.innerHTML = '<a href="' + link + '" target="_blank" class="btn btn-gold" style="display:inline-flex;margin:0 auto;">&#128203; Open My Acknowledgment Form</a>';
+          showScreen('screen-known-user');
+          return;
+        }
+      }
+    }
+  } catch(e) { /* sessionStorage unavailable — continue normally */ }
 })();
 
 // ============================================================
@@ -602,6 +633,18 @@ function showScreen(id) {
   }
   document.getElementById(id).classList.add('active');
   window.scrollTo(0, 0);
+  // Clear saved session when user deliberately returns to identity screen
+  if (id === 'screen-identity') { clearSession(); }
+}
+
+function saveSession(email, screen) {
+  try { sessionStorage.setItem('aln_session', JSON.stringify({ email: email.toLowerCase(), screen: screen })); }
+  catch(e) {}
+}
+
+function clearSession() {
+  try { sessionStorage.removeItem('aln_session'); }
+  catch(e) {}
 }
 
 function showErr(elId, msg) {
@@ -821,6 +864,7 @@ function verifyIdentity() {
     var link = user.formLink || BLANK_FORM_LINK;
     formBox.innerHTML =
       '<a href="' + link + '" target="_blank" class="btn btn-gold" style="display:inline-flex;margin:0 auto;">&#128203; Open My Acknowledgment Form</a>';
+    saveSession(user.email, 'screen-known-user');
     showScreen('screen-known-user');
     return;
   }
@@ -828,11 +872,13 @@ function verifyIdentity() {
   if (!user.hasAccess && user.dateSigned) {
     // Submitted, waiting for approval
     document.getElementById('pending-email-display').textContent = user.email;
+    saveSession(user.email, 'screen-pending');
     showScreen('screen-pending');
     return;
   }
 
   // Full access
+  saveSession(user.email, 'screen-returning');
   buildReturningView(user);
   showScreen('screen-returning');
 }
