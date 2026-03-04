@@ -505,7 +505,7 @@ var USERS = [
   { name:"Edward McConnell",      email:"edmcconne"       +"@"+"gmail.com",             dateSigned:"Feb 26 2026", signature:"Edward McConnell",     hasAccess:true,  microsoftAccount:true,  tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQBhAUhxF0O2Sb1kH5prpWcTAW04t86Oo7pMOiEjvaoHgn8", password:"" },
   { name:"EdView",                email:"abbylaneneighbors"+"@"+"gmail.com",            dateSigned:"Feb 26 2026", signature:"EdView",               hasAccess:true,  microsoftAccount:true,  tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQDKpVIkkpGsQ5mcg8WQA6i8AXhNPuuOUQO1TBbaKSz2Lgk", password:"" },
   { name:"EdExt",                 email:"edext18"         +"@"+"gmail.com",             dateSigned:"Mar 2  2026", signature:"Ed McConnell",         hasAccess:true,  microsoftAccount:false, tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQBBHBC-7QlPS6DV-J8CJzp7Afdb4UThh39UpIXVyJLC1yY", password:"" },
-  { name:"Ashley Rich Cornicello",email:"ashley"          +"@"+"collegiatesealers.com", dateSigned:"Mar 1  2026", signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQBcHn41T78ZTKN2tlwtfq1PAW_jk2hMnkSOZU4LQa1URgI", password:"" },
+  { name:"Ashley Rich Cornicello",email:"ashley"          +"@"+"collegiatesealers.com", dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQBcHn41T78ZTKN2tlwtfq1PAW_jk2hMnkSOZU4LQa1URgI", password:"" },
   { name:"Brenda Gilbert",        email:"bcg3812"         +"@"+"gmail.com",             dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQD787DjQ4XAQaXEsAon4GFkAZkEi7GtqqEnsnklA08GR-c", password:"" },
   { name:"Jim Breeden",           email:"jcb"             +"@"+"lawbreeden.com",        dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQCg03xfk-C2RLhlVdFZOKAlAdjR2CLwhXbNvHwTeNKIF5U", password:"" },
   { name:"Katie McConnell",       email:"ktmc"            +"@"+"mail.com",              dateSigned:"",            signature:"",                     hasAccess:false, microsoftAccount:true,  tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQAQ8guQiMgBSZrNKN_7u_DDAfad6mzGc2WZaV7KST_o3C0", password:"" },
@@ -862,9 +862,10 @@ function submitNewUser() {
   confirmEl.style.display = 'block';
 
   var pendingEl = document.getElementById('newuser-pending');
+  var capturedMailto = mailtoUrl;
   pendingEl.innerHTML =
     '<div style="text-align:center;margin-bottom:16px;">' +
-      '<a href="' + mailtoUrl + '" class="btn btn-gold" style="display:inline-flex;">&#9993; Open Email Client &amp; Send</a>' +
+      '<button class="btn btn-gold" id="btn-open-email" style="display:inline-flex;">&#9993; Open Email Client &amp; Send</button>' +
     '</div>' +
     '<strong>What happens next:</strong><br>' +
     '1. Click the button above — your email client will open with the form pre-filled.<br>' +
@@ -874,6 +875,11 @@ function submitNewUser() {
     'Please ensure you have a free Microsoft account using the same email address you entered above. ' +
     'If you do not have one, create one free at <a href="https://account.microsoft.com" target="_blank">account.microsoft.com</a>.';
   pendingEl.style.display = 'block';
+
+  // Attach click handler after element is in DOM
+  document.getElementById('btn-open-email').addEventListener('click', function() {
+    openMailto(capturedMailto);
+  });
 }
 
 // ============================================================
