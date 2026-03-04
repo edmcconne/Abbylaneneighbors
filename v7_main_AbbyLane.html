@@ -986,6 +986,7 @@ function verifyReviewerToken() {
   if (input !== expected && input !== expectedPrev) {
     errEl.textContent = 'Entry code is incorrect. Please check the lookup spreadsheet and try again.';
     errEl.style.display = 'block';
+    document.getElementById('reviewer-link-box').style.display = 'none';
     return;
   }
   errEl.style.display = 'none';
