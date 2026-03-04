@@ -341,7 +341,7 @@
 
     <!-- Request Access button — hidden until New User + name + email entered -->
     <div class="btn-row" id="btn-request-row" style="display:none;">
-      <button class="btn btn-gold" onclick="requestNewAccess()">&#9993; Send Access Request to Owner</button>
+      <button class="btn btn-gold" onclick="requestNewAccess()">&#128203; Continue to Acknowledgment Form</button>
     </div>
 
   </div>
@@ -362,13 +362,14 @@
   </div>
 </div>
 
-<!-- SCREEN 3: NEW USER -->
+<!-- SCREEN 3: NEW USER — FULL LCP FORM -->
 <div id="screen-newuser" class="screen">
   <div class="card">
     <div class="privilege-banner">&#9878; Attorney-Client Privilege &mdash; Confidential</div>
-    <div class="step-badge">New Member Request</div>
-    <h2 class="card-title">Acknowledgment and Access Request</h2>
-    <p class="card-subtitle">Complete this form to request access. You will receive a one-time access link once your submission is received.</p>
+    <div class="step-badge">New Member &mdash; Acknowledgment Form</div>
+    <h2 class="card-title">Confidentiality Acknowledgment</h2>
+    <p class="card-subtitle">Please complete all fields below. Your submission will be sent directly to the owner for review.</p>
+    <div class="alert alert-info">Your name and email have been pre-filled from the previous screen. Please verify they are correct before submitting.</div>
     <div class="field">
       <label for="new-name">Full Name *</label>
       <input type="text" id="new-name" placeholder="Your full legal name">
@@ -381,6 +382,14 @@
       <label for="new-date">Today's Date *</label>
       <input type="date" id="new-date">
     </div>
+    <div class="field">
+      <label>Microsoft Account</label>
+      <label class="check-item" style="margin-top:6px;">
+        <input type="checkbox" id="new-ms-account">
+        <span>I have a Microsoft account configured with the email address above</span>
+      </label>
+      <p class="sig-note">A Microsoft account enables permanent document access. Create one free at <a href="https://account.microsoft.com" target="_blank">account.microsoft.com</a> if needed.</p>
+    </div>
     <div class="check-section">
       <div class="check-section-title">I acknowledge and agree to all of the following:</div>
       <label class="check-item"><input type="checkbox" class="new-check"><span>1 &mdash; Maintain strict confidentiality of all materials</span></label>
@@ -388,7 +397,7 @@
       <label class="check-item"><input type="checkbox" class="new-check"><span>3 &mdash; Use Track Changes for all document edits</span></label>
       <label class="check-item"><input type="checkbox" class="new-check"><span>4 &mdash; Immediately notify the owner if materials are accidentally shared</span></label>
       <label class="check-item"><input type="checkbox" class="new-check"><span>5 &mdash; Not save materials to unsecured locations</span></label>
-      <label class="check-item"><input type="checkbox" class="new-check"><span>6 &mdash; I have read and agree to all terms and am submitting this form</span></label>
+      <label class="check-item"><input type="checkbox" class="new-check"><span>6 &mdash; I understand I am submitting this form electronically and agree to all terms above</span></label>
     </div>
     <div class="field">
       <label for="new-sig">Electronic Signature *</label>
@@ -397,18 +406,18 @@
     </div>
     <div id="newuser-error" class="alert alert-error" style="display:none"></div>
     <div class="btn-row">
-      <button class="btn btn-gold" onclick="submitNewUser()">&#128203; Copy Acknowledgment and Open Email</button>
+      <button class="btn btn-gold" onclick="submitNewUser()">&#9993; Submit Acknowledgment to Owner</button>
     </div>
     <div id="newuser-confirm" class="alert alert-success" style="display:none;margin-top:14px;">
-      Your acknowledgment has been copied to your clipboard. An email window should open &mdash; paste your acknowledgment into the body and click Send.
+      Your acknowledgment has been submitted. The owner will review your request and contact you with next steps.
     </div>
     <div id="newuser-pending" class="pending-box" style="display:none">
       <strong>What happens next:</strong><br>
-      1. Paste your acknowledgment into the email that opened and click Send.<br>
-      2. Once received, you will be sent a one-time access link to the document.<br>
-      3. If you have a Microsoft account, permanent access will be arranged.<br><br>
+      1. The owner will receive your completed acknowledgment form.<br>
+      2. Your account will be set up and you will be contacted by email.<br>
+      3. Return to this portal to complete the access process.<br><br>
       <strong>To receive permanent document access:</strong><br>
-      Please ensure you have a free Microsoft account using the same email address you entered on this form. If you do not have one, create one free at <a href="https://account.microsoft.com" target="_blank">account.microsoft.com</a> using that same email address.
+      Please ensure you have a free Microsoft account using the same email address you entered above. If you do not have one, create one free at <a href="https://account.microsoft.com" target="_blank">account.microsoft.com</a>.
     </div>
     <hr class="divider">
     <button class="btn btn-outline" onclick="showScreen('screen-identity')" style="font-size:0.82rem;padding:9px 18px;">&#8592; Back</button>
@@ -649,26 +658,91 @@ function shouldShowRequest() {
 
 function requestNewAccess() {
   var name  = document.getElementById('inp-new-name').value.trim();
-  var email = document.getElementById('inp-email').value.trim();
+  var email = document.getElementById('inp-email').value.trim().toLowerCase();
   if (!name)  { showErr('identity-error', 'Please enter your full name.'); return; }
   if (!email || email.indexOf('@') < 0) { showErr('identity-error', 'Please enter a valid email address.'); return; }
 
-  var subject = encodeURIComponent('New Member Access Request — ' + name);
-  var body    = encodeURIComponent(
-    'A new member is requesting access to the Abby Lane Neighbors portal.\n\n' +
-    'Name:  ' + name  + '\n' +
-    'Email: ' + email + '\n\n' +
-    'Action needed:\n' +
-    '1. Create an individual acknowledgment spreadsheet for this user.\n' +
-    '2. Add them to the portal USERS array in CONFIG.\n' +
+  // Duplicate check — block if name or email already in USERS
+  for (var i = 0; i < USERS.length; i++) {
+    if (USERS[i].name.toLowerCase() === name.toLowerCase() ||
+        USERS[i].email.toLowerCase() === email) {
+      showErr('identity-error', 'That name or email is already in use. Please check and try again.');
+      return;
+    }
+  }
+
+  // Route to LCP form, pre-filling name and email
+  document.getElementById('new-name').value  = name;
+  document.getElementById('new-email').value = email;
+  document.getElementById('new-sig').value   = '';
+  document.getElementById('new-ms-account').checked = false;
+  var checks = document.querySelectorAll('.new-check');
+  for (var j = 0; j < checks.length; j++) { checks[j].checked = false; }
+  document.getElementById('newuser-error').style.display   = 'none';
+  document.getElementById('newuser-confirm').style.display = 'none';
+  document.getElementById('newuser-pending').style.display = 'none';
+
+  // Set today's date
+  var t = new Date();
+  var mm = String(t.getMonth()+1).padStart(2,'0');
+  var dd = String(t.getDate()).padStart(2,'0');
+  document.getElementById('new-date').value = t.getFullYear() + '-' + mm + '-' + dd;
+
+  showScreen('screen-newuser');
+}
+
+// ============================================================
+// SUBMIT NEW USER — fires complete LCP acknowledgment to owner
+// ============================================================
+function submitNewUser() {
+  document.getElementById('newuser-error').style.display   = 'none';
+  document.getElementById('newuser-confirm').style.display = 'none';
+  document.getElementById('newuser-pending').style.display = 'none';
+
+  var name  = document.getElementById('new-name').value.trim();
+  var email = document.getElementById('new-email').value.trim();
+  var date  = document.getElementById('new-date').value;
+  var sig   = document.getElementById('new-sig').value.trim();
+  var msAcc = document.getElementById('new-ms-account').checked;
+  var checks = document.querySelectorAll('.new-check');
+  var allChecked = true;
+  for (var i = 0; i < checks.length; i++) { if (!checks[i].checked) { allChecked = false; break; } }
+
+  if (!name)  { showErr('newuser-error', 'Please enter your full name.'); return; }
+  if (!email || email.indexOf('@') < 0) { showErr('newuser-error', 'Please enter a valid email address.'); return; }
+  if (!date)  { showErr('newuser-error', 'Please enter today\'s date.'); return; }
+  if (!allChecked) { showErr('newuser-error', 'Please check all six acknowledgment boxes before submitting.'); return; }
+  if (!sig)   { showErr('newuser-error', 'Please type your full name as your electronic signature.'); return; }
+
+  var subject = encodeURIComponent('New Member Acknowledgment — ' + name);
+  var body = encodeURIComponent(
+    'ATTORNEY-CLIENT PRIVILEGE ACKNOWLEDGMENT\n' +
+    'New Member Submission — Portal\n' +
+    '─────────────────────────────────────────\n\n' +
+    'Name:             ' + name  + '\n' +
+    'Email:            ' + email + '\n' +
+    'Date:             ' + date  + '\n' +
+    'Microsoft Account:' + (msAcc ? ' Yes' : ' No') + '\n' +
+    'Signature:        ' + sig   + '\n\n' +
+    'Acknowledgments (all checked):\n' +
+    '  ✓ 1 — Maintain strict confidentiality of all materials\n' +
+    '  ✓ 2 — Not forward, share, or discuss materials outside authorized group\n' +
+    '  ✓ 3 — Use Track Changes for all document edits\n' +
+    '  ✓ 4 — Immediately notify owner if materials are accidentally shared\n' +
+    '  ✓ 5 — Not save materials to unsecured locations\n' +
+    '  ✓ 6 — Submitted electronically and agrees to all terms\n\n' +
+    '─────────────────────────────────────────\n' +
+    'ACTION NEEDED:\n' +
+    '1. Create individual acknowledgment spreadsheet for this user.\n' +
+    '2. Add to portal USERS array in CONFIG (microsoftAccount: ' + (msAcc ? 'true' : 'false') + ').\n' +
     '3. Set up OneDrive sharing with appropriate permissions.\n' +
-    '4. Notify the user to return to the portal to complete their acknowledgment.'
+    '4. Set hasAccess:true and deploy, then notify user to return to portal.'
   );
 
   window.open('mailto:' + REQ + '?subject=' + subject + '&body=' + body, '_blank');
 
-  document.getElementById('btn-request-row').style.display = 'none';
-  document.getElementById('identity-followup').style.display = 'block';
+  document.getElementById('newuser-confirm').style.display = 'block';
+  document.getElementById('newuser-pending').style.display = 'block';
 }
 
 // ============================================================
@@ -917,37 +991,6 @@ function notifyReviewerAccess(name, email, ptr) {
   );
   window.open('mailto:' + REQ + '?subject=' + subject + '&body=' + body, '_blank');
   document.getElementById('reviewer-notify-confirm').style.display = 'block';
-}
-
-// ============================================================
-// SUBMIT NEW USER
-// ============================================================
-function submitNewUser() {
-  document.getElementById('newuser-error').style.display = 'none';
-  document.getElementById('newuser-confirm').style.display = 'none';
-  document.getElementById('newuser-pending').style.display = 'none';
-
-  var name  = document.getElementById('new-name').value.trim();
-  var email = document.getElementById('new-email').value.trim();
-  var date  = document.getElementById('new-date').value;
-  var sig   = document.getElementById('new-sig').value.trim();
-  var checks = document.querySelectorAll('.new-check');
-  var allChecked = true;
-  for (var i = 0; i < checks.length; i++) { if (!checks[i].checked) { allChecked = false; break; } }
-
-  if (!name)  { showErr('newuser-error', 'Please enter your full name.'); return; }
-  if (!email || email.indexOf('@') < 0) { showErr('newuser-error', 'Please enter a valid email address.'); return; }
-  if (!date)  { showErr('newuser-error', 'Please enter today\'s date.'); return; }
-  if (!allChecked) { showErr('newuser-error', 'Please check all six acknowledgment boxes.'); return; }
-  if (!sig)   { showErr('newuser-error', 'Please type your full name as your signature.'); return; }
-
-  var niceDate = formatDate(date);
-  var body = buildAckText(name, email, niceDate, sig, true, false);
-  copyToClipboard(body);
-  var subject = encodeURIComponent('Access Request and Acknowledgment - ' + name);
-  window.open('mailto:' + REQ + '?subject=' + subject, '_blank');
-  document.getElementById('newuser-confirm').style.display = 'block';
-  document.getElementById('newuser-pending').style.display = 'block';
 }
 
 // ============================================================
