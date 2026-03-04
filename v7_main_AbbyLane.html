@@ -978,7 +978,21 @@ function verifyReviewerToken() {
   document.getElementById('reviewer-link-box').style.display = 'block';
 }
 
+var _reviewerNotified = false;
+
 function notifyReviewerAccess(name, email, ptr) {
+  if (_reviewerNotified) return; // Only fire once per session
+  _reviewerNotified = true;
+
+  // Replace button with plain link so subsequent clicks just open the doc
+  var linkBox = document.getElementById('reviewer-link-box');
+  if (linkBox) {
+    linkBox.innerHTML =
+      '<p style="color:var(--gold);font-size:0.83rem;font-style:italic;margin-bottom:12px;">Entry code accepted. Click below to open the reviewer copy.</p>' +
+      '<a href="' + EXT_LINK + '" target="_blank" class="btn btn-gold">&#128279; Open Reviewer Copy</a>' +
+      '<div id="reviewer-notify-confirm" style="color:var(--gold);font-size:0.83rem;margin-top:10px;">Owner has been notified of your access.</div>';
+  }
+
   var nextPtr = (ptr + 1) % TOKEN_TABLE.length;
   var nextToken = TOKEN_TABLE[nextPtr][0];
   var subject = encodeURIComponent('Reviewer Access Used — ' + name);
@@ -990,7 +1004,6 @@ function notifyReviewerAccess(name, email, ptr) {
     '\n\nNext session token for this user: ' + nextToken
   );
   window.open('mailto:' + REQ + '?subject=' + subject + '&body=' + body, '_blank');
-  document.getElementById('reviewer-notify-confirm').style.display = 'block';
 }
 
 // ============================================================
