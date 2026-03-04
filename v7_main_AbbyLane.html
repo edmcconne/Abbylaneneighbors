@@ -366,10 +366,10 @@
 <div id="screen-newuser" class="screen">
   <div class="card">
     <div class="privilege-banner">&#9878; Attorney-Client Privilege &mdash; Confidential</div>
-    <div class="step-badge">New Member &mdash; Acknowledgment Form</div>
-    <h2 class="card-title">Confidentiality Acknowledgment</h2>
-    <p class="card-subtitle">Please complete all fields below. Your submission will be sent directly to the owner for review.</p>
-    <div class="alert alert-info">Your name and email have been pre-filled from the previous screen. Please verify they are correct before submitting.</div>
+    <div class="step-badge" id="newuser-step-badge">New Member &mdash; Acknowledgment Form</div>
+    <h2 class="card-title" id="newuser-title">Confidentiality Acknowledgment</h2>
+    <p class="card-subtitle" id="newuser-subtitle">Please complete all fields below. Your submission will be sent directly to the owner for review.</p>
+    <div class="alert alert-info" id="newuser-prefill-note">Your name and email have been pre-filled from the previous screen. Please verify they are correct before submitting.</div>
     <div class="field">
       <label for="new-name">Full Name *</label>
       <input type="text" id="new-name" placeholder="Your full legal name">
@@ -724,6 +724,8 @@ function shouldShowRequest() {
   return email.length > 0 && email.indexOf('@') > 0 && newName.length > 0;
 }
 
+var _isKnownUser = false;
+
 function requestNewAccess() {
   var name  = document.getElementById('inp-new-name').value.trim();
   var email = document.getElementById('inp-email').value.trim().toLowerCase();
@@ -740,6 +742,11 @@ function requestNewAccess() {
   }
 
   // Route to LCP form, pre-filling name and email
+  _isKnownUser = false;
+  document.getElementById('newuser-step-badge').textContent = 'New Member \u2014 Acknowledgment Form';
+  document.getElementById('newuser-title').textContent = 'Confidentiality Acknowledgment';
+  document.getElementById('newuser-subtitle').textContent = 'Please complete all fields below. Your submission will be sent directly to the owner for review.';
+  document.getElementById('newuser-prefill-note').textContent = 'Your name and email have been pre-filled from the previous screen. Please verify they are correct before submitting.';
   document.getElementById('new-name').value  = name;
   document.getElementById('new-email').value = email;
   document.getElementById('new-sig').value   = '';
@@ -782,30 +789,57 @@ function submitNewUser() {
   if (!allChecked) { showErr('newuser-error', 'Please check all six acknowledgment boxes before submitting.'); return; }
   if (!sig)   { showErr('newuser-error', 'Please type your full name as your electronic signature.'); return; }
 
-  var subject = encodeURIComponent('New Member Acknowledgment — ' + name);
-  var body = encodeURIComponent(
-    'ATTORNEY-CLIENT PRIVILEGE ACKNOWLEDGMENT\n' +
-    'New Member Submission — Portal\n' +
-    '─────────────────────────────────────────\n\n' +
-    'Name:             ' + name  + '\n' +
-    'Email:            ' + email + '\n' +
-    'Date:             ' + date  + '\n' +
-    'Microsoft Account:' + (msAcc ? ' Yes' : ' No') + '\n' +
-    'Signature:        ' + sig   + '\n\n' +
-    'Acknowledgments (all checked):\n' +
-    '  ✓ 1 — Maintain strict confidentiality of all materials\n' +
-    '  ✓ 2 — Not forward, share, or discuss materials outside authorized group\n' +
-    '  ✓ 3 — Use Track Changes for all document edits\n' +
-    '  ✓ 4 — Immediately notify owner if materials are accidentally shared\n' +
-    '  ✓ 5 — Not save materials to unsecured locations\n' +
-    '  ✓ 6 — Submitted electronically and agrees to all terms\n\n' +
-    '─────────────────────────────────────────\n' +
-    'ACTION NEEDED:\n' +
-    '1. Create individual acknowledgment spreadsheet for this user.\n' +
-    '2. Add to portal USERS array in CONFIG (microsoftAccount: ' + (msAcc ? 'true' : 'false') + ').\n' +
-    '3. Set up OneDrive sharing with appropriate permissions.\n' +
-    '4. Set hasAccess:true and deploy, then notify user to return to portal.'
-  );
+  var subject, body;
+  if (_isKnownUser) {
+    subject = encodeURIComponent('Acknowledgment Received — ' + name);
+    body = encodeURIComponent(
+      'ATTORNEY-CLIENT PRIVILEGE ACKNOWLEDGMENT\n' +
+      'Known Member Submission — Portal\n' +
+      '─────────────────────────────────────────\n\n' +
+      'Name:             ' + name  + '\n' +
+      'Email:            ' + email + '\n' +
+      'Date:             ' + date  + '\n' +
+      'Microsoft Account:' + (msAcc ? ' Yes' : ' No') + '\n' +
+      'Signature:        ' + sig   + '\n\n' +
+      'Acknowledgments (all checked):\n' +
+      '  ✓ 1 — Maintain strict confidentiality of all materials\n' +
+      '  ✓ 2 — Not forward, share, or discuss materials outside authorized group\n' +
+      '  ✓ 3 — Use Track Changes for all document edits\n' +
+      '  ✓ 4 — Immediately notify owner if materials are accidentally shared\n' +
+      '  ✓ 5 — Not save materials to unsecured locations\n' +
+      '  ✓ 6 — Submitted electronically and agrees to all terms\n\n' +
+      '─────────────────────────────────────────\n' +
+      'ACTION NEEDED:\n' +
+      '1. In portal CONFIG for "' + name + '": set dateSigned:"' + date + '", signature:"' + sig + '", hasAccess:true.\n' +
+      '2. Set up OneDrive sharing with appropriate permissions.\n' +
+      '3. Deploy updated portal, then notify user to return.'
+    );
+  } else {
+    subject = encodeURIComponent('New Member Acknowledgment — ' + name);
+    body = encodeURIComponent(
+      'ATTORNEY-CLIENT PRIVILEGE ACKNOWLEDGMENT\n' +
+      'New Member Submission — Portal\n' +
+      '─────────────────────────────────────────\n\n' +
+      'Name:             ' + name  + '\n' +
+      'Email:            ' + email + '\n' +
+      'Date:             ' + date  + '\n' +
+      'Microsoft Account:' + (msAcc ? ' Yes' : ' No') + '\n' +
+      'Signature:        ' + sig   + '\n\n' +
+      'Acknowledgments (all checked):\n' +
+      '  ✓ 1 — Maintain strict confidentiality of all materials\n' +
+      '  ✓ 2 — Not forward, share, or discuss materials outside authorized group\n' +
+      '  ✓ 3 — Use Track Changes for all document edits\n' +
+      '  ✓ 4 — Immediately notify owner if materials are accidentally shared\n' +
+      '  ✓ 5 — Not save materials to unsecured locations\n' +
+      '  ✓ 6 — Submitted electronically and agrees to all terms\n\n' +
+      '─────────────────────────────────────────\n' +
+      'ACTION NEEDED:\n' +
+      '1. Create individual acknowledgment spreadsheet for this user.\n' +
+      '2. Add to portal USERS array in CONFIG (microsoftAccount: ' + (msAcc ? 'true' : 'false') + ').\n' +
+      '3. Set up OneDrive sharing with appropriate permissions.\n' +
+      '4. Set hasAccess:true and deploy, then notify user to return to portal.'
+    );
+  }
 
   openMailto('mailto:' + REQ + '?subject=' + subject + '&body=' + body);
 
@@ -871,13 +905,27 @@ function verifyIdentity() {
 
   // Route by status
   if (!user.hasAccess && !user.dateSigned) {
-    // Pre-added, not yet acknowledged — send to their individual form
-    var formBox = document.getElementById('known-user-form-box');
-    var link = user.formLink || BLANK_FORM_LINK;
-    formBox.innerHTML =
-      '<a href="' + link + '" target="_blank" class="btn btn-gold" style="display:inline-flex;margin:0 auto;">&#128203; Open My Acknowledgment Form</a>';
-    saveSession(user.email, 'screen-known-user');
-    showScreen('screen-known-user');
+    // Pre-added, not yet acknowledged — route to inline portal form
+    _isKnownUser = true;
+    document.getElementById('new-name').value  = user.name;
+    document.getElementById('new-email').value = user.email;
+    document.getElementById('new-sig').value   = '';
+    document.getElementById('new-ms-account').checked = user.microsoftAccount || false;
+    var checks = document.querySelectorAll('.new-check');
+    for (var ci = 0; ci < checks.length; ci++) { checks[ci].checked = false; }
+    document.getElementById('newuser-error').style.display   = 'none';
+    document.getElementById('newuser-confirm').style.display = 'none';
+    document.getElementById('newuser-pending').style.display = 'none';
+    var t2 = new Date();
+    document.getElementById('new-date').value = t2.getFullYear() + '-' +
+      String(t2.getMonth()+1).padStart(2,'0') + '-' + String(t2.getDate()).padStart(2,'0');
+    saveSession(user.email, 'screen-newuser');
+    // Update form headings for known user context
+    document.getElementById('newuser-step-badge').textContent = 'Step 2 of 2 \u2014 Acknowledgment Form';
+    document.getElementById('newuser-title').textContent = 'Confidentiality Acknowledgment';
+    document.getElementById('newuser-subtitle').textContent = 'You have been pre-authorized. Please complete the acknowledgment form below to activate your access.';
+    document.getElementById('newuser-prefill-note').textContent = 'Your name and email have been pre-filled from your account. Please verify they are correct before submitting.';
+    showScreen('screen-newuser');
     return;
   }
 
