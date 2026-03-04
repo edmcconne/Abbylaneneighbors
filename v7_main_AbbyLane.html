@@ -546,8 +546,21 @@ var USERS = [
 // ████████████████████████████████████████████████████████████
 
 // ============================================================
-// PASSWORD UTILITIES  (code — do not move to CONFIG block)
+// MAIL UTILITIES  (code — do not move to CONFIG block)
 // ============================================================
+function openMailto(mailto) {
+  // Fire mailto via hidden iframe to keep portal open in browser
+  var f = document.getElementById('mailto-frame');
+  if (!f) {
+    f = document.createElement('iframe');
+    f.id = 'mailto-frame';
+    f.style.display = 'none';
+    document.body.appendChild(f);
+  }
+  f.src = mailto;
+}
+
+
 function encryptPassword(plain) {
   return plain.split('').map(function(c, i) {
     return (c.charCodeAt(0) ^ PASSWORD_KEY.charCodeAt(i % PASSWORD_KEY.length))
@@ -739,7 +752,7 @@ function submitNewUser() {
     '4. Set hasAccess:true and deploy, then notify user to return to portal.'
   );
 
-  window.open('mailto:' + REQ + '?subject=' + subject + '&body=' + body, '_blank');
+  openMailto('mailto:' + REQ + '?subject=' + subject + '&body=' + body);
 
   document.getElementById('newuser-confirm').style.display = 'block';
   document.getElementById('newuser-pending').style.display = 'block';
@@ -956,7 +969,7 @@ function notifyReviewerAccess(name, email) {
     'Time:  ' + new Date().toLocaleString() + '\n\n' +
     'No action required — token advances automatically each hour.'
   );
-  window.open('mailto:' + REQ + '?subject=' + subject + '&body=' + body, '_blank');
+  openMailto('mailto:' + REQ + '?subject=' + subject + '&body=' + body);
 }
 
 // ============================================================
@@ -983,7 +996,7 @@ function submitKnownUser() {
   var body = buildAckText(name, email, niceDate, sig, false, document.getElementById('ku-microsoft').value === 'true');
   copyToClipboard(body);
   var subject = encodeURIComponent('Acknowledgment Submission - ' + name);
-  window.open('mailto:' + REQ + '?subject=' + subject, '_blank');
+  openMailto('mailto:' + REQ + '?subject=' + subject);
   document.getElementById('ku-confirm').style.display = 'block';
   document.getElementById('ku-pending').style.display = 'block';
 }
