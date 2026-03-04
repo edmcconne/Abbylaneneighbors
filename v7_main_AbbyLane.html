@@ -867,71 +867,39 @@ function buildReturningView(user) {
         '<a href="' + DOC_LINK + '" target="_blank" class="btn btn-gold">&#128279; Open Document</a>' +
       '</div>';
   } else if (EXT_LINK) {
-    var ptr = user.tokenPointer || 0;
+    var ptr = Math.floor(new Date().getHours() / 24 * TOKEN_TABLE.length);
+    var ptrPrev = (ptr - 1 + TOKEN_TABLE.length) % TOKEN_TABLE.length;
     var currentToken = TOKEN_TABLE[ptr % TOKEN_TABLE.length][0];
     var tokenMailSubject = encodeURIComponent('Abby Lane Neighbors - Reviewer Access Code');
     var tokenMailBody = encodeURIComponent(
       'Your reviewer access code is: ' + currentToken +
       '\n\nSteps:\n' +
-      '1. Forward this email to ' + REQ + ' so the owner can confirm your access.\n' +
-      '2. Open the token lookup spreadsheet: ' + TOKEN_LOOKUP_LINK + '\n' +
-      '3. Enter the code above into the spreadsheet to get your portal entry code.\n' +
-      '4. Return to the portal and enter the portal entry code to access the reviewer copy.'
+      '1. Open the token lookup spreadsheet: ' + TOKEN_LOOKUP_LINK + '\n' +
+      '2. Enter the code above into the spreadsheet to get your portal entry code.\n' +
+      '3. Return to the portal and enter the portal entry code to access the reviewer copy.\n\n' +
+      'Note: This code is valid for approximately one hour.'
     );
 
-    if (ptr === 0) {
-      // First visit — send token directly
-      docHtml =
-        '<div class="doc-link-box">' +
-          '<div class="icon">&#128196;</div>' +
-          '<h3>' + safeText(DOC_NAME) + '</h3>' +
-          '<p>Your acknowledgment is on file. Click below to send yourself an access code. You will use this code to retrieve your portal entry code from a lookup spreadsheet.</p>' +
-          '<div style="margin:16px 0;">' +
-            '<a href="mailto:' + safeText(user.email) + '?cc=' + REQ + '&subject=' + tokenMailSubject + '&body=' + tokenMailBody + '" target="_blank" class="btn btn-gold" style="margin-bottom:12px;">&#9993; Send Me an Access Code</a>' +
-          '</div>' +
-          '<p style="color:var(--gold);font-size:0.83rem;font-style:italic;margin-bottom:6px;">After sending, receiving, and forwarding the email — open the lookup spreadsheet, enter your access code, and note the portal entry code. Then enter it below:</p>' +
-          '<div style="margin:8px 0;">' +
-            '<input type="text" id="reviewer-token-input" placeholder="Enter portal entry code" style="padding:10px 14px;font-size:1rem;border:1px solid #d4c5a9;border-radius:3px;width:220px;margin-right:10px;">' +
-            '<button onclick="verifyReviewerToken()" class="btn btn-gold" style="padding:10px 18px;">&#128274; Submit</button>' +
-          '</div>' +
-          '<div id="reviewer-token-error" style="color:#8b1a1a;font-size:0.85rem;display:none;margin-top:8px;"></div>' +
-          '<div id="reviewer-link-box" style="display:none;margin-top:16px;">' +
-            '<p style="color:var(--gold);font-size:0.83rem;font-style:italic;margin-bottom:12px;">Entry code accepted. Click below to open the reviewer copy.</p>' +
-            '<a href="' + EXT_LINK + '" target="_blank" class="btn btn-gold" onclick="notifyReviewerAccess(\'' + safeText(user.name) + '\',\'' + safeText(user.email) + '\',' + ptr + ')">&#128279; Open Reviewer Copy</a>' +
-            '<div id="reviewer-notify-confirm" style="color:var(--gold);font-size:0.83rem;display:none;margin-top:10px;">Owner has been notified of your access.</div>' +
-          '</div>' +
-        '</div>';
-    } else {
-      // Subsequent visit — verify last token first, then send next
-      docHtml =
-        '<div class="doc-link-box">' +
-          '<div class="icon">&#128196;</div>' +
-          '<h3>' + safeText(DOC_NAME) + '</h3>' +
-          '<p>Welcome back. To continue, please enter the access code from your last session email.</p>' +
-          '<div style="margin:8px 0;">' +
-            '<input type="text" id="reviewer-last-token-input" placeholder="Enter last session code" style="padding:10px 14px;font-size:1rem;border:1px solid #d4c5a9;border-radius:3px;width:220px;margin-right:10px;">' +
-            '<button onclick="verifyLastToken()" class="btn btn-gold" style="padding:10px 18px;">&#128274; Verify</button>' +
-          '</div>' +
-          '<div id="reviewer-last-token-error" style="color:#8b1a1a;font-size:0.85rem;display:none;margin-top:8px;"></div>' +
-          '<div id="reviewer-next-step" style="display:none;margin-top:20px;">' +
-            '<p>Verified. Click below to send yourself the next access code.</p>' +
-            '<div style="margin:12px 0;">' +
-              '<a href="mailto:' + safeText(user.email) + '?cc=' + REQ + '&subject=' + tokenMailSubject + '&body=' + tokenMailBody + '" target="_blank" class="btn btn-gold" style="margin-bottom:12px;">&#9993; Send Me an Access Code</a>' +
-            '</div>' +
-            '<p style="color:var(--gold);font-size:0.83rem;font-style:italic;margin-bottom:6px;">After sending, receiving, and forwarding — open the lookup spreadsheet, enter your code, and enter the portal entry code below:</p>' +
-            '<div style="margin:8px 0;">' +
-              '<input type="text" id="reviewer-token-input" placeholder="Enter portal entry code" style="padding:10px 14px;font-size:1rem;border:1px solid #d4c5a9;border-radius:3px;width:220px;margin-right:10px;">' +
-              '<button onclick="verifyReviewerToken()" class="btn btn-gold" style="padding:10px 18px;">&#128274; Submit</button>' +
-            '</div>' +
-            '<div id="reviewer-token-error" style="color:#8b1a1a;font-size:0.85rem;display:none;margin-top:8px;"></div>' +
-            '<div id="reviewer-link-box" style="display:none;margin-top:16px;">' +
-              '<p style="color:var(--gold);font-size:0.83rem;font-style:italic;margin-bottom:12px;">Entry code accepted. Click below to open the reviewer copy.</p>' +
-              '<a href="' + EXT_LINK + '" target="_blank" class="btn btn-gold" onclick="notifyReviewerAccess(\'' + safeText(user.name) + '\',\'' + safeText(user.email) + '\',' + ptr + ')">&#128279; Open Reviewer Copy</a>' +
-              '<div id="reviewer-notify-confirm" style="color:var(--gold);font-size:0.83rem;display:none;margin-top:10px;">Owner has been notified of your access.</div>' +
-            '</div>' +
-          '</div>' +
-        '</div>';
-    }
+    docHtml =
+      '<div class="doc-link-box">' +
+        '<div class="icon">&#128196;</div>' +
+        '<h3>' + safeText(DOC_NAME) + '</h3>' +
+        '<p>Click below to send yourself an access code. You will use this code to retrieve your portal entry code from the lookup spreadsheet.</p>' +
+        '<div style="margin:16px 0;">' +
+          '<a href="mailto:' + safeText(user.email) + '?cc=' + REQ + '&subject=' + tokenMailSubject + '&body=' + tokenMailBody + '" target="_blank" class="btn btn-gold" style="margin-bottom:12px;">&#9993; Send Me an Access Code</a>' +
+        '</div>' +
+        '<p style="color:var(--gold);font-size:0.83rem;font-style:italic;margin-bottom:6px;">After receiving your email — open the lookup spreadsheet, enter your access code, and note the portal entry code. Then enter it below:</p>' +
+        '<div style="margin:8px 0;">' +
+          '<input type="text" id="reviewer-token-input" placeholder="Enter portal entry code" style="padding:10px 14px;font-size:1rem;border:1px solid #d4c5a9;border-radius:3px;width:220px;margin-right:10px;">' +
+          '<button onclick="verifyReviewerToken()" class="btn btn-gold" style="padding:10px 18px;">&#128274; Submit</button>' +
+        '</div>' +
+        '<div id="reviewer-token-error" style="color:#8b1a1a;font-size:0.85rem;display:none;margin-top:8px;"></div>' +
+        '<div id="reviewer-link-box" style="display:none;margin-top:16px;">' +
+          '<p style="color:var(--gold);font-size:0.83rem;font-style:italic;margin-bottom:12px;">Entry code accepted. Click below to open the reviewer copy.</p>' +
+          '<a href="' + EXT_LINK + '" target="_blank" class="btn btn-gold" onclick="notifyReviewerAccess(\'' + safeText(user.name) + '\',\'' + safeText(user.email) + '\')">&#128279; Open Reviewer Copy</a>' +
+          '<div id="reviewer-notify-confirm" style="color:var(--gold);font-size:0.83rem;display:none;margin-top:10px;">Owner has been notified of your access.</div>' +
+        '</div>' +
+      '</div>';
 
   } else {
     docHtml =
@@ -948,28 +916,15 @@ function buildReturningView(user) {
 // Current user reference set during buildReturningView
 var _reviewerUser = null;
 
-function verifyLastToken() {
-  var input = document.getElementById('reviewer-last-token-input').value.trim().toUpperCase();
-  var errEl = document.getElementById('reviewer-last-token-error');
-  if (!input) { errEl.textContent = 'Please enter your last session code.'; errEl.style.display = 'block'; return; }
-  var ptr = _reviewerUser ? (_reviewerUser.tokenPointer || 0) : 0;
-  var lastToken = TOKEN_TABLE[(ptr - 1 + TOKEN_TABLE.length) % TOKEN_TABLE.length][0].toUpperCase();
-  if (input !== lastToken) {
-    errEl.textContent = 'Code does not match. Please check and try again.';
-    errEl.style.display = 'block';
-    return;
-  }
-  errEl.style.display = 'none';
-  document.getElementById('reviewer-next-step').style.display = 'block';
-}
-
 function verifyReviewerToken() {
-  var input = document.getElementById('reviewer-token-input').value.trim().toUpperCase();
-  var errEl = document.getElementById('reviewer-token-error');
-  if (!input) { errEl.textContent = 'Please enter the portal entry code.'; errEl.style.display = 'block'; return; }
-  var ptr = _reviewerUser ? (_reviewerUser.tokenPointer || 0) : 0;
-  var expectedResponse = TOKEN_TABLE[ptr % TOKEN_TABLE.length][1].toUpperCase();
-  if (input !== expectedResponse) {
+  var input    = document.getElementById('reviewer-token-input').value.trim().toUpperCase();
+  var errEl    = document.getElementById('reviewer-token-error');
+  if (!input)  { errEl.textContent = 'Please enter the portal entry code.'; errEl.style.display = 'block'; return; }
+  var ptr      = Math.floor(new Date().getHours() / 24 * TOKEN_TABLE.length);
+  var ptrPrev  = (ptr - 1 + TOKEN_TABLE.length) % TOKEN_TABLE.length;
+  var expected     = TOKEN_TABLE[ptr     % TOKEN_TABLE.length][1].toUpperCase();
+  var expectedPrev = TOKEN_TABLE[ptrPrev % TOKEN_TABLE.length][1].toUpperCase();
+  if (input !== expected && input !== expectedPrev) {
     errEl.textContent = 'Entry code is incorrect. Please check the lookup spreadsheet and try again.';
     errEl.style.display = 'block';
     return;
@@ -980,28 +935,26 @@ function verifyReviewerToken() {
 
 var _reviewerNotified = false;
 
-function notifyReviewerAccess(name, email, ptr) {
-  if (_reviewerNotified) return; // Only fire once per session
+function notifyReviewerAccess(name, email) {
+  if (_reviewerNotified) return; // Fire once per session only
   _reviewerNotified = true;
 
-  // Replace button with plain link so subsequent clicks just open the doc
+  // Replace onclick button with plain link — subsequent clicks just open doc
   var linkBox = document.getElementById('reviewer-link-box');
   if (linkBox) {
     linkBox.innerHTML =
       '<p style="color:var(--gold);font-size:0.83rem;font-style:italic;margin-bottom:12px;">Entry code accepted. Click below to open the reviewer copy.</p>' +
       '<a href="' + EXT_LINK + '" target="_blank" class="btn btn-gold">&#128279; Open Reviewer Copy</a>' +
-      '<div id="reviewer-notify-confirm" style="color:var(--gold);font-size:0.83rem;margin-top:10px;">Owner has been notified of your access.</div>';
+      '<div style="color:var(--gold);font-size:0.83rem;margin-top:10px;">Owner has been notified of your access.</div>';
   }
 
-  var nextPtr = (ptr + 1) % TOKEN_TABLE.length;
-  var nextToken = TOKEN_TABLE[nextPtr][0];
-  var subject = encodeURIComponent('Reviewer Access Used — ' + name);
-  var body = encodeURIComponent(
-    'Reviewer copy has been accessed.\n\n' +
-    'Name: ' + name + '\nEmail: ' + email + '\nTime: ' + new Date().toLocaleString() +
-    '\n\n---\nPortal CONFIG update needed:\n' +
-    '  For user "' + name + '" set tokenPointer: ' + nextPtr +
-    '\n\nNext session token for this user: ' + nextToken
+  var subject = encodeURIComponent('Reviewer Access — ' + name);
+  var body    = encodeURIComponent(
+    'Reviewer copy accessed.\n\n' +
+    'Name:  ' + name  + '\n' +
+    'Email: ' + email + '\n' +
+    'Time:  ' + new Date().toLocaleString() + '\n\n' +
+    'No action required — token advances automatically each hour.'
   );
   window.open('mailto:' + REQ + '?subject=' + subject + '&body=' + body, '_blank');
 }
