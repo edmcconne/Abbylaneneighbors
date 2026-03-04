@@ -358,7 +358,10 @@
     <div id="returning-form-display"></div>
     <div id="doc-access-box"></div>
     <hr class="divider">
-    <button class="btn btn-outline" onclick="showScreen('screen-identity')" style="font-size:0.82rem;padding:9px 18px;">&#8592; Back to Login</button>
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+      <button class="btn btn-outline" onclick="showScreen('screen-identity')" style="font-size:0.82rem;padding:9px 18px;">&#8592; Back to Login</button>
+      <button id="btn-admin" class="btn btn-gold" onclick="openAdmin()" style="display:none;font-size:0.82rem;padding:9px 18px;">&#9881; Admin Panel</button>
+    </div>
   </div>
 </div>
 
@@ -561,15 +564,10 @@ function getCurrentAccessCode() {
 // MAIL UTILITIES  (code — do not move to CONFIG block)
 // ============================================================
 function openMailto(mailto) {
-  // Fire mailto via hidden iframe to keep portal open in browser
-  var f = document.getElementById('mailto-frame');
-  if (!f) {
-    f = document.createElement('iframe');
-    f.id = 'mailto-frame';
-    f.style.display = 'none';
-    document.body.appendChild(f);
-  }
-  f.src = mailto;
+  // Open mailto in new tab/window so portal tab stays intact.
+  // If a desktop mail client is configured it launches directly.
+  // If using webmail (Gmail in Chrome) it opens compose in a new tab.
+  window.open(mailto, '_blank');
 }
 
 
@@ -611,6 +609,7 @@ function verifyPassword(plain, stored) {
       if (user && sess.screen) {
         if (sess.screen === 'screen-returning') {
           buildReturningView(user);
+          document.getElementById('btn-admin').style.display = (userIdx === 0) ? 'inline-block' : 'none';
           showScreen('screen-returning');
           return;
         } else if (sess.screen === 'screen-pending') {
@@ -864,16 +863,17 @@ function submitNewUser() {
   var pendingEl = document.getElementById('newuser-pending');
   var capturedMailto = mailtoUrl;
   pendingEl.innerHTML =
-    '<div style="text-align:center;margin-bottom:16px;">' +
-      '<button class="btn btn-gold" id="btn-open-email" style="display:inline-flex;">&#9993; Open Email Client &amp; Send</button>' +
-    '</div>' +
     '<strong>What happens next:</strong><br>' +
-    '1. Click the button above — your email client will open with the form pre-filled.<br>' +
+    '1. Click the button below — your email client will open with the form pre-filled.<br>' +
     '2. Click Send in your email client.<br>' +
-    '3. The owner will review and contact you with next steps.<br><br>' +
+    '3. The owner will review and contact you with next steps.<br>' +
+    '4. When your email has been sent, you may close the browser tab.<br><br>' +
     '<strong>To receive permanent document access:</strong><br>' +
     'Please ensure you have a free Microsoft account using the same email address you entered above. ' +
-    'If you do not have one, create one free at <a href="https://account.microsoft.com" target="_blank">account.microsoft.com</a>.';
+    'If you do not have one, create one free at <a href="https://account.microsoft.com" target="_blank">account.microsoft.com</a>.' +
+    '<div style="text-align:center;margin-top:20px;">' +
+      '<button class="btn btn-gold" id="btn-open-email">&#9993; Open Email Client &amp; Send</button>' +
+    '</div>';
   pendingEl.style.display = 'block';
 
   // Attach click handler after element is in DOM
@@ -975,6 +975,8 @@ function verifyIdentity() {
   // Full access
   saveSession(user.email, 'screen-returning');
   buildReturningView(user);
+  // Show admin button only for first user (owner/admin role)
+  document.getElementById('btn-admin').style.display = (idx === 0) ? 'inline-block' : 'none';
   showScreen('screen-returning');
 }
 
@@ -1186,9 +1188,664 @@ function fallbackCopy(text) {
   document.body.removeChild(ta);
 }
 
+
 function safeText(str) {
   return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
+</script>
+
+<!-- ============================================================ -->
+<!-- ADMIN PANEL — OWNER ONLY                                     -->
+<!-- ============================================================ -->
+<style>
+/* Admin overlay */
+#admin-overlay {
+  display: none; position: fixed; inset: 0; z-index: 500;
+  background: #0a1520;
+  flex-direction: column;
+  font-family: 'Source Serif 4', Georgia, serif;
+}
+#admin-overlay.open { display: flex; }
+.adm-header {
+  background: #162840;
+  border-bottom: 2px solid #C9A84C;
+  padding: 14px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.adm-header-left h2 { color: #C9A84C; font-size: 17px; letter-spacing: 0.5px; }
+.adm-header-left p  { color: #998877; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+.adm-header-right   { display: flex; gap: 10px; align-items: center; }
+.adm-file-status    { font-size: 12px; color: #998877; font-style: italic; }
+.adm-tabs {
+  display: flex; border-bottom: 1px solid rgba(201,168,76,0.25);
+  padding: 0 24px; background: #0f1e2e; flex-shrink: 0;
+}
+.adm-tab {
+  padding: 11px 18px; cursor: pointer; font-size: 13px; color: #998877;
+  border-bottom: 3px solid transparent; margin-bottom: -1px;
+  transition: color 0.2s; letter-spacing: 0.3px;
+}
+.adm-tab:hover { color: #B8A888; }
+.adm-tab.active { color: #C9A84C; border-bottom-color: #C9A84C; font-weight: bold; }
+.adm-body { flex: 1; overflow-y: auto; padding: 22px 24px; }
+.adm-panel { display: none; max-width: 960px; }
+.adm-panel.active { display: block; }
+.adm-section { margin-bottom: 24px; }
+.adm-section-title {
+  font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+  color: #C9A84C; margin-bottom: 10px; padding-bottom: 5px;
+  border-bottom: 1px solid rgba(201,168,76,0.2);
+}
+.adm-field-row { display: flex; gap: 14px; margin-bottom: 10px; flex-wrap: wrap; }
+.adm-field { display: flex; flex-direction: column; gap: 4px; flex: 1 1 200px; }
+.adm-field label { font-size: 11px; color: #998877; letter-spacing: 1px; text-transform: uppercase; }
+.adm-field input, .adm-field select {
+  background: #162840; color: #F5F0E8;
+  border: 1px solid rgba(201,168,76,0.25); border-radius: 3px;
+  padding: 7px 9px; font-family: 'Courier New', monospace; font-size: 12px;
+}
+.adm-field input:focus, .adm-field select:focus { outline: none; border-color: #C9A84C; }
+.adm-field.wide { flex: 2 1 360px; }
+.adm-btn { padding: 7px 16px; border-radius: 3px; border: none; cursor: pointer; font-size: 13px; font-family: Georgia, serif; font-weight: bold; transition: opacity 0.2s; }
+.adm-btn:hover { opacity: 0.85; }
+.adm-btn-gold    { background: #C9A84C; color: #0F1E2E; }
+.adm-btn-outline { background: transparent; color: #C9A84C; border: 1px solid rgba(201,168,76,0.4); }
+.adm-btn-outline:hover { background: rgba(201,168,76,0.1); }
+.adm-btn-danger  { background: #8B1A1A; color: #fff; }
+.adm-btn-sm      { padding: 4px 10px; font-size: 12px; }
+.adm-btn-row     { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+/* User table */
+.adm-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 13px; }
+.adm-table th {
+  background: #1e3a54; color: #C9A84C; font-size: 11px;
+  letter-spacing: 1px; text-transform: uppercase; padding: 7px 9px;
+  text-align: left; border-bottom: 1px solid rgba(201,168,76,0.25);
+}
+.adm-table td { padding: 7px 9px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; color: #F5F0E8; }
+.adm-table tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
+.adm-table tr:hover td { background: rgba(255,255,255,0.06); }
+/* Badges */
+.adm-badge { display: inline-block; padding: 2px 7px; border-radius: 10px; font-size: 11px; }
+.adm-badge-y { background: rgba(27,94,32,0.3); color: #81C784; border: 1px solid rgba(27,94,32,0.4); }
+.adm-badge-n { background: rgba(139,26,26,0.3); color: #EF9A9A; border: 1px solid rgba(139,26,26,0.4); }
+.adm-badge-p { background: rgba(125,78,0,0.3);  color: #FFD54F; border: 1px solid rgba(125,78,0,0.4); }
+/* User modal */
+.adm-modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:600; align-items:center; justify-content:center; }
+.adm-modal-bg.open { display:flex; }
+.adm-modal { background:#162840; border:1px solid rgba(201,168,76,0.3); border-radius:4px; padding:22px 26px; width:580px; max-width:95vw; max-height:88vh; overflow-y:auto; }
+.adm-modal h3 { color:#C9A84C; font-size:15px; margin-bottom:16px; }
+/* Alerts */
+.adm-alert { padding:9px 12px; border-radius:3px; font-size:13px; margin-bottom:10px; }
+.adm-alert-ok   { background:rgba(27,94,32,0.2);  color:#81C784; border:1px solid rgba(27,94,32,0.4); }
+.adm-alert-err  { background:rgba(139,26,26,0.2); color:#EF9A9A; border:1px solid rgba(139,26,26,0.4); }
+.adm-alert-info { background:rgba(201,168,76,0.1);color:#B8A888; border:1px solid rgba(201,168,76,0.25); }
+/* Email parser */
+.adm-email-paste {
+  background:#162840; color:#F5F0E8; border:1px solid rgba(201,168,76,0.25);
+  border-radius:3px; padding:10px; font-family:'Courier New',monospace; font-size:12px;
+  width:100%; min-height:180px; resize:vertical;
+}
+.adm-parse-result { background:#1e3a54; border:1px solid rgba(201,168,76,0.25); border-radius:3px; padding:14px; margin-top:10px; }
+.adm-change-item { display:flex; align-items:flex-start; gap:10px; padding:5px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:13px; }
+.adm-change-item:last-child { border-bottom:none; }
+.adm-change-label { color:#998877; min-width:130px; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; }
+.adm-change-val { font-family:'Courier New',monospace; }
+/* Toast */
+#adm-toast { position:fixed; bottom:24px; right:24px; padding:11px 18px; border-radius:3px; font-size:13px; opacity:0; transition:opacity 0.3s; pointer-events:none; z-index:700; }
+#adm-toast.show { opacity:1; }
+.adm-toast-ok  { background:#1B5E20; color:#fff; }
+.adm-toast-err { background:#8B1A1A; color:#fff; }
+.adm-unsaved { display:inline-block; width:7px; height:7px; background:#C9A84C; border-radius:50%; margin-left:5px; animation:admpulse 1.5s infinite; }
+@keyframes admpulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+</style>
+
+<!-- Admin overlay -->
+<div id="admin-overlay">
+  <div class="adm-header">
+    <div class="adm-header-left">
+      <h2>&#9881; Admin Panel &mdash; Owner Only</h2>
+      <p>Abby Lane Neighbors &middot; Attorney-Client Privileged</p>
+    </div>
+    <div class="adm-header-right">
+      <span class="adm-file-status" id="adm-file-status">No file loaded for saving</span>
+      <button class="adm-btn adm-btn-outline" onclick="admOpenFile()">&#128194; Load File</button>
+      <button class="adm-btn adm-btn-gold" id="adm-btn-save" onclick="admSaveFile()" disabled>&#128190; Save File</button>
+      <button class="adm-btn adm-btn-outline" onclick="closeAdmin()">&#10005; Close</button>
+    </div>
+  </div>
+  <div class="adm-tabs">
+    <div class="adm-tab active" onclick="admTab('users')">&#128101; Users</div>
+    <div class="adm-tab" onclick="admTab('links')">&#128279; Links</div>
+    <div class="adm-tab" onclick="admTab('system')">&#9881; System</div>
+    <div class="adm-tab" onclick="admTab('email')">&#9993; Email Parser</div>
+  </div>
+  <div class="adm-body">
+
+    <!-- USERS -->
+    <div class="adm-panel active" id="adm-panel-users">
+      <div class="adm-section">
+        <div class="adm-section-title">User Registry</div>
+        <div id="adm-users-alert"></div>
+        <table class="adm-table">
+          <thead><tr>
+            <th>#</th><th>Name</th><th>Email</th><th>Date Signed</th>
+            <th>Access</th><th>MS</th><th>PW</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="adm-users-tbody"></tbody>
+        </table>
+        <div class="adm-btn-row">
+          <button class="adm-btn adm-btn-outline" onclick="admAddUser()">+ Add New User</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LINKS -->
+    <div class="adm-panel" id="adm-panel-links">
+      <div class="adm-section">
+        <div class="adm-section-title">Document Links</div>
+        <div class="adm-field-row">
+          <div class="adm-field wide"><label>Master Document Link (DOC_LINK)</label><input type="text" id="adm-doc-link"></div>
+        </div>
+        <div class="adm-field-row">
+          <div class="adm-field wide"><label>Document Name (DOC_NAME)</label><input type="text" id="adm-doc-name"></div>
+        </div>
+      </div>
+      <div class="adm-section">
+        <div class="adm-section-title">External / Reviewer Links</div>
+        <div class="adm-field-row">
+          <div class="adm-field wide"><label>Reviewer Copy Link (EXT_LINK)</label><input type="text" id="adm-ext-link"></div>
+        </div>
+        <div class="adm-field-row">
+          <div class="adm-field"><label>Reviewer Link Expiry (EXT_EXPIRY)</label><input type="text" id="adm-ext-expiry" placeholder="e.g. Mar 31 2026 or blank"></div>
+        </div>
+        <div class="adm-field-row">
+          <div class="adm-field wide"><label>Token Lookup Spreadsheet (TOKEN_LOOKUP_LINK)</label><input type="text" id="adm-token-lookup"></div>
+        </div>
+        <div class="adm-field-row">
+          <div class="adm-field wide"><label>Blank Acknowledgment Form (BLANK_FORM_LINK)</label><input type="text" id="adm-blank-form"></div>
+        </div>
+      </div>
+      <div class="adm-btn-row">
+        <button class="adm-btn adm-btn-gold" onclick="admApplyLinks()">&#10003; Apply Link Changes</button>
+      </div>
+      <div id="adm-links-alert" style="margin-top:10px;"></div>
+    </div>
+
+    <!-- SYSTEM -->
+    <div class="adm-panel" id="adm-panel-system">
+      <div class="adm-section">
+        <div class="adm-section-title">Notification Settings</div>
+        <div class="adm-field-row">
+          <div class="adm-field"><label>Owner Notification Email (REQ)</label><input type="text" id="adm-req"></div>
+        </div>
+      </div>
+      <div class="adm-section">
+        <div class="adm-section-title">Password Encryption</div>
+        <div class="adm-field-row">
+          <div class="adm-field"><label>Password Key (PASSWORD_KEY)</label><input type="text" id="adm-password-key"></div>
+        </div>
+        <div class="adm-alert adm-alert-info">&#9888; Changing the password key invalidates all existing user passwords. Update all user password fields after changing.</div>
+      </div>
+      <div class="adm-btn-row">
+        <button class="adm-btn adm-btn-gold" onclick="admApplySystem()">&#10003; Apply System Changes</button>
+      </div>
+      <div id="adm-system-alert" style="margin-top:10px;"></div>
+    </div>
+
+    <!-- EMAIL PARSER -->
+    <div class="adm-panel" id="adm-panel-email">
+      <div class="adm-section">
+        <div class="adm-section-title">Parse Portal Notification Email</div>
+        <p style="color:#998877;margin-bottom:10px;font-size:13px;">Paste a portal notification email body. The tool identifies the user and changes needed, then lets you apply them with one click.</p>
+        <textarea class="adm-email-paste" id="adm-email-paste" placeholder="Paste the full email body here..."></textarea>
+        <div class="adm-btn-row">
+          <button class="adm-btn adm-btn-gold" onclick="admParseEmail()">&#128269; Parse Email</button>
+          <button class="adm-btn adm-btn-outline" onclick="document.getElementById('adm-email-paste').value='';document.getElementById('adm-parse-out').innerHTML='';">&#10005; Clear</button>
+        </div>
+        <div id="adm-parse-out"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- User edit modal -->
+<div class="adm-modal-bg" id="adm-user-modal">
+  <div class="adm-modal">
+    <h3 id="adm-modal-title">Edit User</h3>
+    <input type="hidden" id="adm-modal-idx">
+    <div class="adm-field-row">
+      <div class="adm-field wide"><label>Full Name *</label><input type="text" id="adm-m-name"></div>
+    </div>
+    <div class="adm-field-row">
+      <div class="adm-field wide"><label>Email Address *</label><input type="text" id="adm-m-email"></div>
+    </div>
+    <div class="adm-field-row">
+      <div class="adm-field"><label>Date Signed</label><input type="text" id="adm-m-datesigned" placeholder="e.g. Mar 4 2026"></div>
+      <div class="adm-field"><label>Signature</label><input type="text" id="adm-m-signature"></div>
+    </div>
+    <div class="adm-field-row">
+      <div class="adm-field"><label>Has Access</label>
+        <select id="adm-m-hasaccess">
+          <option value="false">false — not yet granted</option>
+          <option value="true">true — access granted</option>
+        </select>
+      </div>
+      <div class="adm-field"><label>Microsoft Account</label>
+        <select id="adm-m-msaccount">
+          <option value="true">true — has MS account</option>
+          <option value="false">false — no MS account</option>
+        </select>
+      </div>
+    </div>
+    <div class="adm-field-row">
+      <div class="adm-field wide"><label>Form Link (OneDrive spreadsheet)</label><input type="text" id="adm-m-formlink"></div>
+    </div>
+    <div class="adm-field-row">
+      <div class="adm-field"><label>Password (encrypted hex, blank = none)</label><input type="text" id="adm-m-password"></div>
+    </div>
+    <div id="adm-modal-alert" style="margin-top:8px;"></div>
+    <div class="adm-btn-row" style="margin-top:14px;">
+      <button class="adm-btn adm-btn-gold" onclick="admSaveUser()">&#10003; Save User</button>
+      <button class="adm-btn adm-btn-outline" onclick="admCloseModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="adm-toast"></div>
+
+<script>
+// ── ADMIN STATE ────────────────────────────────────────────────
+var _admFileHandle = null;
+var _admDirty      = false;
+// Live working copies — loaded from running CONFIG on panel open
+var _admUsers  = [];
+var _admLinks  = {};
+var _admSys    = {};
+
+function openAdmin() {
+  // Deep-copy live CONFIG values into admin working state
+  _admUsers = USERS.map(function(u) { return Object.assign({}, u); });
+  _admLinks = {
+    docLink:     DOC_LINK,
+    docName:     DOC_NAME,
+    extLink:     EXT_LINK,
+    extExpiry:   EXT_EXPIRY,
+    tokenLookup: TOKEN_LOOKUP_LINK,
+    blankForm:   BLANK_FORM_LINK
+  };
+  _admSys = { req: REQ, passwordKey: PASSWORD_KEY };
+  admRenderAll();
+  admSetDirty(false);
+  document.getElementById('admin-overlay').classList.add('open');
+}
+
+function closeAdmin() {
+  if (_admDirty && !confirm('You have unsaved changes. Close without saving?')) return;
+  document.getElementById('admin-overlay').classList.remove('open');
+}
+
+// ── FILE OPS ──────────────────────────────────────────────────
+async function admOpenFile() {
+  try {
+    var handles = await window.showOpenFilePicker({
+      types: [{ description: 'HTML Files', accept: { 'text/html': ['.html'] } }]
+    });
+    _admFileHandle = handles[0];
+    var file = await _admFileHandle.getFile();
+    document.getElementById('adm-file-status').textContent = '&#128196; ' + file.name;
+    document.getElementById('adm-btn-save').disabled = false;
+    admShowToast('File loaded: ' + file.name, 'ok');
+  } catch(e) {
+    if (e.name !== 'AbortError') admShowToast('Error: ' + e.message, 'err');
+  }
+}
+
+async function admSaveFile() {
+  if (!_admFileHandle) { admShowToast('Load the portal file first using Load File', 'err'); return; }
+  try {
+    var file = await _admFileHandle.getFile();
+    var html  = await file.text();
+    var newHtml = admRebuildConfig(html);
+    var writable = await _admFileHandle.createWritable();
+    await writable.write(newHtml);
+    await writable.close();
+    admSetDirty(false);
+    admShowToast('File saved successfully', 'ok');
+  } catch(e) {
+    admShowToast('Save error: ' + e.message, 'err');
+  }
+}
+
+function admRebuildConfig(html) {
+  var startMarker = '// ██   CONFIG — PARAMETERS START';
+  var endMarker   = '// ██   CONFIG — PARAMETERS END';
+  var si = html.indexOf(startMarker);
+  var ei = html.indexOf(endMarker);
+  if (si < 0 || ei < 0) { admShowToast('CONFIG markers not found in file', 'err'); return html; }
+
+  var pre  = html.slice(0, si);
+  var post = html.slice(ei);
+
+  var req = _admSys.req || '';
+  var reqParts = req.includes('@') ? req.split('@') : [req, ''];
+
+  var c = startMarker + '\n';
+  c += '// ██                                                        ██\n';
+  c += '// -- Contact & Document --\n';
+  c += 'var REQ      = "' + reqParts[0] + '" + "@" + "' + reqParts[1] + '";\n';
+  c += 'var DOC_LINK = "' + (_admLinks.docLink||'') + '";\n';
+  c += 'var DOC_NAME = "' + (_admLinks.docName||'') + '";\n\n';
+  c += '// -- External Reviewer --\n';
+  c += 'var EXT_LINK         = "' + (_admLinks.extLink||'') + '";\n';
+  c += 'var EXT_EXPIRY       = "' + (_admLinks.extExpiry||'') + '";\n';
+  c += 'var TOKEN_LOOKUP_LINK = "' + (_admLinks.tokenLookup||'') + '";\n';
+  c += 'var BLANK_FORM_LINK  = "' + (_admLinks.blankForm||'') + '";\n\n';
+  c += '// -- Password Encryption --\n';
+  c += 'var PASSWORD_KEY = "' + (_admSys.passwordKey||'') + '";\n\n';
+  c += '// -- Token Authentication --\n';
+  c += '// Pi-transform: any valid 6-char hex input token computes its response token directly.\n';
+  c += '// No pre-built table needed. Matches formula in AbbyLane_TokenLookup_v3.xlsx.\n';
+  c += '// Token pair changes each hour automatically based on time-of-day.\n\n';
+  c += '// -- User Registry --\n';
+  c += 'var USERS = [\n';
+  _admUsers.forEach(function(u, i) {
+    var em = u.email || '';
+    var emStr = em.includes('@') ? '"' + em.split('@')[0] + '"+"@"+"' + em.split('@')[1] + '"' : '"' + em + '"';
+    var comma = i < _admUsers.length - 1 ? ',' : '';
+    c += '  { name:"' + admEsc(u.name) + '", email:' + emStr +
+         ', dateSigned:"' + admEsc(u.dateSigned||'') + '"' +
+         ', signature:"' + admEsc(u.signature||'') + '"' +
+         ', hasAccess:' + (u.hasAccess ? 'true' : 'false') +
+         ', microsoftAccount:' + (u.microsoftAccount ? 'true' : 'false') +
+         ', tokenPointer:0' +
+         ', formLink:"' + admEsc(u.formLink||'') + '"' +
+         ', password:"' + admEsc(u.password||'') + '" }' + comma + '\n';
+  });
+  c += '];\n\n';
+
+  return pre + c + post;
+}
+
+// ── RENDER ────────────────────────────────────────────────────
+function admRenderAll() {
+  admRenderUsers();
+  admRenderLinks();
+  admRenderSystem();
+}
+
+function admRenderUsers() {
+  var tb = document.getElementById('adm-users-tbody');
+  tb.innerHTML = '';
+  _admUsers.forEach(function(u, i) {
+    var acc = u.hasAccess ? '<span class="adm-badge adm-badge-y">Yes</span>'
+            : (u.dateSigned ? '<span class="adm-badge adm-badge-p">Pending</span>'
+                            : '<span class="adm-badge adm-badge-n">No</span>');
+    var ms  = u.microsoftAccount ? '<span class="adm-badge adm-badge-y">MS</span>'
+                                 : '<span class="adm-badge adm-badge-n">Ext</span>';
+    var pw  = u.password ? '<span class="adm-badge adm-badge-y">Set</span>'
+                         : '<span class="adm-badge adm-badge-n">None</span>';
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td style="color:#998877">' + (i+1) + '</td>' +
+      '<td style="font-weight:600">' + admSafeText(u.name) + '</td>' +
+      '<td style="font-family:monospace;font-size:12px">' + admSafeText(u.email) + '</td>' +
+      '<td style="font-family:monospace;font-size:12px">' + admSafeText(u.dateSigned||'—') + '</td>' +
+      '<td>' + acc + '</td><td>' + ms + '</td><td>' + pw + '</td>' +
+      '<td><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="admEditUser(' + i + ')">Edit</button>' +
+      ' <button class="adm-btn adm-btn-danger adm-btn-sm" onclick="admDeleteUser(' + i + ')">Delete</button></td>';
+    tb.appendChild(tr);
+  });
+}
+
+function admRenderLinks() {
+  document.getElementById('adm-doc-link').value    = _admLinks.docLink    || '';
+  document.getElementById('adm-doc-name').value    = _admLinks.docName    || '';
+  document.getElementById('adm-ext-link').value    = _admLinks.extLink    || '';
+  document.getElementById('adm-ext-expiry').value  = _admLinks.extExpiry  || '';
+  document.getElementById('adm-token-lookup').value= _admLinks.tokenLookup|| '';
+  document.getElementById('adm-blank-form').value  = _admLinks.blankForm  || '';
+}
+
+function admRenderSystem() {
+  document.getElementById('adm-req').value          = _admSys.req         || '';
+  document.getElementById('adm-password-key').value = _admSys.passwordKey || '';
+}
+
+// ── TABS ─────────────────────────────────────────────────────
+function admTab(name) {
+  var names = ['users','links','system','email'];
+  document.querySelectorAll('.adm-tab').forEach(function(t, i) {
+    t.classList.toggle('active', names[i] === name);
+  });
+  document.querySelectorAll('.adm-panel').forEach(function(p) { p.classList.remove('active'); });
+  document.getElementById('adm-panel-' + name).classList.add('active');
+}
+
+// ── USER CRUD ─────────────────────────────────────────────────
+function admEditUser(idx) {
+  var u = _admUsers[idx];
+  document.getElementById('adm-modal-title').textContent = 'Edit User — ' + u.name;
+  document.getElementById('adm-modal-idx').value     = idx;
+  document.getElementById('adm-m-name').value        = u.name;
+  document.getElementById('adm-m-email').value       = u.email;
+  document.getElementById('adm-m-datesigned').value  = u.dateSigned || '';
+  document.getElementById('adm-m-signature').value   = u.signature  || '';
+  document.getElementById('adm-m-hasaccess').value   = String(u.hasAccess);
+  document.getElementById('adm-m-msaccount').value   = String(u.microsoftAccount);
+  document.getElementById('adm-m-formlink').value    = u.formLink   || '';
+  document.getElementById('adm-m-password').value    = u.password   || '';
+  document.getElementById('adm-modal-alert').innerHTML = '';
+  document.getElementById('adm-user-modal').classList.add('open');
+}
+
+function admAddUser() {
+  document.getElementById('adm-modal-title').textContent = 'Add New User';
+  document.getElementById('adm-modal-idx').value     = -1;
+  ['adm-m-name','adm-m-email','adm-m-datesigned','adm-m-signature','adm-m-formlink','adm-m-password']
+    .forEach(function(id) { document.getElementById(id).value = ''; });
+  document.getElementById('adm-m-hasaccess').value  = 'false';
+  document.getElementById('adm-m-msaccount').value  = 'true';
+  document.getElementById('adm-modal-alert').innerHTML = '';
+  document.getElementById('adm-user-modal').classList.add('open');
+}
+
+function admSaveUser() {
+  var idx   = parseInt(document.getElementById('adm-modal-idx').value);
+  var name  = document.getElementById('adm-m-name').value.trim();
+  var email = document.getElementById('adm-m-email').value.trim();
+  if (!name || !email) {
+    document.getElementById('adm-modal-alert').innerHTML =
+      '<div class="adm-alert adm-alert-err">Name and email are required.</div>';
+    return;
+  }
+  var u = {
+    name:            name,
+    email:           email,
+    dateSigned:      document.getElementById('adm-m-datesigned').value.trim(),
+    signature:       document.getElementById('adm-m-signature').value.trim(),
+    hasAccess:       document.getElementById('adm-m-hasaccess').value === 'true',
+    microsoftAccount:document.getElementById('adm-m-msaccount').value === 'true',
+    tokenPointer:    0,
+    formLink:        document.getElementById('adm-m-formlink').value.trim(),
+    password:        document.getElementById('adm-m-password').value.trim()
+  };
+  if (idx >= 0) { _admUsers[idx] = u; } else { _admUsers.push(u); }
+  admRenderUsers();
+  admCloseModal();
+  admSetDirty(true);
+  admShowToast(idx >= 0 ? 'User updated' : 'User added', 'ok');
+}
+
+function admDeleteUser(idx) {
+  if (!confirm('Delete user "' + _admUsers[idx].name + '"?')) return;
+  _admUsers.splice(idx, 1);
+  admRenderUsers();
+  admSetDirty(true);
+  admShowToast('User deleted', 'ok');
+}
+
+function admCloseModal() {
+  document.getElementById('adm-user-modal').classList.remove('open');
+}
+
+// ── LINKS / SYSTEM ────────────────────────────────────────────
+function admApplyLinks() {
+  _admLinks.docLink     = document.getElementById('adm-doc-link').value.trim();
+  _admLinks.docName     = document.getElementById('adm-doc-name').value.trim();
+  _admLinks.extLink     = document.getElementById('adm-ext-link').value.trim();
+  _admLinks.extExpiry   = document.getElementById('adm-ext-expiry').value.trim();
+  _admLinks.tokenLookup = document.getElementById('adm-token-lookup').value.trim();
+  _admLinks.blankForm   = document.getElementById('adm-blank-form').value.trim();
+  admSetDirty(true);
+  document.getElementById('adm-links-alert').innerHTML =
+    '<div class="adm-alert adm-alert-ok">&#10003; Changes staged — save file to write to disk.</div>';
+}
+
+function admApplySystem() {
+  _admSys.req         = document.getElementById('adm-req').value.trim();
+  _admSys.passwordKey = document.getElementById('adm-password-key').value.trim();
+  admSetDirty(true);
+  document.getElementById('adm-system-alert').innerHTML =
+    '<div class="adm-alert adm-alert-ok">&#10003; Changes staged — save file to write to disk.</div>';
+}
+
+// ── EMAIL PARSER ──────────────────────────────────────────────
+function admParseEmail() {
+  var body = document.getElementById('adm-email-paste').value;
+  var out  = document.getElementById('adm-parse-out');
+  if (!body.trim()) { out.innerHTML = ''; return; }
+
+  var isKnown = body.includes('Known Member Submission');
+  var isNew   = body.includes('New Member Submission');
+
+  if (!isKnown && !isNew) {
+    out.innerHTML = '<div class="adm-alert adm-alert-err">Could not identify a portal notification email. Paste the full email body.</div>';
+    return;
+  }
+
+  function extractField(label) {
+    var re = new RegExp(label + '\\s*(.+)');
+    var m  = body.match(re);
+    return m ? m[1].trim() : '';
+  }
+
+  var name     = extractField('Name:');
+  var email    = extractField('Email:');
+  var date     = extractField('Date:');
+  var sig      = extractField('Signature:');
+  var msAccStr = extractField('Microsoft Account:');
+  var msAcc    = msAccStr.toLowerCase() === 'yes';
+
+  if (!name || !email) {
+    out.innerHTML = '<div class="adm-alert adm-alert-err">Could not extract name or email. Check the email format.</div>';
+    return;
+  }
+
+  var userIdx = -1;
+  for (var i = 0; i < _admUsers.length; i++) {
+    if (_admUsers[i].name.toLowerCase() === name.toLowerCase() ||
+        _admUsers[i].email.toLowerCase() === email.toLowerCase()) { userIdx = i; break; }
+  }
+
+  var html = '<div class="adm-parse-result">';
+  html += '<div style="color:#C9A84C;font-weight:bold;margin-bottom:10px;font-size:13px;">';
+  html += isKnown ? '&#128231; Known Member Acknowledgment' : '&#128231; New Member Submission';
+  html += '</div>';
+
+  if (isKnown && userIdx >= 0) {
+    var u = _admUsers[userIdx];
+    var changes = [];
+    if (date && u.dateSigned !== date)          changes.push({ label:'dateSigned',        from:u.dateSigned||'(blank)', to:date });
+    if (sig  && u.signature  !== sig)           changes.push({ label:'signature',          from:u.signature ||'(blank)', to:sig  });
+    if (!u.hasAccess)                           changes.push({ label:'hasAccess',          from:'false', to:'true' });
+    if (u.microsoftAccount !== msAcc)           changes.push({ label:'microsoftAccount',   from:String(u.microsoftAccount), to:String(msAcc) });
+
+    if (!changes.length) {
+      html += '<div class="adm-alert adm-alert-info">No changes needed — user already up to date.</div>';
+    } else {
+      html += '<div style="color:#998877;margin-bottom:8px;">User: <strong style="color:#F5F0E8">' + admSafeText(u.name) + '</strong></div>';
+      changes.forEach(function(c) {
+        html += '<div class="adm-change-item">' +
+          '<span class="adm-change-label">' + c.label + '</span>' +
+          '<span class="adm-change-val" style="color:#998877">' + admSafeText(c.from) + '</span>' +
+          '<span style="color:#C9A84C;margin:0 6px;">&#8594;</span>' +
+          '<span class="adm-change-val" style="color:#81C784">' + admSafeText(c.to) + '</span>' +
+          '</div>';
+      });
+      html += '<div class="adm-btn-row" style="margin-top:12px;">' +
+        '<button class="adm-btn adm-btn-gold" onclick="admApplyEmailChanges(' + userIdx + ',\'' + admEsc(date) + '\',\'' + admEsc(sig) + '\',' + msAcc + ')">&#10003; Apply These Changes</button>' +
+        '</div>';
+    }
+  } else if (isNew) {
+    if (userIdx >= 0) {
+      html += '<div class="adm-alert adm-alert-err">User already exists in CONFIG (' + admSafeText(_admUsers[userIdx].name) + ').</div>';
+    } else {
+      html += '<div style="color:#998877;margin-bottom:10px;">New user to add:</div>';
+      [['name',name],['email',email],['microsoftAccount',String(msAcc)],['dateSigned',date||'(pending)'],['signature',sig||'(pending)'],['hasAccess','false — set true after OneDrive setup']]
+        .forEach(function(f) {
+          html += '<div class="adm-change-item"><span class="adm-change-label">' + f[0] + '</span><span class="adm-change-val" style="color:#81C784">' + admSafeText(f[1]) + '</span></div>';
+        });
+      html += '<div class="adm-alert adm-alert-info" style="margin-top:10px;">You will still need to add the formLink after OneDrive setup.</div>';
+      html += '<div class="adm-btn-row" style="margin-top:10px;"><button class="adm-btn adm-btn-gold" onclick="admPrefillNewUser(\'' + admEsc(name) + '\',\'' + admEsc(email) + '\',' + msAcc + ',\'' + admEsc(date) + '\',\'' + admEsc(sig) + '\')">+ Open Add User Form</button></div>';
+    }
+  } else {
+    html += '<div class="adm-alert adm-alert-err">User "' + admSafeText(name) + '" not found in CONFIG.</div>';
+  }
+  html += '</div>';
+  out.innerHTML = html;
+}
+
+function admApplyEmailChanges(idx, date, sig, msAcc) {
+  var u = _admUsers[idx];
+  if (date) u.dateSigned = date;
+  if (sig)  u.signature  = sig;
+  u.hasAccess = true;
+  u.microsoftAccount = msAcc;
+  admRenderUsers();
+  admSetDirty(true);
+  document.getElementById('adm-parse-out').innerHTML =
+    '<div class="adm-alert adm-alert-ok" style="margin-top:10px;">&#10003; Changes applied to ' + admSafeText(u.name) + ' — save file to write to disk.</div>';
+  admShowToast('Changes applied to ' + u.name, 'ok');
+}
+
+function admPrefillNewUser(name, email, msAcc, date, sig) {
+  admTab('users');
+  admAddUser();
+  document.getElementById('adm-m-name').value       = name;
+  document.getElementById('adm-m-email').value      = email;
+  document.getElementById('adm-m-msaccount').value  = String(msAcc);
+  document.getElementById('adm-m-datesigned').value = date || '';
+  document.getElementById('adm-m-signature').value  = sig  || '';
+}
+
+// ── UTILS ─────────────────────────────────────────────────────
+function admSetDirty(val) {
+  _admDirty = val;
+  var btn = document.getElementById('adm-btn-save');
+  btn.innerHTML = val ? '&#128190; Save File &#9679;' : '&#128190; Save File';
+}
+
+function admShowToast(msg, type) {
+  var t = document.getElementById('adm-toast');
+  t.textContent = (type === 'ok' ? '✓ ' : '✕ ') + msg;
+  t.className = 'adm-toast-' + (type === 'ok' ? 'ok' : 'err');
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 3000);
+}
+
+function admSafeText(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function admEsc(s) {
+  return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"');
+}
+
+// Close modal on background click
+document.getElementById('adm-user-modal').addEventListener('click', function(e) {
+  if (e.target === this) admCloseModal();
+});
 </script>
 </body>
 </html>
