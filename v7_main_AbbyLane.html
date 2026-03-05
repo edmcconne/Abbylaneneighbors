@@ -273,12 +273,40 @@
 <body>
 
 <header class="site-header">
-  <div class="seal">&#9878;</div>
+  <div class="seal" id="seal" title="">&#9878;</div>
   <div>
     <h1>Abby Lane Neighbors</h1>
     <p>Attorney-Client Privilege &middot; Confidential Materials</p>
   </div>
 </header>
+
+<!-- ADMIN LOGIN MODAL — triggered by triple-click on seal -->
+<div id="admin-login-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:400;align-items:center;justify-content:center;">
+  <div style="background:#faf7f2;border:1px solid #d4c5a9;border-radius:4px;padding:32px 36px;width:380px;max-width:92vw;box-shadow:0 8px 32px rgba(0,0,0,0.3);">
+    <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#c9a84c;margin-bottom:8px;">Administrator Access</div>
+    <h3 style="font-family:'Playfair Display',serif;color:#0f1e2e;font-size:1.2rem;margin-bottom:20px;">Identity Verification</h3>
+    <div style="margin-bottom:14px;">
+      <label style="display:block;font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#0f1e2e;margin-bottom:6px;">Name</label>
+      <input type="text" id="adm-login-name" placeholder="Your full name" autocomplete="off"
+        style="width:100%;padding:9px 11px;border:1px solid #d4c5a9;border-radius:3px;font-family:Georgia,serif;font-size:14px;background:#fff;">
+    </div>
+    <div style="margin-bottom:14px;">
+      <label style="display:block;font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#0f1e2e;margin-bottom:6px;">Email</label>
+      <input type="email" id="adm-login-email" placeholder="yourname@example.com" autocomplete="off"
+        style="width:100%;padding:9px 11px;border:1px solid #d4c5a9;border-radius:3px;font-family:Georgia,serif;font-size:14px;background:#fff;">
+    </div>
+    <div style="margin-bottom:20px;">
+      <label style="display:block;font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#0f1e2e;margin-bottom:6px;">Password</label>
+      <input type="password" id="adm-login-password" placeholder="Your password" autocomplete="off"
+        style="width:100%;padding:9px 11px;border:1px solid #d4c5a9;border-radius:3px;font-family:Georgia,serif;font-size:14px;background:#fff;">
+    </div>
+    <div id="adm-login-error" style="display:none;background:#fff0f0;border:1px solid #8b1a1a;border-radius:3px;padding:9px 12px;font-size:13px;color:#8b1a1a;margin-bottom:14px;"></div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="admLoginSubmit()" style="flex:1;background:#c9a84c;color:#0f1e2e;border:none;padding:10px;border-radius:3px;font-family:Georgia,serif;font-size:14px;font-weight:700;cursor:pointer;">&#128274; Verify</button>
+      <button onclick="admLoginClose()" style="background:transparent;color:#6b7280;border:1px solid #d4c5a9;padding:10px 16px;border-radius:3px;font-family:Georgia,serif;font-size:14px;cursor:pointer;">Cancel</button>
+    </div>
+  </div>
+</div>
 
 <!-- SCREEN 1: IDENTITY -->
 <div id="screen-identity" class="screen active">
@@ -292,9 +320,6 @@
       <label for="sel-name">Your Name</label>
       <select id="sel-name" onchange="onNameChange()">
         <option value="">-- Select your name --</option>
-        <option value="0">Edward McConnell</option>
-        <option value="1">EdView</option>
-        <option value="2">EdExt</option>
         <option value="3">Ashley Rich Cornicello</option>
         <option value="4">Brenda Gilbert</option>
         <option value="5">Jim Breeden</option>
@@ -481,7 +506,7 @@ var DOC_NAME = "Abby Lane Lawsuit - Master Document";
 // -- External Reviewer --
 var EXT_LINK         = "https://1drv.ms/w/c/f48a627c72e8b791/IQAT-IvDcUSyRYwYJslj5E2pAZPgBBMp14TUYuy_S4J9-wk?e=AJoEV3";
 var EXT_EXPIRY       = "";
-var TOKEN_LOOKUP_LINK = "https://1drv.ms/x/c/f48a627c72e8b791/IQArQUdKgeAsTIpdvK4r5r3rAXsxwc_1iF2kxo16LhSi3PQ?e=XlNPw5";
+var TOKEN_LOOKUP_LINK = "https://1drv.ms/x/c/f48a627c72e8b791/IQArQUdKgeAsTIpdvK4r5r3rAXsxwc_1iF2kxo16LhSi3PQ?e=sDhAyp";
 var BLANK_FORM_LINK  = "https://1drv.ms/x/c/f48a627c72e8b791/IQB2LqW7rZBITpqKohwXjIX6AfefV4QornXrx_dxOoYWhMw";
 
 // -- Password Encryption --
@@ -494,11 +519,11 @@ var PASSWORD_KEY = "ALN2026";
 
 // -- User Registry --
 var USERS = [
-  { name:"Edward McConnell", email:"edmcconne"+"@"+"gmail.com", dateSigned:"Feb 26 2026", signature:"Edward McConnell", hasAccess:true, microsoftAccount:true, tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQBhAUhxF0O2Sb1kH5prpWcTAW04t86Oo7pMOiEjvaoHgn8", password:"" },
-  { name:"EdView", email:"abbylaneneighbors"+"@"+"gmail.com", dateSigned:"Feb 26 2026", signature:"EdView", hasAccess:true, microsoftAccount:true, tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQDKpVIkkpGsQ5mcg8WQA6i8AXhNPuuOUQO1TBbaKSz2Lgk", password:"" },
-  { name:"EdExt", email:"edext18"+"@"+"gmail.com", dateSigned:"Mar 2  2026", signature:"Ed McConnell", hasAccess:true, microsoftAccount:false, tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQBBHBC-7QlPS6DV-J8CJzp7Afdb4UThh39UpIXVyJLC1yY", password:"" },
-  { name:"Ashley Rich Cornicello", email:"ashley"+"@"+"collegiatesealers.com", dateSigned:"", signature:"", hasAccess:false, microsoftAccount:true, tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQBcHn41T78ZTKN2tlwtfq1PAW_jk2hMnkSOZU4LQa1URgI", password:"" },
-  { name:"Brenda Gilbert", email:"bcg3812"+"@"+"gmail.com", dateSigned:"", signature:"", hasAccess:false, microsoftAccount:true, tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQD787DjQ4XAQaXEsAon4GFkAZkEi7GtqqEnsnklA08GR-c", password:"" },
+  { name:"Edward McConnell", email:"edmcconne"+"@"+"gmail.com", dateSigned:"Feb 26 2026", signature:"Edward McConnell", hasAccess:true, microsoftAccount:true, tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQBhAUhxF0O2Sb1kH5prpWcTAW04t86Oo7pMOiEjvaoHgn8", password:"19213056676D41187E7E000602057178" },
+  { name:"EdView", email:"abbylaneneighbors"+"@"+"gmail.com", dateSigned:"Feb 26 2026", signature:"EdView", hasAccess:true, microsoftAccount:true, tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQDKpVIkkpGsQ5mcg8WQA6i8AXhNPuuOUQO1TBbaKSz2Lgk", password:"202E2C4B685F48251B1145690006737A7E010006" },
+  { name:"EdExt", email:"edext18"+"@"+"gmail.com", dateSigned:"Mar 2  2026", signature:"Ed McConnell", hasAccess:true, microsoftAccount:false, tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQBBHBC-7QlPS6DV-J8CJzp7Afdb4UThh39UpIXVyJLC1yY", password:"04280B4A685F48251B1145690006737A7E010006" },
+  { name:"Ashley Cornicello", email:"ashley"+"@"+"collegiatesealers.com", dateSigned:"", signature:"Ashley Cornicello", hasAccess:false, microsoftAccount:true, tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQBcHn41T78ZTKN2tlwtfq1PAW_jk2hMnkSOZU4LQa1URgI", password:"" },
+  { name:"Brenda Gilbert", email:"bcg3812"+"@"+"gmail.com", dateSigned:"", signature:"", hasAccess:false, microsoftAccount:true, tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQD787DjQ4XAQaXEsAon4GFkAZkEi7GtqqEnsnklA08GR-c", password:"15091D6666737A" },
   { name:"Jim Breeden", email:"jcb"+"@"+"lawbreeden.com", dateSigned:"", signature:"", hasAccess:false, microsoftAccount:true, tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQCg03xfk-C2RLhlVdFZOKAlAdjR2CLwhXbNvHwTeNKIF5U", password:"" },
   { name:"Katie McConnell", email:"ktmc"+"@"+"mail.com", dateSigned:"", signature:"", hasAccess:false, microsoftAccount:true, tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQAQ8guQiMgBSZrNKN_7u_DDAfad6mzGc2WZaV7KST_o3C0", password:"" },
   { name:"Morris Martin", email:"martinmo404"+"@"+"gmail.com", dateSigned:"", signature:"", hasAccess:false, microsoftAccount:true, tokenPointer:0, formLink:"https://1drv.ms/x/c/f48a627c72e8b791/IQD_aYbT7o8bTYg_Byx6vGBcAakXiGfpS26RcQA5xVo4Epg", password:"" },
@@ -1179,6 +1204,106 @@ function fallbackCopy(text) {
 function safeText(str) {
   return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
+
+// ============================================================
+// SEAL TRIPLE-CLICK — ADMIN LOGIN TRIGGER
+// ============================================================
+(function() {
+  var clicks = 0, timer = null;
+  document.getElementById('seal').addEventListener('click', function() {
+    clicks++;
+    if (clicks === 3) {
+      clicks = 0;
+      clearTimeout(timer);
+      admLoginOpen();
+    } else {
+      clearTimeout(timer);
+      timer = setTimeout(function() { clicks = 0; }, 600);
+    }
+  });
+})();
+
+function admLoginOpen() {
+  document.getElementById('adm-login-name').value     = '';
+  document.getElementById('adm-login-email').value    = '';
+  document.getElementById('adm-login-password').value = '';
+  document.getElementById('adm-login-error').style.display = 'none';
+  var m = document.getElementById('admin-login-modal');
+  m.style.display = 'flex';
+  setTimeout(function() { document.getElementById('adm-login-name').focus(); }, 50);
+}
+
+function admLoginClose() {
+  document.getElementById('admin-login-modal').style.display = 'none';
+}
+
+function admLoginSubmit() {
+  var name     = document.getElementById('adm-login-name').value.trim();
+  var email    = document.getElementById('adm-login-email').value.trim().toLowerCase();
+  var password = document.getElementById('adm-login-password').value;
+  var errEl    = document.getElementById('adm-login-error');
+  errEl.style.display = 'none';
+
+  var matchIdx = -1;
+  for (var i = 0; i < Math.min(3, USERS.length); i++) {
+    var u = USERS[i];
+    if (u.name.toLowerCase() === name.toLowerCase() && u.email.toLowerCase() === email) {
+      if (!u.password) {
+        errEl.textContent = 'Administrator account has no password set. Contact the system owner.';
+        errEl.style.display = 'block'; return;
+      }
+      if (!verifyPassword(password, u.password)) {
+        errEl.textContent = 'Incorrect password. Please try again.';
+        errEl.style.display = 'block'; return;
+      }
+      matchIdx = i; break;
+    }
+  }
+
+  if (matchIdx < 0) {
+    errEl.textContent = 'Name, email, or password did not match. Please try again.';
+    errEl.style.display = 'block'; return;
+  }
+
+  admLoginClose();
+  var user = USERS[matchIdx];
+
+  if (!user.hasAccess && !user.dateSigned) {
+    _isKnownUser = true;
+    document.getElementById('new-name').value  = user.name;
+    document.getElementById('new-email').value = user.email;
+    document.getElementById('new-ms-account').checked = user.microsoftAccount || false;
+    var checks = document.querySelectorAll('.new-check');
+    for (var ci = 0; ci < checks.length; ci++) { checks[ci].checked = false; }
+    document.getElementById('newuser-error').style.display   = 'none';
+    document.getElementById('newuser-confirm').style.display = 'none';
+    document.getElementById('newuser-pending').style.display = 'none';
+    var t2 = new Date();
+    document.getElementById('new-date').value = t2.getFullYear() + '-' +
+      String(t2.getMonth()+1).padStart(2,'0') + '-' + String(t2.getDate()).padStart(2,'0');
+    saveSession(user.email, 'screen-newuser');
+    document.getElementById('newuser-step-badge').textContent = 'Step 2 of 2 \u2014 Acknowledgment Form';
+    document.getElementById('newuser-subtitle').textContent = 'You have been pre-authorized. Please complete the acknowledgment form below to activate your access.';
+    document.getElementById('newuser-prefill-note').textContent = 'Your name and email have been pre-filled. Please verify before submitting.';
+    showScreen('screen-newuser'); return;
+  }
+
+  if (!user.hasAccess && user.dateSigned) {
+    document.getElementById('pending-email-display').textContent = user.email;
+    saveSession(user.email, 'screen-pending');
+    showScreen('screen-pending'); return;
+  }
+
+  saveSession(user.email, 'screen-returning');
+  buildReturningView(user);
+  document.getElementById('btn-admin').style.display = (matchIdx === 0) ? 'inline-block' : 'none';
+  showScreen('screen-returning');
+}
+
+document.getElementById('adm-login-password').addEventListener('keydown', function(e) { if (e.key === 'Enter') admLoginSubmit(); });
+document.getElementById('adm-login-email').addEventListener('keydown',    function(e) { if (e.key === 'Enter') admLoginSubmit(); });
+document.getElementById('adm-login-name').addEventListener('keydown',     function(e) { if (e.key === 'Enter') admLoginSubmit(); });
+document.getElementById('admin-login-modal').addEventListener('click',    function(e) { if (e.target === this) admLoginClose(); });
 </script>
 
 <!-- ============================================================ -->
