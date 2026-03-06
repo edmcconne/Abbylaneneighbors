@@ -1,0 +1,2438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abby Lane Neighbors — Portal v8</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:    #0f1e2e;
+    --navy2:   #162840;
+    --gold:    #c9a84c;
+    --gold2:   #e8c96a;
+    --cream:   #f5f0e8;
+    --paper:   #faf7f2;
+    --ink:     #1a1a2e;
+    --muted:   #6b7280;
+    --border:  #d4c5a9;
+    --success: #2d6a4f;
+    --danger:  #8b1a1a;
+    --shadow:  0 4px 24px rgba(15,30,46,0.13);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Source Serif 4', Georgia, serif;
+    background: var(--navy);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 0 60px;
+  }
+  .site-header {
+    width: 100%;
+    background: var(--navy2);
+    border-bottom: 2px solid var(--gold);
+    padding: 22px 40px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 40px;
+  }
+  .site-header .seal {
+    width: 52px; height: 52px;
+    border: 2px solid var(--gold);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gold); font-size: 22px; flex-shrink: 0;
+  }
+  .site-header h1 {
+    font-family: 'Playfair Display', serif;
+    color: var(--cream);
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .site-header p {
+    color: var(--gold);
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 300;
+    margin-top: 2px;
+  }
+  .card {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 680px;
+    padding: 44px 48px;
+    margin: 0 20px;
+  }
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: var(--navy);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .card-subtitle {
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .field { margin-bottom: 22px; }
+  .field label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--navy);
+    margin-bottom: 7px;
+  }
+  .field select,
+  .field input[type="text"],
+  .field input[type="email"],
+  .field input[type="date"] {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: white;
+    font-family: 'Source Serif 4', serif;
+    font-size: 0.95rem;
+    color: var(--ink);
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .field select:focus, .field input:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
+  }
+  .field select {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+  .check-section {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    margin-bottom: 22px;
+    overflow: hidden;
+  }
+  .check-section-title {
+    background: var(--navy);
+    color: var(--cream);
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 9px 16px;
+    font-weight: 600;
+  }
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 13px 16px;
+    border-bottom: 1px solid #f0ebe0;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .check-item:last-child { border-bottom: none; }
+  .check-item:hover { background: #fdf9f2; }
+  .check-item input[type="checkbox"] {
+    width: 18px; height: 18px;
+    margin-top: 1px; flex-shrink: 0;
+    accent-color: var(--navy);
+    cursor: pointer;
+  }
+  .check-item span { font-size: 0.9rem; line-height: 1.5; color: var(--ink); }
+  .check-item.readonly { cursor: default; }
+  .check-item.readonly:hover { background: white; }
+  .ro-field {
+    display: flex;
+    padding: 11px 0;
+    border-bottom: 1px solid #f0ebe0;
+    font-size: 0.92rem;
+  }
+  .ro-field:last-child { border-bottom: none; }
+  .ro-label {
+    width: 120px; flex-shrink: 0;
+    color: var(--muted);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding-top: 2px;
+  }
+  .ro-value { color: var(--ink); }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 13px 28px;
+    border-radius: 3px;
+    font-family: 'Source Serif 4', serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+  .btn-primary { background: var(--navy); color: var(--cream); }
+  .btn-primary:hover { background: var(--navy2); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15,30,46,0.25); }
+  .btn-gold { background: var(--gold); color: var(--navy); }
+  .btn-gold:hover { background: var(--gold2); transform: translateY(-1px); }
+  .btn-outline { background: transparent; color: var(--navy); border: 1.5px solid var(--navy); }
+  .btn-outline:hover { background: var(--navy); color: var(--cream); }
+  .btn-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
+  .alert {
+    padding: 13px 16px;
+    border-radius: 3px;
+    font-size: 0.88rem;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .alert-warn  { background: #fef9ec; border-left: 3px solid var(--gold);    color: #5c4a12; }
+  .alert-success { background: #ecf7f0; border-left: 3px solid var(--success); color: #1a4a30; }
+  .alert-info  { background: #eef2f8; border-left: 3px solid #3b6cbd;        color: #1e3a6e; }
+  .alert-error { background: #fdf0f0; border-left: 3px solid var(--danger);  color: var(--danger); }
+  .doc-link-box {
+    background: linear-gradient(135deg, var(--navy) 0%, #1a3a5c 100%);
+    border-radius: 4px;
+    padding: 28px 30px;
+    text-align: center;
+    margin-top: 28px;
+  }
+  .doc-link-box .icon { font-size: 2.2rem; margin-bottom: 10px; }
+  .doc-link-box h3 { font-family: 'Playfair Display', serif; color: var(--cream); font-size: 1.15rem; margin-bottom: 8px; }
+  .doc-link-box p { color: var(--gold); font-size: 0.83rem; margin-bottom: 18px; font-style: italic; }
+  .privilege-banner {
+    background: var(--navy);
+    color: var(--gold);
+    text-align: center;
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 8px 20px;
+    margin-bottom: 24px;
+    border-radius: 2px;
+  }
+  .step-badge {
+    display: inline-block;
+    background: var(--gold);
+    color: var(--navy);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+  }
+  .sig-note { font-size: 0.78rem; color: var(--muted); font-style: italic; margin-top: 5px; }
+  .pending-box {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 20px 22px;
+    margin-top: 20px;
+    font-size: 0.88rem;
+    line-height: 1.7;
+  }
+  .footer-note {
+    margin-top: 24px;
+    font-size: 0.78rem;
+    color: rgba(245,240,232,0.4);
+    text-align: center;
+    font-style: italic;
+  }
+  .screen { display: none; }
+  .screen.active { display: block; }
+  @media (max-width: 600px) {
+    .card { padding: 28px 22px; }
+    .site-header { padding: 16px 20px; }
+    .site-header h1 { font-size: 1.1rem; }
+  }
+
+  /* ── CHECKLIST SCREEN ── */
+  .card-wide { max-width: 900px !important; }
+  .checklist-instr {
+    font-size: 0.83rem; color: var(--muted); font-style: italic;
+    margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--border);
+  }
+  .task-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+  .task-table th {
+    background: var(--navy); color: var(--gold);
+    font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 6px 8px; text-align: left; border-bottom: 1px solid rgba(201,168,76,0.3);
+  }
+  .task-table th.col-num  { width: 32px; text-align: center; }
+  .task-table th.col-link { width: 68px; text-align: center; }
+  .task-table th.col-done { width: 52px; text-align: center; }
+  .task-table td {
+    padding: 5px 8px; border-bottom: 1px solid #ede8df;
+    vertical-align: middle; font-size: 0.88rem;
+  }
+  .task-table tr:nth-child(even) td { background: #faf7f2; }
+  .task-table tr.done-row td { background: #f0faf2; }
+  .task-num-cell { text-align: center; font-size: 0.75rem; font-weight: 700; color: var(--gold);
+    background: var(--navy); border-radius: 50%; width: 20px; height: 20px;
+    display: inline-flex; align-items: center; justify-content: center; }
+  .task-desc-cell { font-weight: 600; color: var(--navy); }
+  .task-desc-cell.done-text { color: #2e7d32; text-decoration: line-through; font-weight: 400; }
+  .task-link-btn {
+    background: var(--navy); color: var(--gold); border: 1px solid var(--gold);
+    border-radius: 3px; padding: 3px 8px; font-size: 0.72rem; cursor: pointer;
+    white-space: nowrap; text-decoration: none; display: inline-block;
+    font-family: 'Source Serif 4', Georgia, serif;
+  }
+  .task-link-btn:hover { background: var(--gold); color: var(--navy); }
+  .task-comment-input {
+    width: 100%; padding: 4px 7px; font-size: 0.8rem;
+    border: 1px solid #ddd; border-radius: 3px;
+    font-family: 'Source Serif 4', Georgia, serif;
+    background: #fafafa; color: var(--ink);
+    font-style: italic; box-sizing: border-box;
+  }
+  .task-comment-input:focus { outline: none; border-color: var(--gold); background: #fff; }
+  .task-done-cb { width: 16px; height: 16px; accent-color: #2e7d32; cursor: pointer; display: block; margin: 0 auto; }
+  .checklist-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 10px; margin-top: 6px;
+  }
+  .btn-done { background: #2e7d32; color: #fff; border: none; }
+  .btn-done:hover { background: #1e5c3a; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="seal" id="seal" title="">&#9878;</div>
+  <div>
+    <h1>Abby Lane Neighbors</h1>
+    <p>Attorney-Client Privilege &middot; Confidential Materials</p>
+  </div>
+</header>
+
+<!-- ADMIN LOGIN MODAL — triggered by triple-click on seal -->
+<div id="admin-login-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:400;align-items:center;justify-content:center;">
+  <div style="background:#faf7f2;border:1px solid #d4c5a9;border-radius:4px;padding:32px 36px;width:380px;max-width:92vw;box-shadow:0 8px 32px rgba(0,0,0,0.3);">
+    <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#c9a84c;margin-bottom:8px;">Administrator Access</div>
+    <h3 style="font-family:'Playfair Display',serif;color:#0f1e2e;font-size:1.2rem;margin-bottom:20px;">Identity Verification</h3>
+    <div style="margin-bottom:14px;">
+      <label style="display:block;font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#0f1e2e;margin-bottom:6px;">Name</label>
+      <input type="text" id="adm-login-name" placeholder="Your full name" autocomplete="off"
+        style="width:100%;padding:9px 11px;border:1px solid #d4c5a9;border-radius:3px;font-family:Georgia,serif;font-size:14px;background:#fff;">
+    </div>
+    <div style="margin-bottom:14px;">
+      <label style="display:block;font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#0f1e2e;margin-bottom:6px;">Email</label>
+      <input type="email" id="adm-login-email" placeholder="yourname@example.com" autocomplete="off"
+        style="width:100%;padding:9px 11px;border:1px solid #d4c5a9;border-radius:3px;font-family:Georgia,serif;font-size:14px;background:#fff;">
+    </div>
+    <div style="margin-bottom:20px;">
+      <label style="display:block;font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#0f1e2e;margin-bottom:6px;">Password</label>
+      <input type="password" id="adm-login-password" placeholder="Your password" autocomplete="off"
+        style="width:100%;padding:9px 11px;border:1px solid #d4c5a9;border-radius:3px;font-family:Georgia,serif;font-size:14px;background:#fff;">
+    </div>
+    <div id="adm-login-error" style="display:none;background:#fff0f0;border:1px solid #8b1a1a;border-radius:3px;padding:9px 12px;font-size:13px;color:#8b1a1a;margin-bottom:14px;"></div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="admLoginSubmit()" style="flex:1;background:#c9a84c;color:#0f1e2e;border:none;padding:10px;border-radius:3px;font-family:Georgia,serif;font-size:14px;font-weight:700;cursor:pointer;">&#128274; Verify</button>
+      <button onclick="admLoginClose()" style="background:transparent;color:#6b7280;border:1px solid #d4c5a9;padding:10px 16px;border-radius:3px;font-family:Georgia,serif;font-size:14px;cursor:pointer;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 1: IDENTITY -->
+<div id="screen-identity" class="screen active">
+  <div class="card">
+    <div class="privilege-banner">&#9878; Attorney-Client Privilege &mdash; Confidential</div>
+    <h2 class="card-title" style="font-size:1.35rem;margin-bottom:4px;">Abby Lane Neighbors</h2>
+    <p class="card-subtitle" style="margin-bottom:20px;">Document Access Portal</p>
+    <div class="step-badge">Step 1 of 2 &mdash; Identity Verification</div>
+
+    <div class="field">
+      <label for="sel-name">Your Name</label>
+      <select id="sel-name" onchange="onNameChange()">
+        <option value="">-- Select your name --</option>
+        <option value="3">Ashley Rich Cornicello</option>
+        <option value="4">Brenda Gilbert</option>
+        <option value="5">Jim Breeden</option>
+        <option value="6">Katie McConnell</option>
+        <option value="7">Morris Martin</option>
+        <option value="8">Richard Cornicello</option>
+        <option value="9">Robin Spence</option>
+        <option value="10">Shirley Mo Martin</option>
+        <option value="11">Bill and Merrill Noel</option>
+        <option value="12">Spence Lundie</option>
+        <option value="new">New User</option>
+      </select>
+    </div>
+
+    <!-- New User name field — hidden until New User selected -->
+    <div class="field" id="new-user-name-field" style="display:none;">
+      <label for="inp-new-name">Your Full Name</label>
+      <input type="text" id="inp-new-name" placeholder="Enter your full name" autocomplete="name">
+    </div>
+
+    <div class="field">
+      <label for="inp-email">Your Email Address</label>
+      <input type="email" id="inp-email" placeholder="yourname@example.com" autocomplete="email" oninput="onEmailInput()">
+    </div>
+
+    <!-- Password field — hidden until name selected (not for New User) -->
+    <div class="field" id="password-field" style="display:none;">
+      <label for="inp-password">Your Password</label>
+      <input type="password" id="inp-password" placeholder="Enter your password" autocomplete="current-password">
+      <p class="sig-note">Password provided to you by the owner. Contact owner if you have not received one.</p>
+    </div>
+
+    <div id="identity-error" class="alert alert-error" style="display:none"></div>
+    <div id="cookie-not-recognized" class="alert alert-error" style="display:none">
+      Your saved credentials were not recognized. You may have been removed from the registry, or this may be a different device.
+      <br><br>
+      <a href="#" onclick="document.getElementById('cookie-not-recognized').style.display='none';clearLoginCookie();showNewUserFlow();return false;" style="color:#8b1a1a;font-weight:bold;">Click here to submit a new access request.</a>
+    </div>
+    <div id="identity-followup" class="alert alert-warn" style="display:none">
+      Your request has been sent to the owner. You will receive an email once your account has been set up. Return here afterwards to complete your acknowledgment form.
+      <br><br>
+      <em>You may now close this browser tab.</em>
+    </div>
+
+    <!-- Verify button — hidden until known name + email entered -->
+    <div class="btn-row" id="btn-verify-row" style="display:none;">
+      <button class="btn btn-primary" onclick="verifyIdentity()">&#128274; Verify and Continue</button>
+    </div>
+
+    <!-- Request Access button — hidden until New User + name + email entered -->
+    <div class="btn-row" id="btn-request-row" style="display:none;">
+      <button class="btn btn-gold" onclick="requestNewAccess()">&#128203; Continue to Acknowledgment Form</button>
+    </div>
+
+  </div>
+  <p class="footer-note">This portal is restricted to authorized members of the Abby Lane Neighbors group.</p>
+</div>
+
+<!-- SCREEN 2: RETURNING USER — CHECKLIST -->
+<div id="screen-returning" class="screen">
+  <div class="card card-wide">
+    <div class="privilege-banner">&#9878; Attorney-Client Privilege &mdash; Confidential</div>
+    <h2 class="card-title" id="checklist-title">Your Priority Action Items</h2>
+    <p class="checklist-instr" id="checklist-instr">Review your priority items below. Click any link to open the document, add comments as needed, and check items when complete. Click <strong>Send Update</strong> when finished.</p>
+    <div id="checklist-container"></div>
+    <div id="checklist-done-msg" class="alert alert-info" style="display:none;margin-top:12px;"></div>
+    <hr class="divider">
+    <div class="checklist-footer">
+      <button class="btn btn-outline" onclick="showScreen('screen-identity')" style="font-size:0.82rem;padding:9px 18px;">&#8592; Back to Login</button>
+      <button class="btn btn-outline" onclick="openAccountUpdate()" style="font-size:0.82rem;padding:9px 18px;">&#9998; Update My Info</button>
+      <button class="btn btn-done" onclick="sendChecklistUpdate()" style="font-size:0.82rem;padding:9px 18px;">&#9993; Send Update</button>
+      <button id="btn-admin" class="btn btn-gold" onclick="openAdmin()" style="display:none;font-size:0.82rem;padding:9px 18px;">&#9881; Admin Panel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ACCOUNT UPDATE MODAL -->
+<div id="account-update-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:400;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:6px;padding:28px 32px;max-width:420px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.3);">
+    <div style="color:#C9A84C;font-family:Georgia,serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;">My Account</div>
+    <h3 style="margin:0 0 18px;font-family:Georgia,serif;color:#0F1E2E;font-size:1.2rem;">Update Account Info</h3>
+    <div style="margin-bottom:14px;">
+      <label style="display:block;font-size:12px;font-weight:700;color:#0F1E2E;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Name</label>
+      <input type="text" id="acct-name" style="width:100%;padding:9px 12px;border:1px solid #d4c5a9;border-radius:3px;font-size:14px;box-sizing:border-box;">
+    </div>
+    <div style="margin-bottom:14px;">
+      <label style="display:block;font-size:12px;font-weight:700;color:#0F1E2E;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Email</label>
+      <input type="email" id="acct-email" style="width:100%;padding:9px 12px;border:1px solid #d4c5a9;border-radius:3px;font-size:14px;box-sizing:border-box;">
+    </div>
+    <div style="margin-bottom:14px;">
+      <label style="display:block;font-size:12px;font-weight:700;color:#0F1E2E;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">New Password <span style="font-weight:400;text-transform:none;letter-spacing:0;">(leave blank to keep current)</span></label>
+      <input type="password" id="acct-password" placeholder="Enter new password" style="width:100%;padding:9px 12px;border:1px solid #d4c5a9;border-radius:3px;font-size:14px;box-sizing:border-box;">
+    </div>
+    <div style="margin-bottom:20px;">
+      <label style="display:block;font-size:12px;font-weight:700;color:#0F1E2E;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Confirm New Password</label>
+      <input type="password" id="acct-password2" placeholder="Confirm new password" style="width:100%;padding:9px 12px;border:1px solid #d4c5a9;border-radius:3px;font-size:14px;box-sizing:border-box;">
+    </div>
+    <div id="acct-error" style="display:none;background:#fff0f0;border:1px solid #8b1a1a;border-radius:3px;padding:9px 12px;font-size:13px;color:#8b1a1a;margin-bottom:14px;"></div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="submitAccountUpdate()" style="flex:1;background:#C9A84C;color:#0F1E2E;border:none;padding:10px;border-radius:3px;font-family:Georgia,serif;font-size:14px;font-weight:700;cursor:pointer;">&#9993; Send Update Request</button>
+      <button onclick="closeAccountUpdate()" style="background:transparent;color:#6b7280;border:1px solid #d4c5a9;padding:10px 16px;border-radius:3px;font-family:Georgia,serif;font-size:14px;cursor:pointer;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 3: NEW USER — FULL LCP FORM -->
+<div id="screen-newuser" class="screen">
+  <div class="card">
+    <div class="privilege-banner">&#9878; Attorney-Client Privilege &mdash; Confidential</div>
+    <div class="step-badge" id="newuser-step-badge">New Member &mdash; Acknowledgment Form</div>
+    <h2 class="card-title" id="newuser-title">Confidentiality Acknowledgment</h2>
+    <p class="card-subtitle" id="newuser-subtitle">Please complete all fields below. Your submission will be sent directly to the owner for review.</p>
+    <div class="alert alert-info" id="newuser-prefill-note">Your name and email have been pre-filled from the previous screen. Please verify they are correct before submitting.</div>
+    <div class="field">
+      <label for="new-name">Full Name *</label>
+      <input type="text" id="new-name" placeholder="Your full legal name">
+    </div>
+    <div class="field">
+      <label for="new-email">Email Address *</label>
+      <input type="email" id="new-email" placeholder="yourname@example.com">
+    </div>
+    <div class="field">
+      <label for="new-date">Today's Date *</label>
+      <input type="date" id="new-date">
+    </div>
+    <div class="field">
+      <label>Microsoft Account</label>
+      <label class="check-item" style="margin-top:6px;">
+        <input type="checkbox" id="new-ms-account">
+        <span>I have a Microsoft account configured with the email address above</span>
+      </label>
+      <p class="sig-note">A Microsoft account enables permanent document access. Create one free at <a href="https://account.microsoft.com" target="_blank">account.microsoft.com</a> if needed.</p>
+    </div>
+    <div class="check-section">
+      <div class="check-section-title">I acknowledge and agree to all of the following:</div>
+      <label class="check-item"><input type="checkbox" class="new-check"><span>1 &mdash; Maintain strict confidentiality of all materials</span></label>
+      <label class="check-item"><input type="checkbox" class="new-check"><span>2 &mdash; Not forward, share, or discuss materials outside the authorized group</span></label>
+      <label class="check-item"><input type="checkbox" class="new-check"><span>3 &mdash; Use Track Changes for all document edits</span></label>
+      <label class="check-item"><input type="checkbox" class="new-check"><span>4 &mdash; Immediately notify the owner if materials are accidentally shared</span></label>
+      <label class="check-item"><input type="checkbox" class="new-check"><span>5 &mdash; Not save materials to unsecured locations</span></label>
+      <label class="check-item"><input type="checkbox" class="new-check"><span>6 &mdash; I understand I am submitting this form electronically and agree to all terms above</span></label>
+    </div>
+    <div class="field">
+      <label for="new-sig">Electronic Signature *</label>
+      <input type="text" id="new-sig" placeholder="Type your full name as your signature">
+      <p class="sig-note">Typing your name constitutes your electronic signature.</p>
+    </div>
+    <div id="newuser-error" class="alert alert-error" style="display:none"></div>
+    <div class="btn-row">
+      <button class="btn btn-gold" onclick="submitNewUser()">&#9993; Submit Acknowledgment to Owner</button>
+    </div>
+    <div id="newuser-confirm" class="alert alert-success" style="display:none;margin-top:14px;">
+      Your acknowledgment has been submitted. The owner will review your request and contact you with next steps.
+    </div>
+    <div id="newuser-pending" class="pending-box" style="display:none">
+      <strong>What happens next:</strong><br>
+      1. The owner will receive your completed acknowledgment form.<br>
+      2. Your account will be set up and you will be contacted by email.<br>
+      3. Return to this portal to complete the access process.<br><br>
+      <strong>To receive permanent document access:</strong><br>
+      Please ensure you have a free Microsoft account using the same email address you entered above. If you do not have one, create one free at <a href="https://account.microsoft.com" target="_blank">account.microsoft.com</a>.
+    </div>
+    <hr class="divider">
+    <button class="btn btn-outline" onclick="showScreen('screen-identity')" style="font-size:0.82rem;padding:9px 18px;">&#8592; Back</button>
+  </div>
+</div>
+
+<!-- SCREEN 4: KNOWN USER NOT YET ACKNOWLEDGED -->
+<div id="screen-known-user" class="screen">
+  <div class="card">
+    <div class="privilege-banner">&#9878; Attorney-Client Privilege &mdash; Confidential</div>
+    <div class="step-badge">Step 2 of 2 &mdash; Complete Your Acknowledgment</div>
+    <h2 class="card-title">Confidentiality Acknowledgment</h2>
+    <p class="card-subtitle">You have been pre-authorized. Please open your acknowledgment form, complete it, and submit.</p>
+    <div class="alert alert-info">Your personal acknowledgment form will open in a new tab. Complete all fields and follow the instructions to submit it to the owner.</div>
+    <div id="known-user-form-box" style="margin-top:24px;text-align:center;"></div>
+    <div class="pending-box" style="margin-top:20px;">
+      <strong>What happens next:</strong><br>
+      1. Complete all fields in your acknowledgment form and click the submit link inside the form.<br>
+      2. Once the owner receives your submission, access will be granted.<br>
+      3. Return here and log in to reach the document.<br><br>
+      <strong>To receive permanent document access:</strong><br>
+      Please ensure you have a free Microsoft account using the same email address on your form. If you do not have one, create one free at <a href="https://account.microsoft.com" target="_blank">account.microsoft.com</a>.
+    </div>
+    <hr class="divider">
+    <button class="btn btn-outline" onclick="showScreen('screen-identity')" style="font-size:0.82rem;padding:9px 18px;">&#8592; Back</button>
+  </div>
+</div>
+
+<!-- SCREEN 5: PENDING APPROVAL -->
+<div id="screen-pending" class="screen">
+  <div class="card">
+    <div class="step-badge">Pending Approval</div>
+    <h2 class="card-title">Access Pending</h2>
+    <p class="card-subtitle">Your acknowledgment has been received. Access has not yet been granted.</p>
+    <div class="alert alert-warn">
+      Your request is under review. You will be contacted with an access link once processed. Please check your email at <strong id="pending-email-display"></strong>.
+    </div>
+    <div class="pending-box">
+      <strong>In the meantime:</strong><br>
+      If you believe your access should already be active, please contact abbylaneneighbors at gmail dot com directly.
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="showScreen('screen-identity')" style="font-size:0.82rem;padding:9px 18px;">&#8592; Back to Login</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ████████████████████████████████████████████████████████████
+// ██                                                        ██
+// ██   CONFIG — PARAMETERS START
+// ██                                                        ██
+// -- Contact & Document --
+var REQ      = "abbylaneneighbors" + "@" + "gmail.com";
+var DOC_LINK = "https://1drv.ms/w/c/f48a627c72e8b791/IQB39KvXo4FAQY0m4_nmzKm5AXnoxW2_turLT1f4sf2o91c";
+var DOC_NAME = "Abby Lane Lawsuit - Master Document";
+
+// -- External Reviewer --
+var EXT_LINK         = "https://1drv.ms/w/c/f48a627c72e8b791/IQAT-IvDcUSyRYwYJslj5E2pAZPgBBMp14TUYuy_S4J9-wk?e=AJoEV3";
+var EXT_EXPIRY       = "";
+var TOKEN_LOOKUP_LINK = "https://1drv.ms/x/c/f48a627c72e8b791/IQArQUdKgeAsTIpdvK4r5r3rAXsxwc_1iF2kxo16LhSi3PQ?e=sDhAyp";
+
+// -- Password Encryption --
+var PASSWORD_KEY = "ALN2026";
+
+
+// -- Task Lists (Top 10 per role) --
+// Role assignment: collaborator = MS account + hasAccess:true
+//                  reviewer     = non-MS account + hasAccess:true
+//                  newuser      = hasAccess:false (any)
+var TASK_LISTS = {
+  collaborator: [
+    {description:'Complete LCP', link:'#screen-newuser'},
+    {description:'Review/Edit Mar 4 Meeting Notes', link:''},
+    {description:'Review Latest Bookkeeping Email', link:''},
+    {description:'Pay Abby Lane Facilitator', link:''},
+    {description:'Review Summons Response', link:''},
+    {description:'Review NLRG Suggestions', link:''},
+    {description:'Review Claude.ai Demurrer Response Suggestions', link:''},
+    {description:'Review White Summons Response', link:''},
+    {description:'Review Road Videos', link:''},
+    {description:'Other Documents — see full list', link:''}
+  ],
+  reviewer: [
+    {description:'Get MS Account', link:'https://account.microsoft.com'},
+    {description:'Review Mar 4 Meeting Notes', link:''},
+    {description:'Review Latest Bookkeeping Email', link:''},
+    {description:'Pay Abby Lane Facilitator', link:''},
+    {description:'Review Summons Response', link:''},
+    {description:'Review NLRG Suggestions', link:''},
+    {description:'Review Claude.ai Demurrer Response Suggestions', link:''},
+    {description:'Review White Summons Response', link:''},
+    {description:'Review Road Videos', link:''},
+    {description:'Other Documents — see full list', link:''}
+  ],
+  newuser: [
+    {description:'Complete LCP Acknowledgment Form', link:'#screen-newuser'},
+    {description:'Get MS Account', link:'https://account.microsoft.com'}
+  ]
+};
+
+// -- Token Authentication --
+// Pi-transform: any valid 6-char hex input token computes its response token directly.
+// No pre-built table needed. Matches formula in AbbyLane_TokenLookup_v3.xlsx.
+// Token pair changes each hour automatically based on time-of-day.
+
+// -- User Registry --
+var USERS = [
+  { name:"Edward McConnell", email:"edmcconne"+"@"+"gmail.com", dateSigned:"Feb 26 2026", signature:"Edward McConnell", hasAccess:true, microsoftAccount:true, tokenPointer:0, password:"19213056676D41187E7E000602057178" },
+  { name:"EdView", email:"abbylaneneighbors"+"@"+"gmail.com", dateSigned:"Feb 26 2026", signature:"EdView", hasAccess:true, microsoftAccount:true, tokenPointer:0, password:"202E2C4B685F48251B1145690006737A7E010006" },
+  { name:"EdExt", email:"edext18"+"@"+"gmail.com", dateSigned:"Mar 2  2026", signature:"Ed McConnell", hasAccess:true, microsoftAccount:false, tokenPointer:0, password:"04280B4A685F48251B1145690006737A7E010006" },
+  { name:"Ashley Cornicello", email:"ashley"+"@"+"collegiatesealers.com", dateSigned:"", signature:"Ashley Cornicello", hasAccess:false, microsoftAccount:true, tokenPointer:0, password:"" },
+  { name:"Brenda Gilbert", email:"bcg3812"+"@"+"gmail.com", dateSigned:"", signature:"", hasAccess:false, microsoftAccount:true, tokenPointer:0, password:"15091D6666737A" },
+  { name:"Jim Breeden", email:"jcb"+"@"+"lawbreeden.com", dateSigned:"", signature:"", hasAccess:false, microsoftAccount:true, tokenPointer:0, password:"" },
+  { name:"Katie McConnell", email:"ktmc"+"@"+"mail.com", dateSigned:"", signature:"", hasAccess:false, microsoftAccount:true, tokenPointer:0, password:"" },
+  { name:"Morris Martin", email:"martinmo404"+"@"+"gmail.com", dateSigned:"", signature:"", hasAccess:false, microsoftAccount:true, tokenPointer:0, password:"" },
+  { name:"Richard Cornicello", email:"rich"+"@"+"collegiatesealers.com", dateSigned:"", signature:"", hasAccess:false, microsoftAccount:true, tokenPointer:0, password:"" },
+  { name:"Robin Spence", email:"baltirobin"+"@"+"gmail.com", dateSigned:"", signature:"", hasAccess:false, microsoftAccount:true, tokenPointer:0, password:"" },
+  { name:"Shirley Mo Martin", email:"srmartin736"+"@"+"gmail.com", dateSigned:"", signature:"", hasAccess:false, microsoftAccount:true, tokenPointer:0, password:"" },
+  { name:"Bill and Merrill Noel", email:"splicer22"+"@"+"aol.com", dateSigned:"", signature:"", hasAccess:false, microsoftAccount:true, tokenPointer:0, password:"" },
+  { name:"Spence Lundie", email:"spencelundie"+"@"+"gmail.com", dateSigned:"", signature:"", hasAccess:false, microsoftAccount:true, tokenPointer:0, password:"" }
+];
+
+// ██   CONFIG — PARAMETERS END                             ██
+// ██                                                        ██
+// ████████████████████████████████████████████████████████████
+
+// ============================================================
+// TOKEN UTILITIES  (code — do not move to CONFIG block)
+// ============================================================
+function piTransform(hexIn) {
+  // Replicates pi-transform formula from AbbyLane_TokenLookup_v3.xlsx
+  var C = parseInt(hexIn, 16);
+  var D = C / Math.PI;
+  var E = D - Math.floor(D);
+  var F = Math.floor(E * 4096);
+  var G = Math.floor(F / 256);
+  var H = F - G * 256;
+  var I = Math.floor(H / 16);
+  var K = H - I * 16;
+  function hp(n) { return n.toString(16).toUpperCase().padStart(2,'0'); }
+  return hp(G) + hp(I) + hp(K);
+}
+
+function getHourSeed(hour) {
+  // Deterministic 6-char hex seed from hour (0-23)
+  return (hour * 0x111111).toString(16).toUpperCase().padStart(6,'0').slice(0,6);
+}
+
+function getExpectedResponse() {
+  return piTransform(getHourSeed(new Date().getHours()));
+}
+
+function getPrevExpectedResponse() {
+  return piTransform(getHourSeed((new Date().getHours() - 1 + 24) % 24));
+}
+
+function getCurrentAccessCode() {
+  return getHourSeed(new Date().getHours());
+}
+
+// ============================================================
+// MAIL UTILITIES  (code — do not move to CONFIG block)
+// ============================================================
+function openMailto(mailto) {
+  // Open mailto in new tab/window so portal tab stays intact.
+  // If a desktop mail client is configured it launches directly.
+  // If using webmail (Gmail in Chrome) it opens compose in a new tab.
+  window.open(mailto, '_blank');
+}
+
+
+function encryptPassword(plain) {
+  return plain.split('').map(function(c, i) {
+    return (c.charCodeAt(0) ^ PASSWORD_KEY.charCodeAt(i % PASSWORD_KEY.length))
+      .toString(16).padStart(2, '0');
+  }).join('').toUpperCase();
+}
+
+function verifyPassword(plain, stored) {
+  if (!stored) return true; // No password set for this user — skip check
+  return encryptPassword(plain) === stored.toUpperCase();
+}
+
+// ============================================================
+// PAGE INIT
+// ============================================================
+(function init() {
+  // Set today's date on new user form
+  var dateEl = document.getElementById('new-date');
+  if (dateEl) {
+    var t = new Date();
+    var mm = String(t.getMonth()+1).padStart(2,'0');
+    var dd = String(t.getDate()).padStart(2,'0');
+    dateEl.value = t.getFullYear() + '-' + mm + '-' + dd;
+  }
+
+  // ── 1. Restore mid-session state (same-tab reload) ──────────
+  try {
+    var saved = sessionStorage.getItem('aln_session');
+    if (saved) {
+      var sess = JSON.parse(saved);
+      var user = null;
+      for (var i = 0; i < USERS.length; i++) {
+        if (USERS[i].email.toLowerCase() === sess.email) { user = USERS[i]; break; }
+      }
+      if (user && sess.screen) {
+        if (sess.screen === 'screen-returning') {
+          buildReturningView(user);
+          var idx = USERS.indexOf(user);
+          document.getElementById('btn-admin').style.display = (idx === 0) ? 'inline-block' : 'none';
+          showScreen('screen-returning');
+          return;
+        } else if (sess.screen === 'screen-pending') {
+          document.getElementById('pending-email-display').textContent = user.email;
+          showScreen('screen-pending');
+          return;
+        } else if (sess.screen === 'screen-known-user') {
+          var formBox = document.getElementById('known-user-form-box');
+          formBox.innerHTML = '<a href="' + link + '" target="_blank" class="btn btn-gold" style="display:inline-flex;margin:0 auto;">&#128203; Open My Acknowledgment Form</a>';
+          showScreen('screen-known-user');
+          return;
+        } else if (sess.screen === 'screen-newuser') {
+          _isKnownUser = true;
+          document.getElementById('new-name').value  = user.name;
+          document.getElementById('new-email').value = user.email;
+          var t2 = new Date();
+          document.getElementById('new-date').value = t2.getFullYear() + '-' +
+            String(t2.getMonth()+1).padStart(2,'0') + '-' + String(t2.getDate()).padStart(2,'0');
+          document.getElementById('newuser-step-badge').textContent = 'Step 2 of 2 \u2014 Acknowledgment Form';
+          document.getElementById('newuser-subtitle').textContent = 'You have been pre-authorized. Please complete the acknowledgment form below to activate your access.';
+          document.getElementById('newuser-prefill-note').textContent = 'Your name and email have been pre-filled from your account. Please verify they are correct before submitting.';
+          showScreen('screen-newuser');
+          return;
+        }
+      }
+    }
+  } catch(e) {}
+
+  // ── 2. Auto-login from localStorage ─────────────────────────
+  try {
+    var cookie = loadLoginCookie();
+    if (cookie && cookie.email) {
+      var autoUser = null;
+      var autoIdx  = -1;
+      for (var j = 0; j < USERS.length; j++) {
+        if (USERS[j].email.toLowerCase() === cookie.email.toLowerCase()) {
+          autoUser = USERS[j];
+          autoIdx  = j;
+          break;
+        }
+      }
+      if (autoUser) {
+        // Known user — go straight to their appropriate screen
+        if (!autoUser.hasAccess && !autoUser.dateSigned) {
+          // Not yet acknowledged — show inline LCP form
+          _isKnownUser = true;
+          document.getElementById('new-name').value  = autoUser.name;
+          document.getElementById('new-email').value = autoUser.email;
+          var t3 = new Date();
+          document.getElementById('new-date').value = t3.getFullYear() + '-' +
+            String(t3.getMonth()+1).padStart(2,'0') + '-' + String(t3.getDate()).padStart(2,'0');
+          document.getElementById('newuser-step-badge').textContent = 'Step 2 of 2 \u2014 Acknowledgment Form';
+          document.getElementById('newuser-subtitle').textContent = 'You have been pre-authorized. Please complete the acknowledgment form below to activate your access.';
+          document.getElementById('newuser-prefill-note').textContent = 'Your name and email have been pre-filled from your account. Please verify they are correct before submitting.';
+          saveSession(autoUser.email, 'screen-newuser');
+          showScreen('screen-newuser');
+        } else if (!autoUser.hasAccess && autoUser.dateSigned) {
+          // Acknowledged but awaiting approval
+          document.getElementById('pending-email-display').textContent = autoUser.email;
+          saveSession(autoUser.email, 'screen-pending');
+          showScreen('screen-pending');
+        } else {
+          // Full access — go to checklist
+          buildReturningView(autoUser);
+          document.getElementById('btn-admin').style.display = (autoIdx === 0) ? 'inline-block' : 'none';
+          saveSession(autoUser.email, 'screen-returning');
+          showScreen('screen-returning');
+        }
+        return;
+      } else {
+        // Cookie exists but user no longer in registry
+        var notRec = document.getElementById('cookie-not-recognized');
+        if (notRec) notRec.style.display = 'block';
+      }
+    }
+  } catch(e) {}
+
+  // ── 3. No cookie — pre-fill fields if possible ──────────────
+  try {
+    var ck = loadLoginCookie();
+    if (ck) {
+      var sel = document.getElementById('sel-name');
+      if (sel) {
+        for (var oi = 0; oi < sel.options.length; oi++) {
+          if (sel.options[oi].value.trim() === (ck.name||'').trim()) {
+            sel.value = sel.options[oi].value;
+            sel.dispatchEvent(new Event('change'));
+            break;
+          }
+        }
+      }
+      var emailEl = document.getElementById('inp-email');
+      if (emailEl) {
+        emailEl.value = ck.email;
+        emailEl.dispatchEvent(new Event('input'));
+      }
+    }
+  } catch(e) {}
+})();
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showNewUserFlow() {
+  // Route to new user request form
+  document.getElementById('sel-name').value = 'New User';
+  document.getElementById('sel-name').dispatchEvent(new Event('change'));
+  window.scrollTo(0,0);
+}
+
+
+function notifyOwnerMismatch(mailto) {
+  window.open(mailto, '_blank');
+  document.getElementById('identity-error').style.display = 'none';
+  document.getElementById('identity-followup').style.display = 'block';
+}
+
+function showScreen(id) {
+  var screens = document.querySelectorAll('.screen');
+  for (var i = 0; i < screens.length; i++) {
+    screens[i].classList.remove('active');
+  }
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+  // Clear saved session when user deliberately returns to identity screen
+  if (id === 'screen-identity') { clearSession(); }
+}
+
+function saveLoginCookie(name, email, password) {
+  try { localStorage.setItem('aln_user', JSON.stringify({name:name, email:email, password:password||''})); }
+  catch(e) {}
+}
+
+function loadLoginCookie() {
+  try {
+    var val = localStorage.getItem('aln_user');
+    return val ? JSON.parse(val) : null;
+  } catch(e) {}
+  return null;
+}
+
+function clearLoginCookie() {
+  try { localStorage.removeItem('aln_user'); }
+  catch(e) {}
+}
+
+function saveSession(email, screen) {
+  try { sessionStorage.setItem('aln_session', JSON.stringify({ email: email.toLowerCase(), screen: screen })); }
+  catch(e) {}
+}
+
+function clearSession() {
+  try { sessionStorage.removeItem('aln_session'); }
+  catch(e) {}
+}
+
+function showErr(elId, msg) {
+  var el = document.getElementById(elId);
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+// ============================================================
+// IDENTITY SCREEN — DYNAMIC BUTTON VISIBILITY
+// ============================================================
+function onNameChange() {
+  var sel = document.getElementById('sel-name').value;
+  var newNameField = document.getElementById('new-user-name-field');
+  var verifyRow    = document.getElementById('btn-verify-row');
+  var requestRow   = document.getElementById('btn-request-row');
+  var errEl        = document.getElementById('identity-error');
+  var followup     = document.getElementById('identity-followup');
+
+  errEl.style.display = 'none';
+  followup.style.display = 'none';
+
+  if (sel === 'new') {
+    newNameField.style.display = 'block';
+    verifyRow.style.display    = 'none';
+    document.getElementById('password-field').style.display = 'none';
+    document.getElementById('inp-password').value = '';
+    requestRow.style.display = shouldShowRequest() ? 'flex' : 'none';
+  } else if (sel === '') {
+    newNameField.style.display = 'none';
+    verifyRow.style.display    = 'none';
+    requestRow.style.display   = 'none';
+    document.getElementById('password-field').style.display = 'none';
+    document.getElementById('inp-password').value = '';
+  } else {
+    newNameField.style.display = 'none';
+    requestRow.style.display   = 'none';
+    document.getElementById('password-field').style.display = 'block';
+    verifyRow.style.display = shouldShowVerify() ? 'flex' : 'none';
+  }
+}
+
+function onEmailInput() {
+  var sel = document.getElementById('sel-name').value;
+  if (sel === 'new') {
+    document.getElementById('btn-request-row').style.display = shouldShowRequest() ? 'flex' : 'none';
+  } else if (sel !== '') {
+    document.getElementById('btn-verify-row').style.display = shouldShowVerify() ? 'flex' : 'none';
+  }
+  // Re-show verify button if email changed after a mismatch error
+  var errEl = document.getElementById('identity-error');
+  if (errEl.style.display !== 'none' && sel !== '' && sel !== 'new') {
+    document.getElementById('btn-verify-row').style.display = shouldShowVerify() ? 'flex' : 'none';
+  }
+}
+
+function shouldShowVerify() {
+  var email = document.getElementById('inp-email').value.trim();
+  return email.length > 0 && email.indexOf('@') > 0;
+}
+
+function shouldShowRequest() {
+  var email   = document.getElementById('inp-email').value.trim();
+  var newName = document.getElementById('inp-new-name').value.trim();
+  return email.length > 0 && email.indexOf('@') > 0 && newName.length > 0;
+}
+
+var _isKnownUser = false;
+
+function requestNewAccess() {
+  var name  = document.getElementById('inp-new-name').value.trim();
+  var email = document.getElementById('inp-email').value.trim().toLowerCase();
+  if (!name)  { showErr('identity-error', 'Please enter your full name.'); return; }
+  if (!email || email.indexOf('@') < 0) { showErr('identity-error', 'Please enter a valid email address.'); return; }
+
+  // Duplicate check — block if name or email already in USERS
+  for (var i = 0; i < USERS.length; i++) {
+    if (USERS[i].name.toLowerCase() === name.toLowerCase() ||
+        USERS[i].email.toLowerCase() === email) {
+      showErr('identity-error', 'That name or email is already in use. Please check and try again.');
+      return;
+    }
+  }
+
+  // Route to LCP form, pre-filling name and email
+  _isKnownUser = false;
+  document.getElementById('newuser-step-badge').textContent = 'New Member \u2014 Acknowledgment Form';
+  document.getElementById('newuser-title').textContent = 'Confidentiality Acknowledgment';
+  document.getElementById('newuser-subtitle').textContent = 'Please complete all fields below. Your submission will be sent directly to the owner for review.';
+  document.getElementById('newuser-prefill-note').textContent = 'Your name and email have been pre-filled from the previous screen. Please verify they are correct before submitting.';
+  document.getElementById('new-name').value  = name;
+  document.getElementById('new-email').value = email;
+  document.getElementById('new-sig').value   = '';
+  document.getElementById('new-ms-account').checked = false;
+  var checks = document.querySelectorAll('.new-check');
+  for (var j = 0; j < checks.length; j++) { checks[j].checked = false; }
+  document.getElementById('newuser-error').style.display   = 'none';
+  document.getElementById('newuser-confirm').style.display = 'none';
+  document.getElementById('newuser-pending').style.display = 'none';
+
+  // Set today's date
+  var t = new Date();
+  var mm = String(t.getMonth()+1).padStart(2,'0');
+  var dd = String(t.getDate()).padStart(2,'0');
+  document.getElementById('new-date').value = t.getFullYear() + '-' + mm + '-' + dd;
+
+  showScreen('screen-newuser');
+}
+
+// ============================================================
+// SUBMIT NEW USER — fires complete LCP acknowledgment to owner
+// ============================================================
+function submitNewUser() {
+  document.getElementById('newuser-error').style.display   = 'none';
+  document.getElementById('newuser-confirm').style.display = 'none';
+  document.getElementById('newuser-pending').style.display = 'none';
+
+  var name  = document.getElementById('new-name').value.trim();
+  var email = document.getElementById('new-email').value.trim();
+  var date  = document.getElementById('new-date').value;
+  var sig   = document.getElementById('new-sig').value.trim();
+  var msAcc = document.getElementById('new-ms-account').checked;
+  var checks = document.querySelectorAll('.new-check');
+  var allChecked = true;
+  for (var i = 0; i < checks.length; i++) { if (!checks[i].checked) { allChecked = false; break; } }
+
+  if (!name)  { showErr('newuser-error', 'Please enter your full name.'); return; }
+  if (!email || email.indexOf('@') < 0) { showErr('newuser-error', 'Please enter a valid email address.'); return; }
+  if (!date)  { showErr('newuser-error', 'Please enter today\'s date.'); return; }
+  if (!allChecked) { showErr('newuser-error', 'Please check all six acknowledgment boxes before submitting.'); return; }
+  if (!sig)   { showErr('newuser-error', 'Please type your full name as your electronic signature.'); return; }
+
+  var subject, body;
+  if (_isKnownUser) {
+    subject = encodeURIComponent('Acknowledgment Received — ' + name);
+    body = encodeURIComponent(
+      'ATTORNEY-CLIENT PRIVILEGE ACKNOWLEDGMENT\n' +
+      'Known Member Submission — Portal\n' +
+      '─────────────────────────────────────────\n\n' +
+      'Name:             ' + name  + '\n' +
+      'Email:            ' + email + '\n' +
+      'Date:             ' + date  + '\n' +
+      'Microsoft Account:' + (msAcc ? ' Yes' : ' No') + '\n' +
+      'Signature:        ' + sig   + '\n\n' +
+      'Acknowledgments (all checked):\n' +
+      '  ✓ 1 — Maintain strict confidentiality of all materials\n' +
+      '  ✓ 2 — Not forward, share, or discuss materials outside authorized group\n' +
+      '  ✓ 3 — Use Track Changes for all document edits\n' +
+      '  ✓ 4 — Immediately notify owner if materials are accidentally shared\n' +
+      '  ✓ 5 — Not save materials to unsecured locations\n' +
+      '  ✓ 6 — Submitted electronically and agrees to all terms\n\n' +
+      '─────────────────────────────────────────\n' +
+      'ACTION NEEDED:\n' +
+      '1. In portal CONFIG for "' + name + '": set dateSigned:"' + date + '", signature:"' + sig + '", hasAccess:true.\n' +
+      '2. Set up OneDrive sharing with appropriate permissions.\n' +
+      '3. Deploy updated portal, then notify user to return.'
+    );
+  } else {
+    subject = encodeURIComponent('New Member Acknowledgment — ' + name);
+    body = encodeURIComponent(
+      'ATTORNEY-CLIENT PRIVILEGE ACKNOWLEDGMENT\n' +
+      'New Member Submission — Portal\n' +
+      '─────────────────────────────────────────\n\n' +
+      'Name:             ' + name  + '\n' +
+      'Email:            ' + email + '\n' +
+      'Date:             ' + date  + '\n' +
+      'Microsoft Account:' + (msAcc ? ' Yes' : ' No') + '\n' +
+      'Signature:        ' + sig   + '\n\n' +
+      'Acknowledgments (all checked):\n' +
+      '  ✓ 1 — Maintain strict confidentiality of all materials\n' +
+      '  ✓ 2 — Not forward, share, or discuss materials outside authorized group\n' +
+      '  ✓ 3 — Use Track Changes for all document edits\n' +
+      '  ✓ 4 — Immediately notify owner if materials are accidentally shared\n' +
+      '  ✓ 5 — Not save materials to unsecured locations\n' +
+      '  ✓ 6 — Submitted electronically and agrees to all terms\n\n' +
+      '─────────────────────────────────────────\n' +
+      'ACTION NEEDED:\n' +
+      '1. Create individual acknowledgment spreadsheet for this user.\n' +
+      '2. Add to portal USERS array in CONFIG (microsoftAccount: ' + (msAcc ? 'true' : 'false') + ').\n' +
+      '3. Set up OneDrive sharing with appropriate permissions.\n' +
+      '4. Set hasAccess:true and deploy, then notify user to return to portal.'
+    );
+  }
+
+  var mailtoUrl = 'mailto:' + REQ + '?subject=' + subject + '&body=' + body;
+
+  // Show clickable send link rather than auto-firing iframe (more reliable on macOS Chrome)
+  var confirmEl = document.getElementById('newuser-confirm');
+  confirmEl.innerHTML = 'Your form is complete. <strong>Click the button below to open your email client and send your acknowledgment to the owner.</strong>';
+  confirmEl.style.display = 'block';
+
+  var pendingEl = document.getElementById('newuser-pending');
+  var capturedMailto = mailtoUrl;
+  pendingEl.innerHTML =
+    '<strong>What happens next:</strong><br>' +
+    '1. Click the button below — your email client will open with the form pre-filled.<br>' +
+    '2. Click Send in your email client.<br>' +
+    '3. The owner will review and contact you with next steps.<br>' +
+    '4. When your email has been sent, you may close the browser tab.<br><br>' +
+    '<strong>To receive permanent document access:</strong><br>' +
+    'Please ensure you have a free Microsoft account using the same email address you entered above. ' +
+    'If you do not have one, create one free at <a href="https://account.microsoft.com" target="_blank">account.microsoft.com</a>.' +
+    '<div style="text-align:center;margin-top:20px;">' +
+      '<button class="btn btn-gold" id="btn-open-email">&#9993; Open Email Client &amp; Send</button>' +
+    '</div>';
+  pendingEl.style.display = 'block';
+
+  // Attach click handler after element is in DOM
+  document.getElementById('btn-open-email').addEventListener('click', function() {
+    openMailto(capturedMailto);
+  });
+}
+
+// ============================================================
+// VERIFY IDENTITY — hide verify button after click, re-show on email change
+// ============================================================
+// ============================================================
+function verifyIdentity() {
+  document.getElementById('identity-error').style.display = 'none';
+  document.getElementById('btn-verify-row').style.display = 'none';
+
+  var sel = document.getElementById('sel-name');
+  var emailInput = document.getElementById('inp-email');
+  var idx = parseInt(sel.value);
+  var enteredEmail = emailInput.value.trim().toLowerCase();
+
+  if (sel.value === '' || isNaN(idx)) {
+    showErr('identity-error', 'Please select your name from the list.');
+    document.getElementById('btn-verify-row').style.display = 'flex';
+    return;
+  }
+  if (!enteredEmail) {
+    showErr('identity-error', 'Please enter your email address.');
+    document.getElementById('btn-verify-row').style.display = 'flex';
+    return;
+  }
+  if (idx < 0 || idx >= USERS.length) {
+    showErr('identity-error', 'Selection error. Please try again.');
+    document.getElementById('btn-verify-row').style.display = 'flex';
+    return;
+  }
+
+  var user = USERS[idx];
+
+  if (!user || !user.email) {
+    showErr('identity-error', 'Email address not recognized. Select "New User" from the dropdown to request access.');
+    document.getElementById('btn-verify-row').style.display = 'flex';
+    return;
+  }
+
+  if (user.email.toLowerCase() !== enteredEmail) {
+    var errEl = document.getElementById('identity-error');
+    var mailto = 'mailto:' + REQ +
+      '?subject=' + encodeURIComponent('Email Update Request — ' + user.name) +
+      '&body=' + encodeURIComponent('Hi,\n\nI am trying to access the portal but my email address does not match your records.\n\nMy name on the list: ' + user.name + '\nEmail I am trying to use: ' + enteredEmail + '\n\nPlease update my record so I can access the portal.');
+    errEl.innerHTML = 'Email address does not match our records for this name. Please correct it above (the Verify button will reappear), or <a href="#" onclick="notifyOwnerMismatch(\'' + mailto.replace(/'/g, "\\'") + '\')" style="color:#8b1a1a;font-weight:bold;">click here to notify the owner</a> — your name and the email you entered will be included automatically.';
+    errEl.style.display = 'block';
+    // Verify button stays hidden — reappears via onEmailInput when user corrects email
+    return;
+  }
+
+  // Password check (skip if no password set for this user)
+  var enteredPassword = document.getElementById('inp-password').value;
+  if (user.password && !verifyPassword(enteredPassword, user.password)) {
+    showErr('identity-error', 'Password is incorrect. Please try again or contact the owner.');
+    document.getElementById('btn-verify-row').style.display = 'flex';
+    return;
+  }
+
+  // Route by status
+  if (!user.hasAccess && !user.dateSigned) {
+    // Pre-added, not yet acknowledged — route to inline portal form
+    _isKnownUser = true;
+    document.getElementById('new-name').value  = user.name;
+    document.getElementById('new-email').value = user.email;
+    document.getElementById('new-sig').value   = '';
+    document.getElementById('new-ms-account').checked = user.microsoftAccount || false;
+    var checks = document.querySelectorAll('.new-check');
+    for (var ci = 0; ci < checks.length; ci++) { checks[ci].checked = false; }
+    document.getElementById('newuser-error').style.display   = 'none';
+    document.getElementById('newuser-confirm').style.display = 'none';
+    document.getElementById('newuser-pending').style.display = 'none';
+    var t2 = new Date();
+    document.getElementById('new-date').value = t2.getFullYear() + '-' +
+      String(t2.getMonth()+1).padStart(2,'0') + '-' + String(t2.getDate()).padStart(2,'0');
+    saveSession(user.email, 'screen-newuser');
+    // Update form headings for known user context
+    document.getElementById('newuser-step-badge').textContent = 'Step 2 of 2 \u2014 Acknowledgment Form';
+    document.getElementById('newuser-title').textContent = 'Confidentiality Acknowledgment';
+    document.getElementById('newuser-subtitle').textContent = 'You have been pre-authorized. Please complete the acknowledgment form below to activate your access.';
+    document.getElementById('newuser-prefill-note').textContent = 'Your name and email have been pre-filled from your account. Please verify they are correct before submitting.';
+    showScreen('screen-newuser');
+    return;
+  }
+
+  if (!user.hasAccess && user.dateSigned) {
+    // Submitted, waiting for approval
+    document.getElementById('pending-email-display').textContent = user.email;
+    saveSession(user.email, 'screen-pending');
+    showScreen('screen-pending');
+    return;
+  }
+
+  // Full access
+  saveLoginCookie(user.name, user.email);
+  saveSession(user.email, 'screen-returning');
+  buildReturningView(user);
+  // Show admin button only for first user (owner/admin role)
+  document.getElementById('btn-admin').style.display = (idx === 0) ? 'inline-block' : 'none';
+  showScreen('screen-returning');
+}
+
+// ============================================================
+// BUILD RETURNING USER VIEW — CHECKLIST
+// ============================================================
+function getUserRole(user) {
+  if (!user.hasAccess) return 'newuser';
+  return user.microsoftAccount ? 'collaborator' : 'reviewer';
+}
+
+function buildReturningView(user) {
+  _reviewerUser = user;
+  var role = getUserRole(user);
+  var tasks = TASK_LISTS[role] || [];
+  var status = user.taskStatus || [];
+
+  // Ensure status array is long enough
+  while (status.length < tasks.length) {
+    status.push({done:false, comment:''});
+  }
+
+  // Role label for title
+  var roleLabel = role === 'collaborator' ? 'Collaborator' : role === 'reviewer' ? 'Reviewer' : 'Member';
+  document.getElementById('checklist-title').textContent = 'Priority Action Items — ' + user.name;
+
+  // Auto-check LCP item for users who have already signed
+  var lcpDone = !!(user.hasAccess && user.dateSigned);
+  for (var j = 0; j < tasks.length; j++) {
+    var desc = tasks[j].description.toLowerCase();
+    if (desc.indexOf('complete lcp') !== -1 || desc.indexOf('lcp acknowledgment') !== -1) {
+      if (lcpDone && !status[j].done) {
+        status[j] = {done: true, comment: 'Signed ' + user.dateSigned};
+      }
+    }
+  }
+
+
+  var html = '';
+  if (tasks.length === 0) {
+    html = '<p style="color:var(--muted);font-style:italic;padding:16px 0;">No action items assigned for your role at this time.</p>';
+  } else {
+    html += '<table class="task-table"><thead><tr>' +
+      '<th class="col-num">#</th>' +
+      '<th>Action Item</th>' +
+      '<th class="col-link">Link</th>' +
+      '<th>Comments</th>' +
+      '<th class="col-done">Done</th>' +
+      '</tr></thead><tbody>';
+    for (var i = 0; i < tasks.length; i++) {
+      var t = tasks[i];
+      var s = status[i] || {done:false, comment:''};
+      var doneRowClass = s.done ? ' class="done-row"' : '';
+      var descClass = s.done ? ' class="task-desc-cell done-text"' : ' class="task-desc-cell"';
+      var checkedAttr = s.done ? ' checked' : '';
+      var linkCell = '';
+      if (!t.link) {
+        linkCell = '<td></td>';
+      } else if (t.link.indexOf('#screen-') === 0) {
+        var screenId = t.link.slice(1);
+        linkCell = '<td style="text-align:center"><button class="task-link-btn" onclick="showScreen(\'' + screenId + '\')">Open</button></td>';
+      } else {
+        linkCell = '<td style="text-align:center"><a href="' + safeText(t.link) + '" target="_blank" class="task-link-btn">Open &#8599;</a></td>';
+      }
+      html += '<tr' + doneRowClass + ' id="task-item-' + i + '">' +
+        '<td style="text-align:center"><span class="task-num-cell">' + (i+1) + '</span></td>' +
+        '<td' + descClass + ' id="task-desc-' + i + '">' + safeText(t.description) + '</td>' +
+        linkCell +
+        '<td><input class="task-comment-input" type="text" id="task-comment-' + i + '" value="' + safeText(s.comment||'') + '" placeholder="Add comment..."></td>' +
+        '<td style="text-align:center"><input class="task-done-cb" type="checkbox" id="task-done-' + i + '"' + checkedAttr + ' onchange="onTaskDoneChange(' + i + ')"></td>' +
+      '</tr>';
+    }
+    html += '</tbody></table>';
+  }
+
+  document.getElementById('checklist-container').innerHTML = html;
+  document.getElementById('checklist-done-msg').style.display = 'none';
+}
+
+function onTaskDoneChange(idx) {
+  var cb   = document.getElementById('task-done-' + idx);
+  var row  = document.getElementById('task-item-' + idx);
+  var desc = document.getElementById('task-desc-' + idx);
+  if (cb.checked) {
+    row.classList.add('done-row');
+    if (desc) { desc.className = 'task-desc-cell done-text'; }
+  } else {
+    row.classList.remove('done-row');
+    if (desc) { desc.className = 'task-desc-cell'; }
+  }
+}
+
+function sendChecklistUpdate() {
+  var user = _reviewerUser;
+  if (!user) return;
+  var role = getUserRole(user);
+  var tasks = TASK_LISTS[role] || [];
+
+  var lines = 'CHECKLIST UPDATE\n';
+  lines += 'User: ' + user.name + ' <' + user.email + '>\n';
+  lines += 'Role: ' + role + '\n';
+  lines += 'Sent: ' + new Date().toLocaleString() + '\n\n';
+  lines += 'ITEM | STATUS | COMMENT\n';
+  lines += '-----+--------+--------\n';
+
+  for (var i = 0; i < tasks.length; i++) {
+    var cb = document.getElementById('task-done-' + i);
+    var cm = document.getElementById('task-comment-' + i);
+    var done = cb ? (cb.checked ? 'DONE' : 'open') : 'open';
+    var comment = cm ? cm.value.trim() : '';
+    lines += (i+1) + '. ' + tasks[i].description + ' | ' + done + ' | ' + comment + '\n';
+  }
+
+  var subject = encodeURIComponent('ALN Checklist Update — ' + user.name);
+  var body    = encodeURIComponent(lines);
+  openMailto('mailto:' + REQ + '?subject=' + subject + '&body=' + body);
+
+  document.getElementById('checklist-done-msg').textContent =
+    'Your update has been sent. Thank you, ' + user.name + '.';
+  document.getElementById('checklist-done-msg').style.display = 'block';
+}
+
+function openAccountUpdate() {
+  var user = _reviewerUser;
+  if (!user) return;
+  document.getElementById('acct-name').value      = user.name;
+  document.getElementById('acct-email').value     = user.email;
+  document.getElementById('acct-password').value  = '';
+  document.getElementById('acct-password2').value = '';
+  document.getElementById('acct-error').style.display = 'none';
+  var modal = document.getElementById('account-update-modal');
+  modal.style.display = 'flex';
+  document.getElementById('acct-password').focus();
+}
+
+function closeAccountUpdate() {
+  document.getElementById('account-update-modal').style.display = 'none';
+}
+
+function submitAccountUpdate() {
+  var user   = _reviewerUser;
+  if (!user) return;
+  var newName  = document.getElementById('acct-name').value.trim();
+  var newEmail = document.getElementById('acct-email').value.trim().toLowerCase();
+  var pw1      = document.getElementById('acct-password').value;
+  var pw2      = document.getElementById('acct-password2').value;
+  var errEl    = document.getElementById('acct-error');
+  errEl.style.display = 'none';
+
+  if (!newName || !newEmail) {
+    errEl.textContent = 'Name and email are required.';
+    errEl.style.display = 'block'; return;
+  }
+  if (pw1 !== pw2) {
+    errEl.textContent = 'Passwords do not match.';
+    errEl.style.display = 'block'; return;
+  }
+
+  // Build email body with only changed fields
+  var changes = [];
+  if (newName  !== user.name)          changes.push('Name: '  + newName);
+  if (newEmail !== user.email.toLowerCase()) changes.push('Email: ' + newEmail);
+  if (pw1) {
+    var enc = encryptPassword(pw1);
+    changes.push('Password (encrypted): ' + enc);
+  }
+
+  if (!changes.length) {
+    errEl.textContent = 'No changes detected.';
+    errEl.style.display = 'block'; return;
+  }
+
+  var body = 'Account Update — ' + user.name + '\n\n';
+  body += 'Current Email: ' + user.email + '\n';
+  body += changes.join('\n') + '\n\n';
+  body += 'Sent: ' + new Date().toLocaleString();
+
+  var subject = encodeURIComponent('ALN Account Update — ' + user.name);
+  openMailto('mailto:' + REQ + '?subject=' + subject + '&body=' + encodeURIComponent(body));
+  closeAccountUpdate();
+
+  document.getElementById('checklist-done-msg').textContent =
+    'Account update request sent. The owner will apply your changes.';
+  document.getElementById('checklist-done-msg').style.display = 'block';
+}
+
+// Close account modal on overlay click
+document.getElementById('account-update-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeAccountUpdate();
+});
+
+
+// ============================================================
+// SUBMIT KNOWN USER
+// ============================================================
+function submitKnownUser() {
+  document.getElementById('ku-error').style.display = 'none';
+  document.getElementById('ku-confirm').style.display = 'none';
+  document.getElementById('ku-pending').style.display = 'none';
+
+  var name  = document.getElementById('ku-name').value.trim();
+  var email = document.getElementById('ku-email').value.trim();
+  var date  = document.getElementById('ku-date').value;
+  var sig   = document.getElementById('ku-sig').value.trim();
+  var checks = document.querySelectorAll('.ku-check');
+  var allChecked = true;
+  for (var i = 0; i < checks.length; i++) { if (!checks[i].checked) { allChecked = false; break; } }
+
+  if (!date)  { showErr('ku-error', 'Please enter today\'s date.'); return; }
+  if (!allChecked) { showErr('ku-error', 'Please check all six acknowledgment boxes.'); return; }
+  if (!sig)   { showErr('ku-error', 'Please type your full name as your signature.'); return; }
+
+  var niceDate = formatDate(date);
+  var body = buildAckText(name, email, niceDate, sig, false, document.getElementById('ku-microsoft').value === 'true');
+  copyToClipboard(body);
+  var subject = encodeURIComponent('Acknowledgment Submission - ' + name);
+  openMailto('mailto:' + REQ + '?subject=' + subject);
+  document.getElementById('ku-confirm').style.display = 'block';
+  document.getElementById('ku-pending').style.display = 'block';
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function buildAckText(name, email, date, sig, isNew, hasMicrosoft) {
+  return 'ATTORNEY-CLIENT PRIVILEGE ACKNOWLEDGMENT' +
+    (isNew ? '\nACCESS REQUEST' : '') +
+    '\n\nName: ' + name +
+    '\nEmail: ' + email +
+    '\nDate: ' + date +
+    '\nMicrosoft Account: ' + (hasMicrosoft ? 'YES' : 'NO - use temporary link') +
+    '\n\nI acknowledge and agree to:\n' +
+    '\n1. Maintain strict confidentiality of all materials: YES' +
+    '\n2. Not forward, share, or discuss materials outside authorized group: YES' +
+    '\n3. Use Track Changes for all document edits: YES' +
+    '\n4. Immediately notify owner if materials are accidentally shared: YES' +
+    '\n5. Not save materials to unsecured locations: YES' +
+    '\n6. I have submitted this acknowledgment form: YES' +
+    '\n\nSignature: ' + sig +
+    (isNew ? '\n\n---\nThis is an access request for the Abby Lane Neighbors lawsuit document.\nPlease reply with a one-time access link.' : '');
+}
+
+function formatDate(dateStr) {
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var d = new Date(dateStr + 'T00:00:00');
+  return months[d.getMonth()] + ' ' + String(d.getDate()).padStart(2,'0') + ' ' + d.getFullYear();
+}
+
+function copyToClipboard(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).catch(function() { fallbackCopy(text); });
+  } else {
+    fallbackCopy(text);
+  }
+}
+
+function fallbackCopy(text) {
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try { document.execCommand('copy'); } catch(e) {}
+  document.body.removeChild(ta);
+}
+
+
+function safeText(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ============================================================
+// SEAL TRIPLE-CLICK — ADMIN LOGIN TRIGGER
+// ============================================================
+(function() {
+  var clicks = 0, timer = null;
+  document.getElementById('seal').addEventListener('click', function() {
+    clicks++;
+    if (clicks === 3) {
+      clicks = 0;
+      clearTimeout(timer);
+      admLoginOpen();
+    } else {
+      clearTimeout(timer);
+      timer = setTimeout(function() { clicks = 0; }, 600);
+    }
+  });
+})();
+
+function admLoginOpen() {
+  // Pre-fill from localStorage if available
+  var saved = loadLoginCookie();
+  document.getElementById('adm-login-name').value     = saved ? saved.name           : '';
+  document.getElementById('adm-login-email').value    = saved ? saved.email          : '';
+  document.getElementById('adm-login-password').value = saved ? (saved.password||'') : '';
+  document.getElementById('adm-login-error').style.display = 'none';
+  var m = document.getElementById('admin-login-modal');
+  m.style.display = 'flex';
+  setTimeout(function() { document.getElementById('adm-login-name').focus(); }, 50);
+}
+
+function admLoginClose() {
+  document.getElementById('admin-login-modal').style.display = 'none';
+}
+
+function admLoginSubmit() {
+  var name     = document.getElementById('adm-login-name').value.trim();
+  var email    = document.getElementById('adm-login-email').value.trim().toLowerCase();
+  var password = document.getElementById('adm-login-password').value;
+  var errEl    = document.getElementById('adm-login-error');
+  errEl.style.display = 'none';
+
+  var matchIdx = -1;
+  for (var i = 0; i < Math.min(3, USERS.length); i++) {
+    var u = USERS[i];
+    if (u.name.toLowerCase() === name.toLowerCase() && u.email.toLowerCase() === email) {
+      if (!u.password) {
+        errEl.textContent = 'Administrator account has no password set. Contact the system owner.';
+        errEl.style.display = 'block'; return;
+      }
+      if (!verifyPassword(password, u.password)) {
+        errEl.textContent = 'Incorrect password. Please try again.';
+        errEl.style.display = 'block'; return;
+      }
+      matchIdx = i; break;
+    }
+  }
+
+  if (matchIdx < 0) {
+    errEl.textContent = 'Name, email, or password did not match. Please try again.';
+    errEl.style.display = 'block'; return;
+  }
+
+  admLoginClose();
+  var user = USERS[matchIdx];
+  saveLoginCookie(user.name, user.email, password);
+
+  if (!user.hasAccess && !user.dateSigned) {
+    _isKnownUser = true;
+    document.getElementById('new-name').value  = user.name;
+    document.getElementById('new-email').value = user.email;
+    document.getElementById('new-ms-account').checked = user.microsoftAccount || false;
+    var checks = document.querySelectorAll('.new-check');
+    for (var ci = 0; ci < checks.length; ci++) { checks[ci].checked = false; }
+    document.getElementById('newuser-error').style.display   = 'none';
+    document.getElementById('newuser-confirm').style.display = 'none';
+    document.getElementById('newuser-pending').style.display = 'none';
+    var t2 = new Date();
+    document.getElementById('new-date').value = t2.getFullYear() + '-' +
+      String(t2.getMonth()+1).padStart(2,'0') + '-' + String(t2.getDate()).padStart(2,'0');
+    saveSession(user.email, 'screen-newuser');
+    document.getElementById('newuser-step-badge').textContent = 'Step 2 of 2 \u2014 Acknowledgment Form';
+    document.getElementById('newuser-subtitle').textContent = 'You have been pre-authorized. Please complete the acknowledgment form below to activate your access.';
+    document.getElementById('newuser-prefill-note').textContent = 'Your name and email have been pre-filled. Please verify before submitting.';
+    showScreen('screen-newuser'); return;
+  }
+
+  if (!user.hasAccess && user.dateSigned) {
+    document.getElementById('pending-email-display').textContent = user.email;
+    saveSession(user.email, 'screen-pending');
+    showScreen('screen-pending'); return;
+  }
+
+  saveSession(user.email, 'screen-returning');
+  buildReturningView(user);
+  document.getElementById('btn-admin').style.display = (matchIdx === 0) ? 'inline-block' : 'none';
+  showScreen('screen-returning');
+}
+
+document.getElementById('adm-login-password').addEventListener('keydown', function(e) { if (e.key === 'Enter') admLoginSubmit(); });
+document.getElementById('adm-login-email').addEventListener('keydown',    function(e) { if (e.key === 'Enter') admLoginSubmit(); });
+document.getElementById('adm-login-name').addEventListener('keydown',     function(e) { if (e.key === 'Enter') admLoginSubmit(); });
+document.getElementById('admin-login-modal').addEventListener('click',    function(e) { if (e.target === this) admLoginClose(); });
+</script>
+
+<!-- ============================================================ -->
+<!-- ADMIN PANEL — OWNER ONLY                                     -->
+<!-- ============================================================ -->
+<style>
+/* Admin overlay */
+#admin-overlay {
+  display: none; position: fixed; inset: 0; z-index: 500;
+  background: #0a1520;
+  flex-direction: column;
+  font-family: 'Source Serif 4', Georgia, serif;
+}
+#admin-overlay.open { display: flex; }
+.adm-header {
+  background: #162840;
+  border-bottom: 2px solid #C9A84C;
+  padding: 14px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.adm-header-left h2 { color: #C9A84C; font-size: 17px; letter-spacing: 0.5px; }
+.adm-header-left p  { color: #998877; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+.adm-header-right   { display: flex; gap: 10px; align-items: center; }
+.adm-file-status    { font-size: 12px; color: #998877; font-style: italic; }
+.adm-tabs {
+  display: flex; border-bottom: 1px solid rgba(201,168,76,0.25);
+  padding: 0 24px; background: #0f1e2e; flex-shrink: 0;
+}
+.adm-tab {
+  padding: 11px 18px; cursor: pointer; font-size: 13px; color: #998877;
+  border-bottom: 3px solid transparent; margin-bottom: -1px;
+  transition: color 0.2s; letter-spacing: 0.3px;
+}
+.adm-tab:hover { color: #B8A888; }
+.adm-tab.active { color: #C9A84C; border-bottom-color: #C9A84C; font-weight: bold; }
+.adm-body { flex: 1; overflow-y: auto; padding: 22px 24px; }
+.adm-panel { display: none; max-width: 960px; }
+.adm-panel.active { display: block; }
+.adm-section { margin-bottom: 24px; }
+.adm-section-title {
+  font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+  color: #C9A84C; margin-bottom: 10px; padding-bottom: 5px;
+  border-bottom: 1px solid rgba(201,168,76,0.2);
+}
+.adm-field-row { display: flex; gap: 14px; margin-bottom: 10px; flex-wrap: wrap; }
+.adm-field { display: flex; flex-direction: column; gap: 4px; flex: 1 1 200px; }
+.adm-field label { font-size: 11px; color: #998877; letter-spacing: 1px; text-transform: uppercase; }
+.adm-field input, .adm-field select {
+  background: #162840; color: #F5F0E8;
+  border: 1px solid rgba(201,168,76,0.25); border-radius: 3px;
+  padding: 7px 9px; font-family: 'Courier New', monospace; font-size: 12px;
+}
+.adm-field input:focus, .adm-field select:focus { outline: none; border-color: #C9A84C; }
+.adm-field.wide { flex: 2 1 360px; }
+.adm-btn { padding: 7px 16px; border-radius: 3px; border: none; cursor: pointer; font-size: 13px; font-family: Georgia, serif; font-weight: bold; transition: opacity 0.2s; }
+.adm-btn:hover { opacity: 0.85; }
+.adm-btn-gold    { background: #C9A84C; color: #0F1E2E; }
+.adm-btn-outline { background: transparent; color: #C9A84C; border: 1px solid rgba(201,168,76,0.4); }
+.adm-btn-outline:hover { background: rgba(201,168,76,0.1); }
+.adm-btn-danger  { background: #8B1A1A; color: #fff; }
+.adm-btn-sm      { padding: 4px 10px; font-size: 12px; }
+.adm-btn-row     { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+/* User table */
+.adm-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 13px; }
+.adm-table th {
+  background: #1e3a54; color: #C9A84C; font-size: 11px;
+  letter-spacing: 1px; text-transform: uppercase; padding: 7px 9px;
+  text-align: left; border-bottom: 1px solid rgba(201,168,76,0.25);
+}
+.adm-table td { padding: 7px 9px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; color: #F5F0E8; }
+.adm-table tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
+.adm-table tr:hover td { background: rgba(255,255,255,0.06); }
+/* Badges */
+.adm-badge { display: inline-block; padding: 2px 7px; border-radius: 10px; font-size: 11px; }
+.adm-badge-y { background: rgba(27,94,32,0.3); color: #81C784; border: 1px solid rgba(27,94,32,0.4); }
+.adm-badge-n { background: rgba(139,26,26,0.3); color: #EF9A9A; border: 1px solid rgba(139,26,26,0.4); }
+.adm-badge-p { background: rgba(125,78,0,0.3);  color: #FFD54F; border: 1px solid rgba(125,78,0,0.4); }
+/* User modal */
+.adm-modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:600; align-items:center; justify-content:center; }
+.adm-modal-bg.open { display:flex; }
+.adm-modal { background:#162840; border:1px solid rgba(201,168,76,0.3); border-radius:4px; padding:22px 26px; width:580px; max-width:95vw; max-height:88vh; overflow-y:auto; }
+.adm-modal h3 { color:#C9A84C; font-size:15px; margin-bottom:16px; }
+/* Alerts */
+.adm-alert { padding:9px 12px; border-radius:3px; font-size:13px; margin-bottom:10px; }
+.adm-alert-ok   { background:rgba(27,94,32,0.2);  color:#81C784; border:1px solid rgba(27,94,32,0.4); }
+.adm-alert-err  { background:rgba(139,26,26,0.2); color:#EF9A9A; border:1px solid rgba(139,26,26,0.4); }
+.adm-alert-info { background:rgba(201,168,76,0.1);color:#B8A888; border:1px solid rgba(201,168,76,0.25); }
+/* Email parser */
+.adm-email-paste {
+  background:#162840; color:#F5F0E8; border:1px solid rgba(201,168,76,0.25);
+  border-radius:3px; padding:10px; font-family:'Courier New',monospace; font-size:12px;
+  width:100%; min-height:180px; resize:vertical;
+}
+.adm-parse-result { background:#1e3a54; border:1px solid rgba(201,168,76,0.25); border-radius:3px; padding:14px; margin-top:10px; }
+.adm-change-item { display:flex; align-items:flex-start; gap:10px; padding:5px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:13px; }
+.adm-change-item:last-child { border-bottom:none; }
+.adm-change-label { color:#998877; min-width:130px; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; }
+.adm-change-val { font-family:'Courier New',monospace; }
+/* Toast */
+#adm-toast { position:fixed; bottom:24px; right:24px; padding:11px 18px; border-radius:3px; font-size:13px; opacity:0; transition:opacity 0.3s; pointer-events:none; z-index:700; }
+#adm-toast.show { opacity:1; }
+.adm-toast-ok  { background:#1B5E20; color:#fff; }
+.adm-toast-err { background:#8B1A1A; color:#fff; }
+.adm-unsaved { display:inline-block; width:7px; height:7px; background:#C9A84C; border-radius:50%; margin-left:5px; animation:admpulse 1.5s infinite; }
+@keyframes admpulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+</style>
+
+<!-- Admin overlay -->
+<div id="admin-overlay">
+  <div class="adm-header">
+    <div class="adm-header-left">
+      <h2>&#9881; Admin Panel &mdash; Owner Only</h2>
+      <p>Abby Lane Neighbors &middot; Attorney-Client Privileged</p>
+    </div>
+    <div class="adm-header-right">
+      <span class="adm-file-status" id="adm-file-status">No file loaded for saving</span>
+      <button class="adm-btn adm-btn-outline" onclick="admOpenFile()">&#128194; Load File</button>
+      <button class="adm-btn adm-btn-gold" id="adm-btn-save" onclick="admSaveFile()" disabled>&#128190; Save File</button>
+      <button class="adm-btn adm-btn-outline" onclick="closeAdmin()">&#10005; Close</button>
+    </div>
+  </div>
+  <div class="adm-tabs">
+    <div class="adm-tab active" onclick="admTab('users')">&#128101; Users</div>
+    <div class="adm-tab" onclick="admTab('links')">&#128279; Links</div>
+    <div class="adm-tab" onclick="admTab('system')">&#9881; System</div>
+    <div class="adm-tab" onclick="admTab('tasks')">&#9989; Tasks</div>
+    <div class="adm-tab" onclick="admTab('email')">&#9993; Email Parser</div>
+  </div>
+  <div class="adm-body">
+
+    <!-- USERS -->
+    <div class="adm-panel active" id="adm-panel-users">
+      <div class="adm-section">
+        <div class="adm-section-title">User Registry</div>
+        <div id="adm-users-alert"></div>
+        <table class="adm-table">
+          <thead><tr>
+            <th>#</th><th>Name</th><th>Email</th><th>Date Signed</th>
+            <th>Access</th><th>MS</th><th>PW</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="adm-users-tbody"></tbody>
+        </table>
+        <div class="adm-btn-row">
+          <button class="adm-btn adm-btn-outline" onclick="admAddUser()">+ Add New User</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LINKS -->
+    <div class="adm-panel" id="adm-panel-links">
+      <div class="adm-section">
+        <div class="adm-section-title">Document Links</div>
+        <div class="adm-field-row">
+          <div class="adm-field wide"><label>Master Document Link (DOC_LINK)</label><input type="text" id="adm-doc-link"></div>
+        </div>
+        <div class="adm-field-row">
+          <div class="adm-field wide"><label>Document Name (DOC_NAME)</label><input type="text" id="adm-doc-name"></div>
+        </div>
+      </div>
+      <div class="adm-section">
+        <div class="adm-section-title">External / Reviewer Links</div>
+        <div class="adm-field-row">
+          <div class="adm-field wide"><label>Reviewer Copy Link (EXT_LINK)</label><input type="text" id="adm-ext-link"></div>
+        </div>
+        <div class="adm-field-row">
+          <div class="adm-field"><label>Reviewer Link Expiry (EXT_EXPIRY)</label><input type="text" id="adm-ext-expiry" placeholder="e.g. Mar 31 2026 or blank"></div>
+        </div>
+        <div class="adm-field-row">
+          <div class="adm-field wide"><label>Token Lookup Spreadsheet (TOKEN_LOOKUP_LINK)</label><input type="text" id="adm-token-lookup"></div>
+        </div>
+        <div class="adm-field-row">
+        </div>
+      </div>
+      <div class="adm-btn-row">
+        <button class="adm-btn adm-btn-gold" onclick="admApplyLinks()">&#10003; Apply Link Changes</button>
+      </div>
+      <div id="adm-links-alert" style="margin-top:10px;"></div>
+    </div>
+
+    <!-- SYSTEM -->
+    <div class="adm-panel" id="adm-panel-system">
+      <div class="adm-section">
+        <div class="adm-section-title">Notification Settings</div>
+        <div class="adm-field-row">
+          <div class="adm-field"><label>Owner Notification Email (REQ)</label><input type="text" id="adm-req"></div>
+        </div>
+      </div>
+      <div class="adm-section">
+        <div class="adm-section-title">Password Encryption</div>
+        <div class="adm-field-row">
+          <div class="adm-field"><label>Password Key (PASSWORD_KEY)</label><input type="text" id="adm-password-key"></div>
+        </div>
+        <div class="adm-alert adm-alert-info">&#9888; Changing the password key invalidates all existing user passwords. Update all user password fields after changing.</div>
+      </div>
+      <div class="adm-btn-row">
+        <button class="adm-btn adm-btn-gold" onclick="admApplySystem()">&#10003; Apply System Changes</button>
+      </div>
+      <div id="adm-system-alert" style="margin-top:10px;"></div>
+    </div>
+
+    <!-- EMAIL PARSER -->
+    <div class="adm-panel" id="adm-panel-email">
+      <div class="adm-section">
+        <div class="adm-section-title">Parse Portal Notification Email</div>
+        <p style="color:#998877;margin-bottom:10px;font-size:13px;">Paste a portal notification email body. The tool identifies the user and changes needed, then lets you apply them with one click.</p>
+        <textarea class="adm-email-paste" id="adm-email-paste" placeholder="Paste the full email body here..."></textarea>
+        <div class="adm-btn-row">
+          <button class="adm-btn adm-btn-gold" onclick="admParseEmail()">&#128269; Parse Email</button>
+          <button class="adm-btn adm-btn-outline" onclick="document.getElementById('adm-email-paste').value='';document.getElementById('adm-parse-out').innerHTML='';">&#10005; Clear</button>
+        </div>
+        <div id="adm-parse-out"></div>
+      </div>
+    </div>
+
+    <!-- TASKS -->
+    <div class="adm-panel" id="adm-panel-tasks">
+      <div class="adm-section">
+        <div class="adm-section-title">Task Lists — Top 10 Per Role</div>
+        <p style="color:#998877;margin-bottom:14px;font-size:13px;">Edit priority task lists for each role. Use &#8593;&#8595; to reorder. Changes are staged until you Save File.</p>
+        <div id="adm-tasks-alert"></div>
+        <div id="adm-tasks-container"></div>
+        <div class="adm-btn-row" style="margin-top:14px;">
+          <button class="adm-btn adm-btn-gold" onclick="admApplyTasks()">&#10003; Stage Task Changes</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- User edit modal -->
+<div class="adm-modal-bg" id="adm-user-modal">
+  <div class="adm-modal">
+    <h3 id="adm-modal-title">Edit User</h3>
+    <input type="hidden" id="adm-modal-idx">
+    <div class="adm-field-row">
+      <div class="adm-field wide"><label>Full Name *</label><input type="text" id="adm-m-name"></div>
+    </div>
+    <div class="adm-field-row">
+      <div class="adm-field wide"><label>Email Address *</label><input type="text" id="adm-m-email"></div>
+    </div>
+    <div class="adm-field-row">
+      <div class="adm-field"><label>Date Signed</label><input type="text" id="adm-m-datesigned" placeholder="e.g. Mar 4 2026"></div>
+      <div class="adm-field"><label>Signature</label><input type="text" id="adm-m-signature"></div>
+    </div>
+    <div class="adm-field-row">
+      <div class="adm-field"><label>Has Access</label>
+        <select id="adm-m-hasaccess">
+          <option value="false">false — not yet granted</option>
+          <option value="true">true — access granted</option>
+        </select>
+      </div>
+      <div class="adm-field"><label>Microsoft Account</label>
+        <select id="adm-m-msaccount">
+          <option value="true">true — has MS account</option>
+          <option value="false">false — no MS account</option>
+        </select>
+      </div>
+    </div>
+    <div class="adm-field-row">
+    </div>
+    <div class="adm-field-row">
+      <div class="adm-field"><label>Password (encrypted hex, blank = none)</label><input type="text" id="adm-m-password"></div>
+    </div>
+    <div id="adm-modal-alert" style="margin-top:8px;"></div>
+    <div class="adm-btn-row" style="margin-top:14px;">
+      <button class="adm-btn adm-btn-gold" onclick="admSaveUser()">&#10003; Save User</button>
+      <button class="adm-btn adm-btn-outline" onclick="admCloseModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="adm-toast"></div>
+
+<script>
+// ── ADMIN STATE ────────────────────────────────────────────────
+var _admFileHandle = null;
+var _admDirty      = false;
+// Live working copies — loaded from running CONFIG on panel open
+var _admUsers  = [];
+var _admLinks  = {};
+var _admSys    = {};
+
+function openAdmin() {
+  // Deep-copy live CONFIG values into admin working state
+  _admUsers = USERS.map(function(u) { return Object.assign({}, u, {taskStatus: (u.taskStatus||[]).map(function(s){return Object.assign({},s);})}); });
+  _admLinks = {
+    docLink:     DOC_LINK,
+    docName:     DOC_NAME,
+    extLink:     EXT_LINK,
+    extExpiry:   EXT_EXPIRY,
+    tokenLookup: TOKEN_LOOKUP_LINK,
+  };
+  _admSys = { req: REQ, passwordKey: PASSWORD_KEY };
+  _admTasks = null; // reset so admGetTasks() re-copies from live TASK_LISTS
+  admRenderAll();
+  admSetDirty(false);
+  document.getElementById('admin-overlay').classList.add('open');
+}
+
+function closeAdmin() {
+  if (_admDirty && !confirm('You have unsaved changes. Close without saving?')) return;
+  document.getElementById('admin-overlay').classList.remove('open');
+}
+
+// ── FILE OPS ──────────────────────────────────────────────────
+async function admOpenFile() {
+  try {
+    var handles = await window.showOpenFilePicker({
+      types: [{ description: 'HTML Files', accept: { 'text/html': ['.html'] } }]
+    });
+    _admFileHandle = handles[0];
+    var file = await _admFileHandle.getFile();
+    document.getElementById('adm-file-status').textContent = '&#128196; ' + file.name;
+    document.getElementById('adm-btn-save').disabled = false;
+    admShowToast('File loaded: ' + file.name, 'ok');
+  } catch(e) {
+    if (e.name !== 'AbortError') admShowToast('Error: ' + e.message, 'err');
+  }
+}
+
+async function admSaveFile() {
+  if (!_admFileHandle) { admShowToast('Load the portal file first using Load File', 'err'); return; }
+  try {
+    var file = await _admFileHandle.getFile();
+    var html  = await file.text();
+    var newHtml = admRebuildConfig(html);
+    var writable = await _admFileHandle.createWritable();
+    await writable.write(newHtml);
+    await writable.close();
+    admSetDirty(false);
+    admShowToast('File saved successfully', 'ok');
+  } catch(e) {
+    admShowToast('Save error: ' + e.message, 'err');
+  }
+}
+
+function admRebuildConfig(html) {
+  var startMarker = '// ██   CONFIG — PARAMETERS START';
+  var endMarker   = '// ██   CONFIG — PARAMETERS END';
+  var si = html.indexOf(startMarker);
+  var ei = html.indexOf(endMarker);
+  if (si < 0 || ei < 0) { admShowToast('CONFIG markers not found in file', 'err'); return html; }
+
+  var pre  = html.slice(0, si);
+  var post = html.slice(ei);
+
+  var req = _admSys.req || '';
+  var reqParts = req.includes('@') ? req.split('@') : [req, ''];
+
+  var c = startMarker + '\n';
+  c += '// ██                                                        ██\n';
+  c += '// -- Contact & Document --\n';
+  c += 'var REQ      = "' + reqParts[0] + '" + "@" + "' + reqParts[1] + '";\n';
+  c += 'var DOC_LINK = "' + (_admLinks.docLink||'') + '";\n';
+  c += 'var DOC_NAME = "' + (_admLinks.docName||'') + '";\n\n';
+  c += '// -- External Reviewer --\n';
+  c += 'var EXT_LINK         = "' + (_admLinks.extLink||'') + '";\n';
+  c += 'var EXT_EXPIRY       = "' + (_admLinks.extExpiry||'') + '";\n';
+  c += 'var TOKEN_LOOKUP_LINK = "' + (_admLinks.tokenLookup||'') + '";\n';
+  c += '// -- Password Encryption --\n';
+  c += 'var PASSWORD_KEY = "' + (_admSys.passwordKey||'') + '";\n\n';
+  c += '// -- Token Authentication --\n';
+  c += '// Pi-transform: any valid 6-char hex input token computes its response token directly.\n';
+  c += '// No pre-built table needed. Matches formula in AbbyLane_TokenLookup_v3.xlsx.\n';
+  c += '// Token pair changes each hour automatically based on time-of-day.\n\n';
+  // -- Task Lists --
+  var tl = _admTasks || TASK_LISTS;
+  c += '// -- Task Lists --\n';
+  c += 'var TASK_LISTS = {\n';
+  var roles = ['collaborator','reviewer','newuser'];
+  roles.forEach(function(role, ri) {
+    var list = tl[role] || [];
+    c += '  ' + role + ': [\n';
+    list.forEach(function(item, ii) {
+      var comma = ii < list.length - 1 ? ',' : '';
+      c += '    {description:"' + admEsc(item.description) + '", link:"' + admEsc(item.link||'') + '"}' + comma + '\n';
+    });
+    c += '  ]' + (ri < roles.length - 1 ? ',' : '') + '\n';
+  });
+  c += '};\n\n';
+
+  c += '// -- User Registry --\n';
+  c += 'var USERS = [\n';
+  _admUsers.forEach(function(u, i) {
+    var em = u.email || '';
+    var emStr = em.includes('@') ? '"' + em.split('@')[0] + '"+"@"+"' + em.split('@')[1] + '"' : '"' + em + '"';
+    var comma = i < _admUsers.length - 1 ? ',' : '';
+    // Build taskStatus array — preserve existing, pad to 10
+    var ts = u.taskStatus || [];
+    while (ts.length < 10) ts.push({done:false, comment:''});
+    var tsStr = '[' + ts.slice(0,10).map(function(s) {
+      return '{done:' + (s.done ? 'true' : 'false') + ',comment:"' + admEsc(s.comment||'') + '"}';
+    }).join(',') + ']';
+    c += '  { name:"' + admEsc(u.name) + '", email:' + emStr +
+         ', dateSigned:"' + admEsc(u.dateSigned||'') + '"' +
+         ', signature:"' + admEsc(u.signature||'') + '"' +
+         ', hasAccess:' + (u.hasAccess ? 'true' : 'false') +
+         ', microsoftAccount:' + (u.microsoftAccount ? 'true' : 'false') +
+         ', tokenPointer:0' +
+         '' +
+         ', password:"' + admEsc(u.password||'') + '"' +
+         ', taskStatus:' + tsStr + ' }' + comma + '\n';
+  });
+  c += '];\n\n';
+
+  return pre + c + post;
+}
+
+// ── RENDER ────────────────────────────────────────────────────
+function admRenderAll() {
+  admRenderUsers();
+  admRenderLinks();
+  admRenderSystem();
+}
+
+function admRenderUsers() {
+  var tb = document.getElementById('adm-users-tbody');
+  tb.innerHTML = '';
+  _admUsers.forEach(function(u, i) {
+    var acc = u.hasAccess ? '<span class="adm-badge adm-badge-y">Yes</span>'
+            : (u.dateSigned ? '<span class="adm-badge adm-badge-p">Pending</span>'
+                            : '<span class="adm-badge adm-badge-n">No</span>');
+    var ms  = u.microsoftAccount ? '<span class="adm-badge adm-badge-y">MS</span>'
+                                 : '<span class="adm-badge adm-badge-n">Ext</span>';
+    var pw  = u.password ? '<span class="adm-badge adm-badge-y">Set</span>'
+                         : '<span class="adm-badge adm-badge-n">None</span>';
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td style="color:#998877">' + (i+1) + '</td>' +
+      '<td style="font-weight:600">' + admSafeText(u.name) + '</td>' +
+      '<td style="font-family:monospace;font-size:12px">' + admSafeText(u.email) + '</td>' +
+      '<td style="font-family:monospace;font-size:12px">' + admSafeText(u.dateSigned||'—') + '</td>' +
+      '<td>' + acc + '</td><td>' + ms + '</td><td>' + pw + '</td>' +
+      '<td><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="admEditUser(' + i + ')">Edit</button>' +
+      ' <button class="adm-btn adm-btn-danger adm-btn-sm" onclick="admDeleteUser(' + i + ')">Delete</button></td>';
+    tb.appendChild(tr);
+  });
+}
+
+function admRenderLinks() {
+  document.getElementById('adm-doc-link').value    = _admLinks.docLink    || '';
+  document.getElementById('adm-doc-name').value    = _admLinks.docName    || '';
+  document.getElementById('adm-ext-link').value    = _admLinks.extLink    || '';
+  document.getElementById('adm-ext-expiry').value  = _admLinks.extExpiry  || '';
+  document.getElementById('adm-token-lookup').value= _admLinks.tokenLookup|| '';
+}
+
+function admRenderSystem() {
+  document.getElementById('adm-req').value          = _admSys.req         || '';
+  document.getElementById('adm-password-key').value = _admSys.passwordKey || '';
+}
+
+// ── TABS ─────────────────────────────────────────────────────
+function admTab(name) {
+  var names = ['users','links','system','tasks','email'];
+  document.querySelectorAll('.adm-tab').forEach(function(t, i) {
+    t.classList.toggle('active', names[i] === name);
+  });
+  document.querySelectorAll('.adm-panel').forEach(function(p) { p.classList.remove('active'); });
+  document.getElementById('adm-panel-' + name).classList.add('active');
+  if (name === 'tasks') admRenderTasks();
+}
+
+// ── TASKS TAB ─────────────────────────────────────────────────
+var _admTasks = null; // working copy of TASK_LISTS
+
+function admGetTasks() {
+  if (!_admTasks) {
+    // Deep copy from live TASK_LISTS
+    _admTasks = {};
+    var roles = ['collaborator','reviewer','newuser'];
+    for (var r = 0; r < roles.length; r++) {
+      var role = roles[r];
+      _admTasks[role] = (TASK_LISTS[role] || []).map(function(t) {
+        return {description: t.description, link: t.link || ''};
+      });
+    }
+  }
+  return _admTasks;
+}
+
+function admRenderTasks() {
+  var tasks = admGetTasks();
+  var roles = ['collaborator','reviewer','newuser'];
+  var roleLabels = {'collaborator':'Collaborators (MS Account)', 'reviewer':'Reviewers (Non-MS Account)', 'newuser':'New Users'};
+  var html = '';
+
+  for (var r = 0; r < roles.length; r++) {
+    var role = roles[r];
+    var list = tasks[role] || [];
+    html += '<div style="margin-bottom:24px;">';
+    html += '<div class="adm-section-title">' + roleLabels[role] + '</div>';
+    html += '<div id="adm-tasklist-' + role + '">';
+    for (var i = 0; i < list.length; i++) {
+      html += admTaskRowHtml(role, i, list[i], list.length);
+    }
+    html += '</div>';
+    html += '<div class="adm-btn-row" style="margin-top:6px;">';
+    html += '<button class="adm-btn adm-btn-outline adm-btn-sm" onclick="admAddTask(\'' + role + '\')">+ Add Item</button>';
+    html += '</div></div>';
+  }
+  document.getElementById('adm-tasks-container').innerHTML = html;
+}
+
+function admTaskRowHtml(role, idx, item, total) {
+  var upDisabled = idx === 0 ? ' disabled' : '';
+  var dnDisabled = idx === total-1 ? ' disabled' : '';
+  return '<div class="adm-task-row" id="adm-tr-' + role + '-' + idx + '" style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">' +
+    '<span style="color:#998877;min-width:18px;font-size:11px;text-align:right;">' + (idx+1) + '</span>' +
+    '<div style="display:flex;flex-direction:column;gap:2px;">' +
+      '<button class="adm-btn adm-btn-outline adm-btn-sm" style="padding:1px 6px;font-size:11px;" onclick="admMoveTask(\'' + role + '\',' + idx + ',-1)"' + upDisabled + '>&#8593;</button>' +
+      '<button class="adm-btn adm-btn-outline adm-btn-sm" style="padding:1px 6px;font-size:11px;" onclick="admMoveTask(\'' + role + '\',' + idx + ',1)"' + dnDisabled + '>&#8595;</button>' +
+    '</div>' +
+    '<input type="text" value="' + admEsc(item.description) + '" id="adm-td-' + role + '-' + idx + '" ' +
+      'style="flex:2;background:#162840;color:#F5F0E8;border:1px solid rgba(201,168,76,0.25);border-radius:3px;padding:6px 8px;font-family:Courier New,monospace;font-size:12px;" ' +
+      'placeholder="Task description">' +
+    '<input type="text" value="' + admEsc(item.link) + '" id="adm-tl-' + role + '-' + idx + '" ' +
+      'style="flex:3;background:#162840;color:#F5F0E8;border:1px solid rgba(201,168,76,0.25);border-radius:3px;padding:6px 8px;font-family:Courier New,monospace;font-size:12px;" ' +
+      'placeholder="https:// link (optional)">' +
+    '<button class="adm-btn adm-btn-danger adm-btn-sm" onclick="admDeleteTask(\'' + role + '\',' + idx + ')">&#10005;</button>' +
+  '</div>';
+}
+
+function admReadTasksFromUI() {
+  var tasks = admGetTasks();
+  var roles = ['collaborator','reviewer','newuser'];
+  for (var r = 0; r < roles.length; r++) {
+    var role = roles[r];
+    var list = tasks[role] || [];
+    for (var i = 0; i < list.length; i++) {
+      var descEl = document.getElementById('adm-td-' + role + '-' + i);
+      var linkEl = document.getElementById('adm-tl-' + role + '-' + i);
+      if (descEl) list[i].description = descEl.value.trim();
+      if (linkEl) list[i].link = linkEl.value.trim();
+    }
+  }
+}
+
+function admMoveTask(role, idx, dir) {
+  admReadTasksFromUI();
+  var list = admGetTasks()[role];
+  var newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= list.length) return;
+  var tmp = list[idx];
+  list[idx] = list[newIdx];
+  list[newIdx] = tmp;
+  admRenderTasks();
+  admSetDirty(true);
+}
+
+function admDeleteTask(role, idx) {
+  admReadTasksFromUI();
+  if (!confirm('Delete task "' + admGetTasks()[role][idx].description + '"?')) return;
+  admGetTasks()[role].splice(idx, 1);
+  admRenderTasks();
+  admSetDirty(true);
+}
+
+function admAddTask(role) {
+  admReadTasksFromUI();
+  admGetTasks()[role].push({description:'', link:''});
+  admRenderTasks();
+  admSetDirty(true);
+  // Focus new description field
+  var list = admGetTasks()[role];
+  var newIdx = list.length - 1;
+  setTimeout(function() {
+    var el = document.getElementById('adm-td-' + role + '-' + newIdx);
+    if (el) el.focus();
+  }, 50);
+}
+
+function admApplyTasks() {
+  admReadTasksFromUI();
+  admSetDirty(true);
+  document.getElementById('adm-tasks-alert').innerHTML =
+    '<div class="adm-alert adm-alert-ok">&#10003; Task changes staged — save file to write to disk.</div>';
+}
+
+// ── USER CRUD ─────────────────────────────────────────────────
+function admEditUser(idx) {
+  var u = _admUsers[idx];
+  document.getElementById('adm-modal-title').textContent = 'Edit User — ' + u.name;
+  document.getElementById('adm-modal-idx').value     = idx;
+  document.getElementById('adm-m-name').value        = u.name;
+  document.getElementById('adm-m-email').value       = u.email;
+  document.getElementById('adm-m-datesigned').value  = u.dateSigned || '';
+  document.getElementById('adm-m-signature').value   = u.signature  || '';
+  document.getElementById('adm-m-hasaccess').value   = String(u.hasAccess);
+  document.getElementById('adm-m-msaccount').value   = String(u.microsoftAccount);
+  document.getElementById('adm-m-password').value    = u.password   || '';
+  document.getElementById('adm-modal-alert').innerHTML = '';
+  document.getElementById('adm-user-modal').classList.add('open');
+}
+
+function admAddUser() {
+  document.getElementById('adm-modal-title').textContent = 'Add New User';
+  document.getElementById('adm-modal-idx').value     = -1;
+  ['adm-m-name','adm-m-email','adm-m-datesigned','adm-m-signature','adm-m-password']
+    .forEach(function(id) { document.getElementById(id).value = ''; });
+  document.getElementById('adm-m-hasaccess').value  = 'false';
+  document.getElementById('adm-m-msaccount').value  = 'true';
+  document.getElementById('adm-modal-alert').innerHTML = '';
+  document.getElementById('adm-user-modal').classList.add('open');
+}
+
+function admSaveUser() {
+  var idx   = parseInt(document.getElementById('adm-modal-idx').value);
+  var name  = document.getElementById('adm-m-name').value.trim();
+  var email = document.getElementById('adm-m-email').value.trim();
+  if (!name || !email) {
+    document.getElementById('adm-modal-alert').innerHTML =
+      '<div class="adm-alert adm-alert-err">Name and email are required.</div>';
+    return;
+  }
+  var u = {
+    name:            name,
+    email:           email,
+    dateSigned:      document.getElementById('adm-m-datesigned').value.trim(),
+    signature:       document.getElementById('adm-m-signature').value.trim(),
+    hasAccess:       document.getElementById('adm-m-hasaccess').value === 'true',
+    microsoftAccount:document.getElementById('adm-m-msaccount').value === 'true',
+    tokenPointer:    0,
+    password:        document.getElementById('adm-m-password').value.trim()
+  };
+  if (idx >= 0) { _admUsers[idx] = u; } else { _admUsers.push(u); }
+  admRenderUsers();
+  admCloseModal();
+  admSetDirty(true);
+  admShowToast(idx >= 0 ? 'User updated' : 'User added', 'ok');
+}
+
+function admDeleteUser(idx) {
+  if (!confirm('Delete user "' + _admUsers[idx].name + '"?')) return;
+  _admUsers.splice(idx, 1);
+  admRenderUsers();
+  admSetDirty(true);
+  admShowToast('User deleted', 'ok');
+}
+
+function admCloseModal() {
+  document.getElementById('adm-user-modal').classList.remove('open');
+}
+
+// ── LINKS / SYSTEM ────────────────────────────────────────────
+function admApplyLinks() {
+  _admLinks.docLink     = document.getElementById('adm-doc-link').value.trim();
+  _admLinks.docName     = document.getElementById('adm-doc-name').value.trim();
+  _admLinks.extLink     = document.getElementById('adm-ext-link').value.trim();
+  _admLinks.extExpiry   = document.getElementById('adm-ext-expiry').value.trim();
+  _admLinks.tokenLookup = document.getElementById('adm-token-lookup').value.trim();
+  admSetDirty(true);
+  document.getElementById('adm-links-alert').innerHTML =
+    '<div class="adm-alert adm-alert-ok">&#10003; Changes staged — save file to write to disk.</div>';
+}
+
+function admApplySystem() {
+  _admSys.req         = document.getElementById('adm-req').value.trim();
+  _admSys.passwordKey = document.getElementById('adm-password-key').value.trim();
+  admSetDirty(true);
+  document.getElementById('adm-system-alert').innerHTML =
+    '<div class="adm-alert adm-alert-ok">&#10003; Changes staged — save file to write to disk.</div>';
+}
+
+// ── EMAIL PARSER ──────────────────────────────────────────────
+function admParseEmail() {
+  var body = document.getElementById('adm-email-paste').value;
+  var out  = document.getElementById('adm-parse-out');
+  if (!body.trim()) { out.innerHTML = ''; return; }
+
+  var isKnown  = body.includes('Known Member Submission');
+  var isNew    = body.includes('New Member Submission');
+  var isUpdate = body.includes('Account Update —');
+
+  if (!isKnown && !isNew && !isUpdate) {
+    out.innerHTML = '<div class="adm-alert adm-alert-err">Could not identify a portal notification email. Paste the full email body.</div>';
+    return;
+  }
+
+  function extractField(label) {
+    var re = new RegExp(label + '\\s*(.+)');
+    var m  = body.match(re);
+    return m ? m[1].trim() : '';
+  }
+
+  var name     = extractField('Name:');
+  var email    = extractField('Email:');
+  var date     = extractField('Date:');
+  var sig      = extractField('Signature:');
+  var msAccStr = extractField('Microsoft Account:');
+  var msAcc    = msAccStr.toLowerCase() === 'yes';
+
+  if (!name || !email) {
+    out.innerHTML = '<div class="adm-alert adm-alert-err">Could not extract name or email. Check the email format.</div>';
+    return;
+  }
+
+  var userIdx = -1;
+  for (var i = 0; i < _admUsers.length; i++) {
+    if (_admUsers[i].name.toLowerCase() === name.toLowerCase() ||
+        _admUsers[i].email.toLowerCase() === email.toLowerCase()) { userIdx = i; break; }
+  }
+
+  var html = '<div class="adm-parse-result">';
+  html += '<div style="color:#C9A84C;font-weight:bold;margin-bottom:10px;font-size:13px;">';
+  html += isUpdate ? '&#128231; Account Update Request' : isKnown ? '&#128231; Known Member Acknowledgment' : '&#128231; New Member Submission';
+  html += '</div>';
+
+  if (isUpdate) {
+    // Account Update email — match by Current Email field
+    var currentEmail = extractField('Current Email:');
+    var updIdx = -1;
+    for (var ui = 0; ui < _admUsers.length; ui++) {
+      if (_admUsers[ui].email.toLowerCase() === (currentEmail||'').toLowerCase()) { updIdx = ui; break; }
+    }
+    if (updIdx < 0) {
+      html += '<div class="adm-alert adm-alert-err">Could not find user with email: ' + admSafeText(currentEmail) + '</div>';
+    } else {
+      var u = _admUsers[updIdx];
+      var newName  = extractField('Name:');
+      var newEmail = extractField('Email:');
+      var newPw    = extractField('Password \\(encrypted\\):');
+      var changes  = [];
+      if (newName  && newName  !== u.name)          changes.push({label:'name',     from:u.name,          to:newName,  val:newName});
+      if (newEmail && newEmail !== u.email.toLowerCase()) changes.push({label:'email',    from:u.email,         to:newEmail, val:newEmail});
+      if (newPw)                                    changes.push({label:'password',  from:'(encrypted)',   to:newPw,    val:newPw});
+      if (!changes.length) {
+        html += '<div class="adm-alert adm-alert-info">No changes detected for ' + admSafeText(u.name) + '.</div>';
+      } else {
+        html += '<div style="color:#998877;margin-bottom:8px;">User: <strong style="color:#F5F0E8">' + admSafeText(u.name) + '</strong></div>';
+        changes.forEach(function(c) {
+          html += '<div class="adm-change-item">' +
+            '<span class="adm-change-label">' + c.label + '</span>' +
+            '<span class="adm-change-val" style="color:#998877">' + admSafeText(c.from) + '</span>' +
+            '<span style="color:#C9A84C;margin:0 6px;">&#8594;</span>' +
+            '<span class="adm-change-val" style="color:#81C784">' + admSafeText(c.to) + '</span>' +
+            '</div>';
+        });
+        var chJson = encodeURIComponent(JSON.stringify(changes.map(function(c){return {label:c.label,val:c.val};})));
+        html += '<div class="adm-btn-row" style="margin-top:12px;">' +
+          '<button class="adm-btn adm-btn-gold" onclick="admApplyAccountUpdate(' + updIdx + ',\'' + chJson + '\')">&#10003; Apply These Changes</button>' +
+          '</div>';
+      }
+    }
+  } else if (isKnown && userIdx >= 0) {
+    var u = _admUsers[userIdx];
+    var changes = [];
+    if (date && u.dateSigned !== date)          changes.push({ label:'dateSigned',        from:u.dateSigned||'(blank)', to:date });
+    if (sig  && u.signature  !== sig)           changes.push({ label:'signature',          from:u.signature ||'(blank)', to:sig  });
+    if (!u.hasAccess)                           changes.push({ label:'hasAccess',          from:'false', to:'true' });
+    if (u.microsoftAccount !== msAcc)           changes.push({ label:'microsoftAccount',   from:String(u.microsoftAccount), to:String(msAcc) });
+
+    if (!changes.length) {
+      html += '<div class="adm-alert adm-alert-info">No changes needed — user already up to date.</div>';
+    } else {
+      html += '<div style="color:#998877;margin-bottom:8px;">User: <strong style="color:#F5F0E8">' + admSafeText(u.name) + '</strong></div>';
+      changes.forEach(function(c) {
+        html += '<div class="adm-change-item">' +
+          '<span class="adm-change-label">' + c.label + '</span>' +
+          '<span class="adm-change-val" style="color:#998877">' + admSafeText(c.from) + '</span>' +
+          '<span style="color:#C9A84C;margin:0 6px;">&#8594;</span>' +
+          '<span class="adm-change-val" style="color:#81C784">' + admSafeText(c.to) + '</span>' +
+          '</div>';
+      });
+      html += '<div class="adm-btn-row" style="margin-top:12px;">' +
+        '<button class="adm-btn adm-btn-gold" onclick="admApplyEmailChanges(' + userIdx + ',\'' + admEsc(date) + '\',\'' + admEsc(sig) + '\',' + msAcc + ')">&#10003; Apply These Changes</button>' +
+        '</div>';
+    }
+  } else if (isNew) {
+    if (userIdx >= 0) {
+      html += '<div class="adm-alert adm-alert-err">User already exists in CONFIG (' + admSafeText(_admUsers[userIdx].name) + ').</div>';
+    } else {
+      html += '<div style="color:#998877;margin-bottom:10px;">New user to add:</div>';
+      [['name',name],['email',email],['microsoftAccount',String(msAcc)],['dateSigned',date||'(pending)'],['signature',sig||'(pending)'],['hasAccess','false — set true after OneDrive setup']]
+        .forEach(function(f) {
+          html += '<div class="adm-change-item"><span class="adm-change-label">' + f[0] + '</span><span class="adm-change-val" style="color:#81C784">' + admSafeText(f[1]) + '</span></div>';
+        });
+      html += '<div class="adm-alert adm-alert-info" style="margin-top:10px;">User added — save file to write to disk.</div>';
+      html += '<div class="adm-btn-row" style="margin-top:10px;"><button class="adm-btn adm-btn-gold" onclick="admPrefillNewUser(\'' + admEsc(name) + '\',\'' + admEsc(email) + '\',' + msAcc + ',\'' + admEsc(date) + '\',\'' + admEsc(sig) + '\')">+ Open Add User Form</button></div>';
+    }
+  } else {
+    html += '<div class="adm-alert adm-alert-err">User "' + admSafeText(name) + '" not found in CONFIG.</div>';
+  }
+  html += '</div>';
+  out.innerHTML = html;
+}
+
+function admApplyAccountUpdate(idx, chJson) {
+  var u = _admUsers[idx];
+  var changes = JSON.parse(decodeURIComponent(chJson));
+  changes.forEach(function(c) {
+    if (c.label === 'name')     u.name     = c.val;
+    if (c.label === 'email')    u.email    = c.val;
+    if (c.label === 'password') u.password = c.val;
+  });
+  admRenderUsers();
+  admSetDirty(true);
+  document.getElementById('adm-parse-out').innerHTML =
+    '<div class="adm-alert adm-alert-ok" style="margin-top:10px;">&#10003; Account updated for ' + admSafeText(u.name) + ' — save file to write to disk.</div>';
+  admShowToast('Account updated for ' + u.name, 'ok');
+}
+
+
+function admApplyEmailChanges(idx, date, sig, msAcc) {
+  var u = _admUsers[idx];
+  if (date) u.dateSigned = date;
+  if (sig)  u.signature  = sig;
+  u.hasAccess = true;
+  u.microsoftAccount = msAcc;
+  admRenderUsers();
+  admSetDirty(true);
+  document.getElementById('adm-parse-out').innerHTML =
+    '<div class="adm-alert adm-alert-ok" style="margin-top:10px;">&#10003; Changes applied to ' + admSafeText(u.name) + ' — save file to write to disk.</div>';
+  admShowToast('Changes applied to ' + u.name, 'ok');
+}
+
+function admPrefillNewUser(name, email, msAcc, date, sig) {
+  admTab('users');
+  admAddUser();
+  document.getElementById('adm-m-name').value       = name;
+  document.getElementById('adm-m-email').value      = email;
+  document.getElementById('adm-m-msaccount').value  = String(msAcc);
+  document.getElementById('adm-m-datesigned').value = date || '';
+  document.getElementById('adm-m-signature').value  = sig  || '';
+}
+
+// ── UTILS ─────────────────────────────────────────────────────
+function admSetDirty(val) {
+  _admDirty = val;
+  var btn = document.getElementById('adm-btn-save');
+  btn.innerHTML = val ? '&#128190; Save File &#9679;' : '&#128190; Save File';
+}
+
+function admShowToast(msg, type) {
+  var t = document.getElementById('adm-toast');
+  t.textContent = (type === 'ok' ? '✓ ' : '✕ ') + msg;
+  t.className = 'adm-toast-' + (type === 'ok' ? 'ok' : 'err');
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 3000);
+}
+
+function admSafeText(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function admEsc(s) {
+  return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"');
+}
+
+// Close modal on background click
+document.getElementById('adm-user-modal').addEventListener('click', function(e) {
+  if (e.target === this) admCloseModal();
+});
+</script>
+</body>
+</html>
