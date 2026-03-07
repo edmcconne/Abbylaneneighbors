@@ -282,8 +282,16 @@
     padding: 6px 8px; text-align: left; border-bottom: 1px solid rgba(201,168,76,0.3);
   }
   .task-table th.col-num  { width: 32px; text-align: center; }
-  .task-table th.col-link { width: 68px; text-align: center; }
+  .task-table th.col-link { width: 110px; text-align: center; }
   .task-table th.col-done { width: 52px; text-align: center; }
+  .task-countdown {
+    display: block; font-size: 0.68rem; font-weight: 700; margin-top: 3px;
+    padding: 2px 5px; border-radius: 3px; white-space: nowrap; letter-spacing: 0.02em;
+  }
+  .task-countdown.ok     { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+  .task-countdown.warn   { background: #fff8e1; color: #b45309; border: 1px solid #ffd54f; }
+  .task-countdown.urgent { background: #fdecea; color: #c62828; border: 1px solid #ef9a9a; }
+  .task-countdown.expired{ background: #fdecea; color: #c62828; border: 1px solid #ef9a9a; }
   .task-table td {
     padding: 5px 8px; border-bottom: 1px solid #ede8df;
     vertical-align: middle; font-size: 0.88rem;
@@ -440,6 +448,7 @@
       <button class="btn btn-outline" onclick="showScreen('screen-identity')" style="font-size:0.82rem;padding:9px 18px;">&#8592; Back to Login</button>
       <button class="btn btn-outline" onclick="openAccountUpdate()" style="font-size:0.82rem;padding:9px 18px;">&#9998; Update My Info</button>
       <button class="btn btn-done" onclick="sendChecklistUpdate()" style="font-size:0.82rem;padding:9px 18px;">&#9993; Send Update</button>
+      <span style="font-size:0.75rem;color:var(--muted);font-style:italic;align-self:center;">Send to save your progress between sessions</span>
       <button id="btn-admin" class="btn btn-gold" onclick="openAdmin()" style="display:none;font-size:0.82rem;padding:9px 18px;">&#9881; Admin Panel</button>
     </div>
   </div>
@@ -591,66 +600,61 @@ var DOC_NAME = "Abby Lane Lawsuit - Master Document";
 var EXT_LINK         = "https://1drv.ms/w/c/f48a627c72e8b791/IQAT-IvDcUSyRYwYJslj5E2pAZPgBBMp14TUYuy_S4J9-wk?e=AJoEV3";
 var EXT_EXPIRY       = "";
 var TOKEN_LOOKUP_LINK = "https://1drv.ms/x/c/f48a627c72e8b791/IQArQUdKgeAsTIpdvK4r5r3rAXsxwc_1iF2kxo16LhSi3PQ?e=sDhAyp";
-
 // -- Password Encryption --
 var PASSWORD_KEY = "ALN2026";
-
-
-// -- Task Lists (Top 10 per role) --
-// Role assignment: collaborator = MS account + hasAccess:true
-//                  reviewer     = non-MS account + hasAccess:true
-//                  newuser      = hasAccess:false (any)
-var TASK_LISTS = {
-  collaborator: [
-    {description:'Complete LCP', link:'#screen-newuser'},
-    {description:'Review/Edit Mar 4 Meeting Notes', link:''},
-    {description:'Review Latest Bookkeeping Email', link:''},
-    {description:'Pay Abby Lane Facilitator', link:''},
-    {description:'Review Summons Response', link:''},
-    {description:'Review NLRG Suggestions', link:''},
-    {description:'Review Claude.ai Demurrer Response Suggestions', link:''},
-    {description:'Review White Summons Response', link:''},
-    {description:'Review Road Videos', link:''},
-    {description:'Other Documents — see full list', link:''}
-  ],
-  reviewer: [
-    {description:'Get MS Account', link:'https://account.microsoft.com'},
-    {description:'Review Mar 4 Meeting Notes', link:''},
-    {description:'Review Latest Bookkeeping Email', link:''},
-    {description:'Pay Abby Lane Facilitator', link:''},
-    {description:'Review Summons Response', link:''},
-    {description:'Review NLRG Suggestions', link:''},
-    {description:'Review Claude.ai Demurrer Response Suggestions', link:''},
-    {description:'Review White Summons Response', link:''},
-    {description:'Review Road Videos', link:''},
-    {description:'Other Documents — see full list', link:''}
-  ],
-  newuser: [
-    {description:'Complete LCP Acknowledgment Form', link:'#screen-newuser'},
-    {description:'Get MS Account', link:'https://account.microsoft.com'}
-  ]
-};
 
 // -- Token Authentication --
 // Pi-transform: any valid 6-char hex input token computes its response token directly.
 // No pre-built table needed. Matches formula in AbbyLane_TokenLookup_v3.xlsx.
 // Token pair changes each hour automatically based on time-of-day.
 
+// -- Task Lists --
+var TASK_LISTS = {
+  collaborator: [
+    {description:"Complete LCP", link:"#screen-newuser", expiry:""},
+    {description:"Review/Edit Mar 4 Meeting Notes", link:"https://1drv.ms/w/c/f48a627c72e8b791/IQAgneIrqphxTaeJygQ4Od-aASGvRTaGLHXQM9Z-8r0eg-M?e=zjO3Co", expiry:""},
+    {description:"Review Latest Invoice from Mr. Breeden", link:"https://1drv.ms/b/c/f48a627c72e8b791/IQDrzYdu-K0JSbIWP88K_SZkAWq1W3OEDncWozjKKMFI8aA?e=lUQd8T", expiry:""},
+    {description:"Pay Abby Lane Facilitator", link:"", expiry:""},
+    {description:"Review Summons Response", link:"https://1drv.ms/b/c/f48a627c72e8b791/IQC9EfCsElIPR7UBP_OlKcbtAecUhFe5G41VSWeatbWaJXc?e=B3jU55", expiry:""},
+    {description:"Review NLRG Suggestions", link:"https://1drv.ms/b/c/f48a627c72e8b791/IQAZQTyBXI9lSLCQSPJZ-ZwmAT1YliS-oe8MuSLr6-PDfc8?e=Lf2dmu", expiry:""},
+    {description:"Review Claude.ai Demurrer Response Suggestions", link:"https://1drv.ms/w/c/f48a627c72e8b791/IQCsQpu2KbZVTZOuBHXy5iE-AQrn1b42agCo0SyKt61iDtQ?e=31IInf", expiry:""},
+    {description:"Review White Summons Response", link:"https://1drv.ms/b/c/f48a627c72e8b791/IQAzXAIckrtkT7nlbDTC4zMkATbx1KBYSZib2_L3VXw4PuU?e=FBJ8Y7", expiry:""},
+    {description:"Review 2026 Road Video", link:"https://1drv.ms/v/c/f48a627c72e8b791/IQDXobHEqmttR4U6VCbAD_4ZAe78mnKJJxQPFzk48sVH8DY?e=76Wsm9", expiry:""},
+    {description:"Other Documents — see full list", link:"", expiry:""}
+  ],
+  reviewer: [
+    {description:"Get MS Account", link:"https://account.microsoft.com", expiry:""},
+    {description:"Review Mar 4 Meeting Notes", link:"https://1drv.ms/w/c/f48a627c72e8b791/IQAgneIrqphxTaeJygQ4Od-aAWvm0yW44P2oSRIxLHNwcBg?e=hDc0oW", expiry:"Mar 6 2026 11:59 PM"},
+    {description:"Review Latest Invoice from Mr. Breeden", link:"https://1drv.ms/b/c/f48a627c72e8b791/IQDrzYdu-K0JSbIWP88K_SZkAQiQBPnaqTL6VdxxArS3sPk?e=yRy1Ah", expiry:"Mar 6 2026 11:59 PM"},
+    {description:"Pay Abby Lane Facilitator", link:"", expiry:""},
+    {description:"Review Summons Response", link:"https://1drv.ms/b/c/f48a627c72e8b791/IQC9EfCsElIPR7UBP_OlKcbtAdZKi9WVZXMT6M_cJraJHSI?e=cRri3q", expiry:"Mar 6 2026 11:59 PM"},
+    {description:"Review NLRG Suggestions", link:"https://1drv.ms/b/c/f48a627c72e8b791/IQAZQTyBXI9lSLCQSPJZ-ZwmAa9SAQ3VFd1_v55NvvvojD0?e=vPQaS4", expiry:"Mar 6 2026 11:59 PM"},
+    {description:"Review Claude.ai Demurrer Response Suggestions", link:"https://1drv.ms/w/c/f48a627c72e8b791/IQCsQpu2KbZVTZOuBHXy5iE-AUikTYFOiFTPJfHuLx0p4iA?e=HBy7Ac", expiry:"Mar 6 2026 11:59 PM"},
+    {description:"Review White Summons Response", link:"https://1drv.ms/b/c/f48a627c72e8b791/IQAzXAIckrtkT7nlbDTC4zMkAb0gzE1lZTH4tIGcap8HvXo?e=mnLvIQ", expiry:"Mar 6 2026 11:59 PM"},
+    {description:"Review 2026 Road Video", link:"https://1drv.ms/v/c/f48a627c72e8b791/IQDXobHEqmttR4U6VCbAD_4ZARNhUMrDTlK6RcPNxewPk4g?e=J7KJ8B", expiry:"Mar 6 2026 11:59 PM"},
+    {description:"Other Documents — see full list", link:"", expiry:""}
+  ],
+  newuser: [
+    {description:"Complete LCP Acknowledgment Form", link:"#screen-newuser", expiry:""},
+    {description:"Get MS Account", link:"https://account.microsoft.com", expiry:""}
+  ]
+};
+
 // -- User Registry --
 var USERS = [
-  { name:"Edward McConnell", email:"edmcconne"+"@"+"gmail.com", dateSigned:"Feb 26 2026", signature:"Edward McConnell", hasAccess:true, microsoftAccount:true, tokenPointer:0, password:"19213056676D41187E7E000602057178" },
-  { name:"EdView", email:"abbylaneneighbors"+"@"+"gmail.com", dateSigned:"Feb 26 2026", signature:"EdView", hasAccess:true, microsoftAccount:true, tokenPointer:0, password:"202E2C4B685F48251B1145690006737A7E010006" },
-  { name:"EdExt", email:"edext18"+"@"+"gmail.com", dateSigned:"Mar 2  2026", signature:"Ed McConnell", hasAccess:true, microsoftAccount:false, tokenPointer:0, password:"04280B4A685F48251B1145690006737A7E010006" },
-  { name:"Ashley Cornicello", email:"ashley"+"@"+"collegiatesealers.com", dateSigned:"", signature:"Ashley Cornicello", hasAccess:false, microsoftAccount:true, tokenPointer:0, password:"" },
-  { name:"Brenda Gilbert", email:"bcg3812"+"@"+"gmail.com", dateSigned:"", signature:"", hasAccess:false, microsoftAccount:true, tokenPointer:0, password:"15091D6666737A" },
-  { name:"Jim Breeden", email:"jcb"+"@"+"lawbreeden.com", dateSigned:"", signature:"", hasAccess:false, microsoftAccount:true, tokenPointer:0, password:"" },
-  { name:"Katie McConnell", email:"ktmc"+"@"+"mail.com", dateSigned:"", signature:"", hasAccess:false, microsoftAccount:true, tokenPointer:0, password:"" },
-  { name:"Morris Martin", email:"martinmo404"+"@"+"gmail.com", dateSigned:"", signature:"", hasAccess:false, microsoftAccount:true, tokenPointer:0, password:"" },
-  { name:"Richard Cornicello", email:"rich"+"@"+"collegiatesealers.com", dateSigned:"", signature:"", hasAccess:false, microsoftAccount:true, tokenPointer:0, password:"" },
-  { name:"Robin Spence", email:"baltirobin"+"@"+"gmail.com", dateSigned:"", signature:"", hasAccess:false, microsoftAccount:true, tokenPointer:0, password:"" },
-  { name:"Shirley Mo Martin", email:"srmartin736"+"@"+"gmail.com", dateSigned:"", signature:"", hasAccess:false, microsoftAccount:true, tokenPointer:0, password:"" },
-  { name:"Bill and Merrill Noel", email:"splicer22"+"@"+"aol.com", dateSigned:"", signature:"", hasAccess:false, microsoftAccount:true, tokenPointer:0, password:"" },
-  { name:"Spence Lundie", email:"spencelundie"+"@"+"gmail.com", dateSigned:"", signature:"", hasAccess:false, microsoftAccount:true, tokenPointer:0, password:"" }
+  { name:"Edward McConnell", email:"edmcconne"+"@"+"gmail.com", dateSigned:"Feb 26 2026", signature:"Edward McConnell", hasAccess:true, microsoftAccount:true, tokenPointer:0, password:"19213056676D41187E7E000602057178", taskStatus:[{done:true,comment:"Signed Feb 26 2026"},{done:true,comment:""},{done:true,comment:""},{done:true,comment:""},{done:true,comment:""},{done:true,comment:""},{done:true,comment:""},{done:true,comment:""},{done:true,comment:""},{done:false,comment:""}] },
+  { name:"EdView", email:"abbylaneneighbors"+"@"+"gmail.com", dateSigned:"Feb 26 2026", signature:"EdView", hasAccess:true, microsoftAccount:true, tokenPointer:0, password:"202E2C4B685F48251B1145690006737A7E010006", taskStatus:[{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""}] },
+  { name:"EdExt", email:"edext18"+"@"+"gmail.com", dateSigned:"Mar 2  2026", signature:"Ed McConnell", hasAccess:true, microsoftAccount:false, tokenPointer:0, password:"04280B4A685F48251B1145690006737A7E010006", taskStatus:[{done:false,comment:""},{done:false,comment:"Link expires: Mar 6 2026 11:59 PM"},{done:false,comment:"Link expires: Mar 6 2026 11:59 PM"},{done:false,comment:""},{done:false,comment:"Link expires: Mar 6 2026 11:59 PM"},{done:false,comment:"Link expires: Mar 6 2026 11:59 PM"},{done:false,comment:"Link expires: Mar 6 2026 11:59 PM"},{done:false,comment:"Link expires: Mar 6 2026 11:59 PM"},{done:false,comment:"Link expires: Mar 6 2026 11:59 PM"},{done:false,comment:""}] },
+  { name:"Ashley Cornicello", email:"ashley"+"@"+"collegiatesealers.com", dateSigned:"", signature:"Ashley Cornicello", hasAccess:false, microsoftAccount:true, tokenPointer:0, password:"", taskStatus:[{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""}] },
+  { name:"Brenda Gilbert", email:"bcg3812"+"@"+"gmail.com", dateSigned:"", signature:"Brenda Gilbert", hasAccess:false, microsoftAccount:true, tokenPointer:0, password:"", taskStatus:[{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""}] },
+  { name:"Jim Breeden", email:"jcb"+"@"+"lawbreeden.com", dateSigned:"", signature:"Jim Breeden", hasAccess:false, microsoftAccount:true, tokenPointer:0, password:"", taskStatus:[{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""}] },
+  { name:"Katie McConnell", email:"ktmc"+"@"+"mail.com", dateSigned:"", signature:"", hasAccess:false, microsoftAccount:true, tokenPointer:0, password:"", taskStatus:[{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""}] },
+  { name:"Morris Martin", email:"martinmo404"+"@"+"gmail.com", dateSigned:"", signature:"", hasAccess:false, microsoftAccount:true, tokenPointer:0, password:"", taskStatus:[{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""}] },
+  { name:"Richard Cornicello", email:"rich"+"@"+"collegiatesealers.com", dateSigned:"", signature:"", hasAccess:false, microsoftAccount:true, tokenPointer:0, password:"", taskStatus:[{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""}] },
+  { name:"Robin Spence", email:"baltirobin"+"@"+"gmail.com", dateSigned:"", signature:"", hasAccess:false, microsoftAccount:true, tokenPointer:0, password:"", taskStatus:[{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""}] },
+  { name:"Shirley Mo Martin", email:"srmartin736"+"@"+"gmail.com", dateSigned:"", signature:"", hasAccess:false, microsoftAccount:false, tokenPointer:0, password:"", taskStatus:[{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""}] },
+  { name:"Bill and Merl Noel", email:"splicer22"+"@"+"aol.com", dateSigned:"2026-03-06", signature:"Bill Noel", hasAccess:true, microsoftAccount:false, tokenPointer:0, password:"", taskStatus:[{done:false,comment:""},{done:false,comment:"Link expires: Mar 6 2026 11:59 PM"},{done:false,comment:"Link expires: Mar 6 2026 11:59 PM"},{done:true,comment:"Paid Mar 7 2026"},{done:false,comment:"Link expires: Mar 6 2026 11:59 PM"},{done:false,comment:"Link expires: Mar 6 2026 11:59 PM"},{done:false,comment:"Link expires: Mar 6 2026 11:59 PM"},{done:false,comment:"Link expires: Mar 6 2026 11:59 PM"},{done:false,comment:"Link expires: Mar 6 2026 11:59 PM"},{done:false,comment:""}] },
+  { name:"Spence Lundie", email:"spencelundie"+"@"+"gmail.com", dateSigned:"", signature:"", hasAccess:false, microsoftAccount:true, tokenPointer:0, password:"", taskStatus:[{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""}] }
 ];
 
 // ██   CONFIG — PARAMETERS END                             ██
@@ -867,6 +871,11 @@ function showScreen(id) {
   window.scrollTo(0, 0);
   // Clear saved session when user deliberately returns to identity screen
   if (id === 'screen-identity') { clearSession(); }
+  // Stop countdown timer when leaving checklist
+  if (id !== 'screen-returning' && _countdownInterval) {
+    clearInterval(_countdownInterval);
+    _countdownInterval = null;
+  }
 }
 
 function saveLoginCookie(name, email, password) {
@@ -1265,6 +1274,17 @@ function buildReturningView(user) {
       } else if (t.link.indexOf('#screen-') === 0) {
         var screenId = t.link.slice(1);
         linkCell = '<td style="text-align:center"><button class="task-link-btn" onclick="showScreen(\'' + screenId + '\')">Open</button></td>';
+      } else if (role === 'reviewer' && t.expiry) {
+        // Non-MS reviewer link with expiry — button + live countdown badge
+        linkCell = '<td style="text-align:center">' +
+          '<button class="task-link-btn" onclick="openReviewerLink(' + i + ',\'' + safeText(t.link) + '\',\'' + safeText(t.expiry) + '\')">Open &#8599;</button>' +
+          '<span class="task-countdown" id="task-cd-' + i + '" data-expiry="' + safeText(t.expiry) + '">...</span>' +
+          '</td>';
+        // Auto-fill comment with expiry if blank
+        if (!s.comment) {
+          s.comment = 'Link expires: ' + t.expiry;
+          status[i] = s;
+        }
       } else {
         linkCell = '<td style="text-align:center"><a href="' + safeText(t.link) + '" target="_blank" class="task-link-btn">Open &#8599;</a></td>';
       }
@@ -1281,6 +1301,7 @@ function buildReturningView(user) {
 
   document.getElementById('checklist-container').innerHTML = html;
   document.getElementById('checklist-done-msg').style.display = 'none';
+  if (role === 'reviewer') startCountdownTimers();
 }
 
 function onTaskDoneChange(idx) {
@@ -1296,10 +1317,86 @@ function onTaskDoneChange(idx) {
   }
 }
 
+function openReviewerLink(taskIdx, url, expiry) {
+  var now = new Date();
+  var exp = expiry ? new Date(expiry) : null;
+  if (exp && !isNaN(exp.getTime()) && now > exp) {
+    // Link is expired — show inline warning in the link cell
+    var user = _reviewerUser;
+    var userName = user ? user.name : 'Portal User';
+    var mailSubject = encodeURIComponent('ALN Link Renewal Request — ' + userName);
+    var mailBody = encodeURIComponent(
+      'Link Renewal Request\n\nUser: ' + userName + '\nTask: ' + (taskIdx+1) + '\nExpired link: ' + url +
+      '\nExpiry was: ' + expiry + '\n\nPlease create a new anyone-can-view link for this document and update the portal.'
+    );
+    var mailto = 'mailto:' + REQ + '?subject=' + mailSubject + '&body=' + mailBody;
+    // Replace the button cell with an expired warning
+    var row = document.getElementById('task-item-' + taskIdx);
+    if (row) {
+      var cells = row.getElementsByTagName('td');
+      // Link is in cell index 2
+      if (cells[2]) {
+        cells[2].innerHTML =
+          '<span style="color:#e57373;font-size:11px;font-weight:bold;">&#9888; Expired</span><br>' +
+          '<a href="' + mailto + '" style="color:#C9A84C;font-size:11px;text-decoration:underline;">Request new link</a>';
+      }
+    }
+  } else {
+    window.open(url, '_blank');
+  }
+}
+
+var _countdownInterval = null;
+
+function startCountdownTimers() {
+  // Clear any existing timer
+  if (_countdownInterval) clearInterval(_countdownInterval);
+  updateCountdownBadges();
+  _countdownInterval = setInterval(updateCountdownBadges, 60000); // update every minute
+}
+
+function updateCountdownBadges() {
+  var badges = document.querySelectorAll('.task-countdown[data-expiry]');
+  var now = new Date();
+  badges.forEach(function(badge) {
+    var expiry = badge.getAttribute('data-expiry');
+    var exp = expiry ? new Date(expiry) : null;
+    if (!exp || isNaN(exp.getTime())) {
+      badge.style.display = 'none';
+      return;
+    }
+    var msLeft = exp - now;
+    if (msLeft <= 0) {
+      badge.textContent = '⚠ Expired';
+      badge.className = 'task-countdown expired';
+    } else {
+      var daysLeft  = Math.floor(msLeft / (1000 * 60 * 60 * 24));
+      var hoursLeft = Math.floor((msLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      var minsLeft  = Math.floor((msLeft % (1000 * 60 * 60)) / (1000 * 60));
+      var label, cls;
+      if (daysLeft >= 2) {
+        label = daysLeft + 'd ' + hoursLeft + 'h';
+        cls   = 'ok';
+      } else if (daysLeft >= 1 || hoursLeft >= 24) {
+        label = daysLeft + 'd ' + hoursLeft + 'h';
+        cls   = 'warn';
+      } else if (hoursLeft >= 1) {
+        label = hoursLeft + 'h ' + minsLeft + 'm';
+        cls   = 'urgent';
+      } else {
+        label = minsLeft + 'm';
+        cls   = 'urgent';
+      }
+      badge.textContent = label;
+      badge.className   = 'task-countdown ' + cls;
+    }
+  });
+}
+
 function sendChecklistUpdate() {
   var user = _reviewerUser;
   if (!user) return;
-  var role = getUserRole(user);
+  var role  = getUserRole(user);
   var tasks = TASK_LISTS[role] || [];
 
   var lines = 'CHECKLIST UPDATE\n';
@@ -1314,7 +1411,7 @@ function sendChecklistUpdate() {
     var cm = document.getElementById('task-comment-' + i);
     var done = cb ? (cb.checked ? 'DONE' : 'open') : 'open';
     var comment = cm ? cm.value.trim() : '';
-    lines += (i+1) + '. ' + tasks[i].description + ' | ' + done + ' | ' + comment + '\n';
+    lines += (i+1) + '. ' + tasks[i].description + ' | ' + done + ' | ' + comment.replace(/\|/g, '/') + '\n';
   }
 
   var subject = encodeURIComponent('ALN Checklist Update — ' + user.name);
@@ -1368,7 +1465,7 @@ function submitAccountUpdate() {
   if (newEmail !== user.email.toLowerCase()) changes.push('Email: ' + newEmail);
   if (pw1) {
     var enc = encryptPassword(pw1);
-    changes.push('Password (encrypted): ' + enc);
+    changes.push('Password-encrypted: ' + enc);
   }
 
   if (!changes.length) {
@@ -1904,6 +2001,7 @@ async function admOpenFile() {
 async function admSaveFile() {
   if (!_admFileHandle) { admShowToast('Load the portal file first using Load File', 'err'); return; }
   try {
+    admReadTasksFromUI(); // capture any unsaved UI edits before writing
     var file = await _admFileHandle.getFile();
     var html  = await file.text();
     var newHtml = admRebuildConfig(html);
@@ -1956,7 +2054,7 @@ function admRebuildConfig(html) {
     c += '  ' + role + ': [\n';
     list.forEach(function(item, ii) {
       var comma = ii < list.length - 1 ? ',' : '';
-      c += '    {description:"' + admEsc(item.description) + '", link:"' + admEsc(item.link||'') + '"}' + comma + '\n';
+      c += '    {description:"' + admEsc(item.description) + '", link:"' + admEsc(item.link||'') + '", expiry:"' + admEsc(item.expiry||'') + '"}' + comma + '\n';
     });
     c += '  ]' + (ri < roles.length - 1 ? ',' : '') + '\n';
   });
@@ -2054,7 +2152,7 @@ function admGetTasks() {
     for (var r = 0; r < roles.length; r++) {
       var role = roles[r];
       _admTasks[role] = (TASK_LISTS[role] || []).map(function(t) {
-        return {description: t.description, link: t.link || ''};
+        return {description: t.description, link: t.link || '', expiry: t.expiry || ''};
       });
     }
   }
@@ -2087,6 +2185,11 @@ function admRenderTasks() {
 function admTaskRowHtml(role, idx, item, total) {
   var upDisabled = idx === 0 ? ' disabled' : '';
   var dnDisabled = idx === total-1 ? ' disabled' : '';
+  var expiryField = role === 'reviewer'
+    ? '<input type="text" value="' + admEsc(item.expiry||'') + '" id="adm-te-' + role + '-' + idx + '" ' +
+        'style="flex:2;background:#162840;color:#C9A84C;border:1px solid rgba(201,168,76,0.4);border-radius:3px;padding:6px 8px;font-family:Courier New,monospace;font-size:12px;" ' +
+        'placeholder="Expiry: e.g. Mar 31 2026 11:59 PM">'
+    : '';
   return '<div class="adm-task-row" id="adm-tr-' + role + '-' + idx + '" style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">' +
     '<span style="color:#998877;min-width:18px;font-size:11px;text-align:right;">' + (idx+1) + '</span>' +
     '<div style="display:flex;flex-direction:column;gap:2px;">' +
@@ -2099,6 +2202,7 @@ function admTaskRowHtml(role, idx, item, total) {
     '<input type="text" value="' + admEsc(item.link) + '" id="adm-tl-' + role + '-' + idx + '" ' +
       'style="flex:3;background:#162840;color:#F5F0E8;border:1px solid rgba(201,168,76,0.25);border-radius:3px;padding:6px 8px;font-family:Courier New,monospace;font-size:12px;" ' +
       'placeholder="https:// link (optional)">' +
+    expiryField +
     '<button class="adm-btn adm-btn-danger adm-btn-sm" onclick="admDeleteTask(\'' + role + '\',' + idx + ')">&#10005;</button>' +
   '</div>';
 }
@@ -2110,10 +2214,12 @@ function admReadTasksFromUI() {
     var role = roles[r];
     var list = tasks[role] || [];
     for (var i = 0; i < list.length; i++) {
-      var descEl = document.getElementById('adm-td-' + role + '-' + i);
-      var linkEl = document.getElementById('adm-tl-' + role + '-' + i);
-      if (descEl) list[i].description = descEl.value.trim();
-      if (linkEl) list[i].link = linkEl.value.trim();
+      var descEl   = document.getElementById('adm-td-' + role + '-' + i);
+      var linkEl   = document.getElementById('adm-tl-' + role + '-' + i);
+      var expiryEl = document.getElementById('adm-te-' + role + '-' + i);
+      if (descEl)   list[i].description = descEl.value.trim();
+      if (linkEl)   list[i].link        = linkEl.value.trim();
+      if (expiryEl) list[i].expiry      = expiryEl.value.trim();
     }
   }
 }
@@ -2250,11 +2356,12 @@ function admParseEmail() {
   var out  = document.getElementById('adm-parse-out');
   if (!body.trim()) { out.innerHTML = ''; return; }
 
-  var isKnown  = body.includes('Known Member Submission');
-  var isNew    = body.includes('New Member Submission');
-  var isUpdate = body.includes('Account Update —');
+  var isKnown     = body.includes('Known Member Submission');
+  var isNew       = body.includes('New Member Submission');
+  var isUpdate    = body.includes('Account Update —');
+  var isChecklist = body.includes('CHECKLIST UPDATE');
 
-  if (!isKnown && !isNew && !isUpdate) {
+  if (!isKnown && !isNew && !isUpdate && !isChecklist) {
     out.innerHTML = '<div class="adm-alert adm-alert-err">Could not identify a portal notification email. Paste the full email body.</div>';
     return;
   }
@@ -2272,7 +2379,7 @@ function admParseEmail() {
   var msAccStr = extractField('Microsoft Account:');
   var msAcc    = msAccStr.toLowerCase() === 'yes';
 
-  if (!name || !email) {
+  if (!isUpdate && !isChecklist && (!name || !email)) {
     out.innerHTML = '<div class="adm-alert adm-alert-err">Could not extract name or email. Check the email format.</div>';
     return;
   }
@@ -2285,10 +2392,53 @@ function admParseEmail() {
 
   var html = '<div class="adm-parse-result">';
   html += '<div style="color:#C9A84C;font-weight:bold;margin-bottom:10px;font-size:13px;">';
-  html += isUpdate ? '&#128231; Account Update Request' : isKnown ? '&#128231; Known Member Acknowledgment' : '&#128231; New Member Submission';
+  html += isChecklist ? '&#9989; Checklist Update' : isUpdate ? '&#128231; Account Update Request' : isKnown ? '&#128231; Known Member Acknowledgment' : '&#128231; New Member Submission';
   html += '</div>';
 
-  if (isUpdate) {
+  if (isChecklist) {
+    // Match user by email in "User: Name <email>" line
+    var userLineMatch = body.match(/User:\s*.+<([^>]+)>/);
+    var clEmail = userLineMatch ? userLineMatch[1].trim().toLowerCase() : '';
+    var clIdx = -1;
+    for (var ci = 0; ci < _admUsers.length; ci++) {
+      if (_admUsers[ci].email.toLowerCase() === clEmail) { clIdx = ci; break; }
+    }
+    if (clIdx < 0) {
+      html += '<div class="adm-alert adm-alert-err">Could not find user with email: ' + admSafeText(clEmail) + '</div>';
+    } else {
+      var cu = _admUsers[clIdx];
+      var newStatus = [];
+      // Normalize line endings then re-insert newlines before item numbers
+      // that Gmail strips when copy-pasting (e.g. " 2. " → "\n2. ")
+      var bodyNorm = body.replace(/\r\n|\r/g, '\n');
+      bodyNorm = bodyNorm.replace(/ (\d{1,2}\. )/g, '\n$1');
+      // Use [ \t]* (not \s*) before comment group to prevent consuming newlines
+      var itemRe = /^\d+\.\s+[^|\n\r]+\|\s*(DONE|open)\s*\|[ \t]*([^|\n\r]*)/gm;
+      var im;
+      while ((im = itemRe.exec(bodyNorm)) !== null) {
+        newStatus.push({ done: im[1] === 'DONE', comment: im[2].trim() });
+      }
+      if (!newStatus.length) {
+        html += '<div class="adm-alert adm-alert-err">Could not parse checklist items. Check email format.</div>';
+      } else {
+        html += '<div style="color:#998877;margin-bottom:8px;">User: <strong style="color:#F5F0E8">' + admSafeText(cu.name) + '</strong></div>';
+        html += '<div style="color:#998877;font-size:12px;margin-bottom:10px;">' + newStatus.length + ' items found</div>';
+        newStatus.forEach(function(s, idx) {
+          html += '<div class="adm-change-item">' +
+            '<span class="adm-change-label">' + (idx+1) + '</span>' +
+            '<span class="adm-change-val" style="color:' + (s.done ? '#81C784' : '#998877') + '">' +
+              (s.done ? '&#10003; DONE' : 'open') +
+            '</span>' +
+            (s.comment ? '<span class="adm-change-val" style="color:#F5F0E8;margin-left:8px;">' + admSafeText(s.comment) + '</span>' : '') +
+            '</div>';
+        });
+        var clJson = encodeURIComponent(JSON.stringify(newStatus));
+        html += '<div class="adm-btn-row" style="margin-top:12px;">' +
+          '<button class="adm-btn adm-btn-gold" onclick="admApplyChecklistUpdate(' + clIdx + ',\'' + clJson + '\')">&#10003; Apply Checklist State</button>' +
+          '</div>';
+      }
+    }
+  } else if (isUpdate) {
     // Account Update email — match by Current Email field
     var currentEmail = extractField('Current Email:');
     var updIdx = -1;
@@ -2301,7 +2451,7 @@ function admParseEmail() {
       var u = _admUsers[updIdx];
       var newName  = extractField('Name:');
       var newEmail = extractField('Email:');
-      var newPw    = extractField('Password \\(encrypted\\):');
+      var newPw    = extractField('Password-encrypted:');
       var changes  = [];
       if (newName  && newName  !== u.name)          changes.push({label:'name',     from:u.name,          to:newName,  val:newName});
       if (newEmail && newEmail !== u.email.toLowerCase()) changes.push({label:'email',    from:u.email,         to:newEmail, val:newEmail});
@@ -2367,6 +2517,23 @@ function admParseEmail() {
   out.innerHTML = html;
 }
 
+function admApplyChecklistUpdate(idx, clJson) {
+  var u = _admUsers[idx];
+  var newStatus = JSON.parse(decodeURIComponent(clJson));
+  // Sanitize comments — strip stray carriage returns from email line endings
+  newStatus = newStatus.map(function(s) {
+    return { done: s.done, comment: (s.comment||'').replace(/[\r\n]/g, '').trim() };
+  });
+  u.taskStatus = newStatus;
+  // Also update live USERS so same-session checklist view reflects the change
+  if (USERS[idx]) USERS[idx].taskStatus = newStatus.map(function(s){ return Object.assign({},s); });
+  admSetDirty(true);
+  document.getElementById('adm-parse-out').innerHTML =
+    '<div class="adm-alert adm-alert-ok" style="margin-top:10px;">&#10003; Checklist state applied for ' + admSafeText(u.name) + ' — save file to write to disk.</div>';
+  admShowToast('Checklist updated for ' + u.name, 'ok');
+}
+
+
 function admApplyAccountUpdate(idx, chJson) {
   var u = _admUsers[idx];
   var changes = JSON.parse(decodeURIComponent(chJson));
@@ -2426,7 +2593,7 @@ function admSafeText(s) {
 }
 
 function admEsc(s) {
-  return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"');
+  return String(s||'').replace(/[\r\n]/g,'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"');
 }
 
 // Close modal on background click
