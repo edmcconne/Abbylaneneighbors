@@ -439,6 +439,13 @@
 <div id="screen-returning" class="screen">
   <div class="card card-wide">
     <div class="privilege-banner">&#9878; Attorney-Client Privilege &mdash; Confidential</div>
+    <!-- REPRESENT MODE BANNER — hidden unless owner is representing another user -->
+    <div id="represent-banner" style="display:none;background:#7B2C2C;color:#FFD580;padding:10px 16px;border-radius:4px;margin-bottom:14px;display:none;align-items:center;gap:12px;flex-wrap:wrap;">
+      <span style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;">&#9888; Represent Mode</span>
+      <span id="represent-name" style="font-size:14px;font-weight:700;flex:1;"></span>
+      <select id="represent-select" onchange="switchRepresent(this.value)" style="font-size:12px;padding:4px 8px;border-radius:3px;border:1px solid #FFD580;background:#5a1f1f;color:#FFD580;cursor:pointer;"></select>
+      <button onclick="exitRepresent()" style="font-size:12px;padding:5px 12px;border-radius:3px;border:1px solid #FFD580;background:transparent;color:#FFD580;cursor:pointer;font-weight:700;">&#10005; Exit Represent Mode</button>
+    </div>
     <h2 class="card-title" id="checklist-title">Your Priority Action Items</h2>
     <p class="checklist-instr" id="checklist-instr">Review your priority items below. Click any link to open the document, add comments as needed, and check items when complete. Click <strong>Send Update</strong> when finished.</p>
     <div id="checklist-container"></div>
@@ -450,6 +457,7 @@
       <button class="btn btn-done" onclick="sendChecklistUpdate()" style="font-size:0.82rem;padding:9px 18px;">&#9993; Send Update</button>
       <span style="font-size:0.75rem;color:var(--muted);font-style:italic;align-self:center;">Send to save your progress between sessions</span>
       <button id="btn-admin" class="btn btn-gold" onclick="openAdmin()" style="display:none;font-size:0.82rem;padding:9px 18px;">&#9881; Admin Panel</button>
+      <button id="btn-represent" class="btn btn-gold" onclick="openRepresentPicker()" style="display:none;font-size:0.82rem;padding:9px 18px;">&#128100; Represent User</button>
     </div>
   </div>
 </div>
@@ -603,6 +611,8 @@ var TOKEN_LOOKUP_LINK = "https://1drv.ms/x/c/f48a627c72e8b791/IQArQUdKgeAsTIpdvK
 // -- Password Encryption --
 var PASSWORD_KEY = "ALN2026";
 
+// -- Link Behavior --
+var FORCE_WEB_VIEWER = true;  // Append ?web=1 to OneDrive links — forces web viewer, prevents local app launch
 // -- Token Authentication --
 // Pi-transform: any valid 6-char hex input token computes its response token directly.
 // No pre-built table needed. Matches formula in AbbyLane_TokenLookup_v3.xlsx.
@@ -611,28 +621,28 @@ var PASSWORD_KEY = "ALN2026";
 // -- Task Lists --
 var TASK_LISTS = {
   collaborator: [
-    {description:"Complete LCP", link:"#screen-newuser", expiry:""},
-    {description:"Review/Edit Mar 4 Meeting Notes", link:"https://1drv.ms/w/c/f48a627c72e8b791/IQAgneIrqphxTaeJygQ4Od-aASGvRTaGLHXQM9Z-8r0eg-M?e=zjO3Co", expiry:""},
-    {description:"Review Latest Invoice from Mr. Breeden", link:"https://1drv.ms/b/c/f48a627c72e8b791/IQDrzYdu-K0JSbIWP88K_SZkAWq1W3OEDncWozjKKMFI8aA?e=lUQd8T", expiry:""},
-    {description:"Pay Abby Lane Facilitator", link:"", expiry:""},
-    {description:"Review Summons Response", link:"https://1drv.ms/b/c/f48a627c72e8b791/IQC9EfCsElIPR7UBP_OlKcbtAecUhFe5G41VSWeatbWaJXc?e=B3jU55", expiry:""},
-    {description:"Review NLRG Suggestions", link:"https://1drv.ms/b/c/f48a627c72e8b791/IQAZQTyBXI9lSLCQSPJZ-ZwmAT1YliS-oe8MuSLr6-PDfc8?e=Lf2dmu", expiry:""},
-    {description:"Review Claude.ai Demurrer Response Suggestions", link:"https://1drv.ms/w/c/f48a627c72e8b791/IQCsQpu2KbZVTZOuBHXy5iE-AQrn1b42agCo0SyKt61iDtQ?e=31IInf", expiry:""},
-    {description:"Review White Summons Response", link:"https://1drv.ms/b/c/f48a627c72e8b791/IQAzXAIckrtkT7nlbDTC4zMkATbx1KBYSZib2_L3VXw4PuU?e=FBJ8Y7", expiry:""},
-    {description:"Review 2026 Road Video", link:"https://1drv.ms/v/c/f48a627c72e8b791/IQDXobHEqmttR4U6VCbAD_4ZAe78mnKJJxQPFzk48sVH8DY?e=76Wsm9", expiry:""},
-    {description:"Other Documents — see full list", link:"https://1drv.ms/f/c/f48a627c72e8b791/IgD6L9u-whyhQqpm0gwnF34SAY9fqCsDRMAWSUKOgHmWs-c", expiry:""}
+    {description:"Any user specific doc edit link", link:"https://1drv.ms/w/c/f48a627c72e8b791/IQCzno4cHEAoR4Zfg2ss9ykFAdvNOCruDU9dCZmVry2l9L0", expiry:""},
+    {description:"Any user specific doc view link", link:"https://1drv.ms/w/c/f48a627c72e8b791/IQBs3N4SH2BhT5jwcR2MtEHbAUh8igiVxrt_HOBj7RZH98M", expiry:""},
+    {description:"Specific User Specific Doc View Link", link:"https://1drv.ms/w/c/F48A627C72E8B791/AWzc3hIfYGFPmPBxHYy0Qds?e=YdxQc4", expiry:""},
+    {description:"View Access - Modified - anyone link", link:"https://1drv.ms/w/c/f48a627c72e8b791/IQBs3N4SH2BhT5jwcR2MtEHbAerHrL9GCWFalabbZb_GPxM", expiry:""},
+    {description:"Test Access - MS Users - View File - View Link", link:"https://1drv.ms/w/c/F48A627C72E8B791/AXqp4kmnWZlJmHsgZhgXCx4?e=VYkUz6", expiry:""},
+    {description:"Test Access - MS Users - View File - Edit Link", link:"https://1drv.ms/w/c/F48A627C72E8B791/AXqp4kmnWZlJmHsgZhgXCx4?e=kKY5FA", expiry:""},
+    {description:"Test Edit Access for non-MS Account users", link:"https://1drv.ms/w/c/F48A627C72E8B791/AbOejhwcQChHhl-Dayz3KQU?e=YY5moy", expiry:""},
+    {description:"Test Edit Access for MS Account users", link:"https://1drv.ms/w/c/F48A627C72E8B791/AbOejhwcQChHhl-Dayz3KQU?e=0dv2vl", expiry:""},
+    {description:"View Lawsuit Files", link:"https://1drv.ms/f/c/F48A627C72E8B791/AqncgL_Cs2NLgvf-iZ3gn7c?e=D9kKfu", expiry:""},
+    {description:"Message Board (to generate email to others)", link:"https://1drv.ms/x/c/f48a627c72e8b791/IQDPJ_LH4OGCQ5U2kbwlfat0Aa7502pa_3xLB_mG-huPUkw?e=bkQtYS", expiry:""}
   ],
   reviewer: [
-    {description:"Get MS Account", link:"https://account.microsoft.com", expiry:""},
-    {description:"Review Mar 4 Meeting Notes", link:"https://1drv.ms/w/c/f48a627c72e8b791/IQAgneIrqphxTaeJygQ4Od-aAWvm0yW44P2oSRIxLHNwcBg?e=hDc0oW", expiry:"Mar 6 2026 11:59 PM"},
-    {description:"Review Latest Invoice from Mr. Breeden", link:"https://1drv.ms/b/c/f48a627c72e8b791/IQDrzYdu-K0JSbIWP88K_SZkAQiQBPnaqTL6VdxxArS3sPk?e=yRy1Ah", expiry:"Mar 6 2026 11:59 PM"},
-    {description:"Pay Abby Lane Facilitator", link:"", expiry:""},
-    {description:"Review Summons Response", link:"https://1drv.ms/b/c/f48a627c72e8b791/IQC9EfCsElIPR7UBP_OlKcbtAdZKi9WVZXMT6M_cJraJHSI?e=cRri3q", expiry:"Mar 6 2026 11:59 PM"},
-    {description:"Review NLRG Suggestions", link:"https://1drv.ms/b/c/f48a627c72e8b791/IQAZQTyBXI9lSLCQSPJZ-ZwmAa9SAQ3VFd1_v55NvvvojD0?e=vPQaS4", expiry:"Mar 6 2026 11:59 PM"},
-    {description:"Review Claude.ai Demurrer Response Suggestions", link:"https://1drv.ms/w/c/f48a627c72e8b791/IQCsQpu2KbZVTZOuBHXy5iE-AUikTYFOiFTPJfHuLx0p4iA?e=HBy7Ac", expiry:"Mar 6 2026 11:59 PM"},
-    {description:"Review White Summons Response", link:"https://1drv.ms/b/c/f48a627c72e8b791/IQAzXAIckrtkT7nlbDTC4zMkAb0gzE1lZTH4tIGcap8HvXo?e=mnLvIQ", expiry:"Mar 6 2026 11:59 PM"},
-    {description:"Review 2026 Road Video", link:"https://1drv.ms/v/c/f48a627c72e8b791/IQDXobHEqmttR4U6VCbAD_4ZARNhUMrDTlK6RcPNxewPk4g?e=J7KJ8B", expiry:"Mar 6 2026 11:59 PM"},
-    {description:"Other Documents — see full list", link:"", expiry:""}
+    {description:"Any user specific doc view link of final docs", link:"https://1drv.ms/w/c/f48a627c72e8b791/IQBs3N4SH2BhT5jwcR2MtEHbAUh8igiVxrt_HOBj7RZH98M", expiry:""},
+    {description:"Any user specific doc time limited View of working docs", link:"https://1drv.ms/w/c/f48a627c72e8b791/IQCzno4cHEAoR4Zfg2ss9ykFAWIMWxeGHd0Vfj3lLYQVHk0", expiry:"Mar 10 2026 11:59PM"},
+    {description:"Any user specific doc edit link", link:"https://1drv.ms/w/c/f48a627c72e8b791/IQCzno4cHEAoR4Zfg2ss9ykFAU2Iiq4FF9zhk6I2mo-YLU8", expiry:""},
+    {description:"Any user specific doc time limited Edit link", link:"https://1drv.ms/w/c/f48a627c72e8b791/IQCzno4cHEAoR4Zfg2ss9ykFAU2Iiq4FF9zhk6I2mo-YLU8?e=dKQHXF", expiry:"Mar 10 2026 11:59PM"},
+    {description:"Test Access - MS Users - View File - View Link", link:"https://1drv.ms/w/c/F48A627C72E8B791/AXqp4kmnWZlJmHsgZhgXCx4?e=VYkUz6", expiry:""},
+    {description:"Test Access - MS Users - View File - Edit Link", link:"https://1drv.ms/w/c/F48A627C72E8B791/AXqp4kmnWZlJmHsgZhgXCx4?e=kKY5FA", expiry:""},
+    {description:"Test Edit Access for non-MS Account users", link:"https://1drv.ms/w/c/F48A627C72E8B791/AbOejhwcQChHhl-Dayz3KQU?e=YY5moy", expiry:""},
+    {description:"Test Edit Access for MS Account users", link:"https://1drv.ms/w/c/F48A627C72E8B791/AbOejhwcQChHhl-Dayz3KQU?e=0dv2vl", expiry:""},
+    {description:"View Lawsuit Files", link:"https://1drv.ms/f/c/F48A627C72E8B791/AqncgL_Cs2NLgvf-iZ3gn7c?e=D9kKfu", expiry:""},
+    {description:"Message Board (to generate email to others)", link:"https://1drv.ms/x/c/f48a627c72e8b791/IQDPJ_LH4OGCQ5U2kbwlfat0Aa7502pa_3xLB_mG-huPUkw?e=bkQtYS", expiry:""}
   ],
   newuser: [
     {description:"Complete LCP Acknowledgment Form", link:"#screen-newuser", expiry:""},
@@ -642,9 +652,9 @@ var TASK_LISTS = {
 
 // -- User Registry --
 var USERS = [
-  { name:"Edward McConnell", email:"edmcconne"+"@"+"gmail.com", dateSigned:"Feb 26 2026", signature:"Edward McConnell", hasAccess:true, microsoftAccount:true, tokenPointer:0, password:"19213056676D41187E7E000602057178", taskStatus:[{done:true,comment:"Signed Feb 26 2026"},{done:true,comment:""},{done:true,comment:""},{done:true,comment:""},{done:true,comment:""},{done:true,comment:""},{done:true,comment:""},{done:true,comment:""},{done:true,comment:""},{done:false,comment:""}] },
-  { name:"EdView", email:"abbylaneneighbors"+"@"+"gmail.com", dateSigned:"Feb 26 2026", signature:"EdView", hasAccess:true, microsoftAccount:true, tokenPointer:0, password:"202E2C4B685F48251B1145690006737A7E010006", taskStatus:[{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""}] },
-  { name:"EdExt", email:"edext18"+"@"+"gmail.com", dateSigned:"Mar 2  2026", signature:"Ed McConnell", hasAccess:true, microsoftAccount:false, tokenPointer:0, password:"04280B4A685F48251B1145690006737A7E010006", taskStatus:[{done:false,comment:""},{done:false,comment:"Link expires: Mar 6 2026 11:59 PM"},{done:false,comment:"Link expires: Mar 6 2026 11:59 PM"},{done:false,comment:""},{done:false,comment:"Link expires: Mar 6 2026 11:59 PM"},{done:false,comment:"Link expires: Mar 6 2026 11:59 PM"},{done:false,comment:"Link expires: Mar 6 2026 11:59 PM"},{done:false,comment:"Link expires: Mar 6 2026 11:59 PM"},{done:false,comment:"Link expires: Mar 6 2026 11:59 PM"},{done:false,comment:""}] },
+  { name:"Edward McConnell", email:"edmcconne"+"@"+"gmail.com", dateSigned:"Feb 26 2026", signature:"Edward McConnell", hasAccess:true, microsoftAccount:true, tokenPointer:0, password:"19213056676D41187E7E000602057178", taskStatus:[{done:true,comment:"Pass"},{done:true,comment:"Pass"},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""}] },
+  { name:"EdView", email:"abbylaneneighbors"+"@"+"gmail.com", dateSigned:"Feb 26 2026", signature:"EdView", hasAccess:true, microsoftAccount:true, tokenPointer:0, password:"202E2C4B685F48251B1145690006737A7E010006", taskStatus:[{done:true,comment:"Pass"},{done:true,comment:"Pass"},{done:false,comment:"Fail - Edit Access to doc"},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""}] },
+  { name:"EdExt", email:"edext18"+"@"+"gmail.com", dateSigned:"Mar 2  2026", signature:"Ed McConnell", hasAccess:true, microsoftAccount:false, tokenPointer:0, password:"04280B4A685F48251B1145690006737A7E010006", taskStatus:[{done:true,comment:"Pass"},{done:false,comment:"Fail - Gives Edit Capability"},{done:false,comment:"Pass"},{done:false,comment:"Pass"},{done:false,comment:"Link expires: Mar 6 2026 11:59 PM"},{done:false,comment:"Link expires: Mar 6 2026 11:59 PM"},{done:false,comment:"Link expires: Mar 6 2026 11:59 PM"},{done:false,comment:"Link expires: Mar 6 2026 11:59 PM"},{done:false,comment:"Link expires: Mar 6 2026 11:59 PM"},{done:false,comment:""}] },
   { name:"Ashley Cornicello", email:"ashley"+"@"+"collegiatesealers.com", dateSigned:"", signature:"Ashley Cornicello", hasAccess:false, microsoftAccount:true, tokenPointer:0, password:"", taskStatus:[{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""}] },
   { name:"Brenda Gilbert", email:"bcg3812"+"@"+"gmail.com", dateSigned:"", signature:"Brenda Gilbert", hasAccess:false, microsoftAccount:true, tokenPointer:0, password:"", taskStatus:[{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""}] },
   { name:"Jim Breeden", email:"jcb"+"@"+"lawbreeden.com", dateSigned:"", signature:"Jim Breeden", hasAccess:false, microsoftAccount:true, tokenPointer:0, password:"", taskStatus:[{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""},{done:false,comment:""}] },
@@ -703,6 +713,17 @@ function openMailto(mailto) {
   // If a desktop mail client is configured it launches directly.
   // If using webmail (Gmail in Chrome) it opens compose in a new tab.
   window.open(mailto, '_blank');
+}
+
+// Append ?web=1 to OneDrive links when FORCE_WEB_VIEWER is enabled
+function forceWebUrl(url) {
+  if (!FORCE_WEB_VIEWER) return url;
+  if (!url || url.indexOf('#screen-') === 0 || url.indexOf('mailto:') === 0) return url;
+  // Only apply to OneDrive/SharePoint links
+  if (url.indexOf('1drv.ms') < 0 && url.indexOf('onedrive.live.com') < 0 && url.indexOf('sharepoint.com') < 0) return url;
+  // Don't add if already present
+  if (url.indexOf('web=1') >= 0) return url;
+  return url + (url.indexOf('?') >= 0 ? '&' : '?') + 'web=1';
 }
 
 
@@ -1226,6 +1247,19 @@ function getUserRole(user) {
 
 function buildReturningView(user) {
   _reviewerUser = user;
+  // Track owner (idx 0) for represent mode
+  var userIdx = USERS.indexOf(user);
+  if (userIdx < 0) {
+    // Try matching by email
+    userIdx = USERS.findIndex(function(u){ return u.email === user.email; });
+  }
+  var isOwner = (userIdx === 0);
+  if (isOwner && _representingIdx < 0) {
+    _ownerUser = user; // save owner ref when not already representing
+  }
+  // Show/hide Represent button — only for owner when NOT in represent mode
+  var btnRep = document.getElementById('btn-represent');
+  if (btnRep) btnRep.style.display = (isOwner && _representingIdx < 0) ? 'inline-block' : 'none';
   var role = getUserRole(user);
   var tasks = TASK_LISTS[role] || [];
   var status = user.taskStatus || [];
@@ -1276,8 +1310,9 @@ function buildReturningView(user) {
         linkCell = '<td style="text-align:center"><button class="task-link-btn" onclick="showScreen(\'' + screenId + '\')">Open</button></td>';
       } else if (role === 'reviewer' && t.expiry) {
         // Non-MS reviewer link with expiry — button + live countdown badge
+        var reviewerUrl = forceWebUrl(t.link);
         linkCell = '<td style="text-align:center">' +
-          '<button class="task-link-btn" onclick="openReviewerLink(' + i + ',\'' + safeText(t.link) + '\',\'' + safeText(t.expiry) + '\')">Open &#8599;</button>' +
+          '<button class="task-link-btn" onclick="openReviewerLink(' + i + ',\'' + safeText(reviewerUrl) + '\',\'' + safeText(t.expiry) + '\')">Open &#8599;</button>' +
           '<span class="task-countdown" id="task-cd-' + i + '" data-expiry="' + safeText(t.expiry) + '">...</span>' +
           '</td>';
         // Auto-fill comment with expiry if blank
@@ -1286,7 +1321,7 @@ function buildReturningView(user) {
           status[i] = s;
         }
       } else {
-        linkCell = '<td style="text-align:center"><a href="' + safeText(t.link) + '" target="_blank" class="task-link-btn">Open &#8599;</a></td>';
+        linkCell = '<td style="text-align:center"><a href="' + safeText(forceWebUrl(t.link)) + '" target="_blank" class="task-link-btn">Open &#8599;</a></td>';
       }
       html += '<tr' + doneRowClass + ' id="task-item-' + i + '">' +
         '<td style="text-align:center"><span class="task-num-cell">' + (i+1) + '</span></td>' +
@@ -1347,6 +1382,8 @@ function openReviewerLink(taskIdx, url, expiry) {
 }
 
 var _countdownInterval = null;
+var _ownerUser = null;        // set when owner logs in; used to restore after representation
+var _representingIdx = -1;    // index of user being represented (-1 = not representing)
 
 function startCountdownTimers() {
   // Clear any existing timer
@@ -1421,6 +1458,93 @@ function sendChecklistUpdate() {
   document.getElementById('checklist-done-msg').textContent =
     'Your update has been sent. Thank you, ' + user.name + '.';
   document.getElementById('checklist-done-msg').style.display = 'block';
+}
+
+// ============================================================
+// REPRESENT USER MODE (owner only)
+// ============================================================
+// Save current checklist UI state back to the USERS array for the active user
+// Called before any represent mode transition to preserve unsaved changes
+function saveCurrentUIState() {
+  if (!_reviewerUser) return;
+  var userIdx = USERS.findIndex(function(u){ return u.email === _reviewerUser.email; });
+  if (userIdx < 0) return;
+  var role = getUserRole(_reviewerUser);
+  var tasks = TASK_LISTS[role] || [];
+  var ts = USERS[userIdx].taskStatus || [];
+  while (ts.length < tasks.length) ts.push({done:false, comment:''});
+  for (var i = 0; i < tasks.length; i++) {
+    var cb = document.getElementById('task-done-' + i);
+    var cm = document.getElementById('task-comment-' + i);
+    if (cb) ts[i].done = cb.checked;
+    if (cm) ts[i].comment = cm.value;
+  }
+  USERS[userIdx].taskStatus = ts;
+}
+
+function openRepresentPicker() {
+  // Save current UI state before showing picker
+  saveCurrentUIState();
+  // Build the dropdown with all non-owner users
+  var sel = document.getElementById('represent-select');
+  sel.innerHTML = '<option value="">— Select user —</option>';
+  for (var i = 1; i < USERS.length; i++) {
+    var opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = USERS[i].name + ' (' + getUserRole(USERS[i]) + ')';
+    sel.appendChild(opt);
+  }
+  // Show banner in picker mode (no user selected yet)
+  var banner = document.getElementById('represent-banner');
+  banner.style.display = 'flex';
+  document.getElementById('represent-name').textContent = 'Select a user to represent:';
+}
+
+function switchRepresent(idxStr) {
+  var idx = parseInt(idxStr, 10);
+  if (isNaN(idx) || idx < 1 || idx >= USERS.length) return;
+
+  // Save current UI state before switching away
+  saveCurrentUIState();
+
+  _representingIdx = idx;
+  var repUser = USERS[idx];
+
+  // Update banner
+  document.getElementById('represent-name').textContent = repUser.name + ' — ' + getUserRole(repUser);
+  document.getElementById('represent-banner').style.display = 'flex';
+
+  // Rebuild dropdown in case user switches
+  var sel = document.getElementById('represent-select');
+  sel.innerHTML = '<option value="">— Switch user —</option>';
+  for (var i = 1; i < USERS.length; i++) {
+    var opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = USERS[i].name + ' (' + getUserRole(USERS[i]) + ')';
+    if (i === idx) opt.selected = true;
+    sel.appendChild(opt);
+  }
+
+  // Hide admin/represent buttons while representing
+  document.getElementById('btn-admin').style.display = 'none';
+  document.getElementById('btn-represent').style.display = 'none';
+
+  // Build checklist for represented user (reads live USERS array)
+  buildReturningView(USERS[idx]);
+}
+
+function exitRepresent() {
+  // Save represented user's current UI state before exiting
+  saveCurrentUIState();
+
+  _representingIdx = -1;
+  document.getElementById('represent-banner').style.display = 'none';
+  // Restore owner view — reads from USERS array which has preserved state
+  if (_ownerUser) {
+    buildReturningView(_ownerUser);
+    document.getElementById('btn-admin').style.display = 'inline-block';
+    document.getElementById('btn-represent').style.display = 'inline-block';
+  }
 }
 
 function openAccountUpdate() {
@@ -1871,6 +1995,16 @@ document.getElementById('admin-login-modal').addEventListener('click',    functi
         </div>
         <div class="adm-alert adm-alert-info">&#9888; Changing the password key invalidates all existing user passwords. Update all user password fields after changing.</div>
       </div>
+      <div class="adm-section">
+        <div class="adm-section-title">Link Behavior</div>
+        <div class="adm-field-row" style="align-items:center;gap:12px;">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:#F5F0E8;font-size:13px;">
+            <input type="checkbox" id="adm-force-web-viewer" style="width:16px;height:16px;cursor:pointer;">
+            Force Web Viewer (<code>?web=1</code>) — appended to OneDrive links, prevents local app launch
+          </label>
+        </div>
+        <div class="adm-alert adm-alert-info" style="margin-top:8px;">&#9432; When enabled, all document links open in the browser web viewer instead of launching Word/Excel locally. Recommended for consistent cross-device experience.</div>
+      </div>
       <div class="adm-btn-row">
         <button class="adm-btn adm-btn-gold" onclick="admApplySystem()">&#10003; Apply System Changes</button>
       </div>
@@ -1970,7 +2104,7 @@ function openAdmin() {
     extExpiry:   EXT_EXPIRY,
     tokenLookup: TOKEN_LOOKUP_LINK,
   };
-  _admSys = { req: REQ, passwordKey: PASSWORD_KEY };
+  _admSys = { req: REQ, passwordKey: PASSWORD_KEY, forceWebViewer: FORCE_WEB_VIEWER };
   _admTasks = null; // reset so admGetTasks() re-copies from live TASK_LISTS
   admRenderAll();
   admSetDirty(false);
@@ -2040,6 +2174,8 @@ function admRebuildConfig(html) {
   c += 'var TOKEN_LOOKUP_LINK = "' + (_admLinks.tokenLookup||'') + '";\n';
   c += '// -- Password Encryption --\n';
   c += 'var PASSWORD_KEY = "' + (_admSys.passwordKey||'') + '";\n\n';
+  c += '// -- Link Behavior --\n';
+  c += 'var FORCE_WEB_VIEWER = ' + (_admSys.forceWebViewer ? 'true' : 'false') + ';  // Append ?web=1 to OneDrive links — forces web viewer, prevents local app launch\n';
   c += '// -- Token Authentication --\n';
   c += '// Pi-transform: any valid 6-char hex input token computes its response token directly.\n';
   c += '// No pre-built table needed. Matches formula in AbbyLane_TokenLookup_v3.xlsx.\n';
@@ -2128,6 +2264,7 @@ function admRenderLinks() {
 function admRenderSystem() {
   document.getElementById('adm-req').value          = _admSys.req         || '';
   document.getElementById('adm-password-key').value = _admSys.passwordKey || '';
+  document.getElementById('adm-force-web-viewer').checked = !!_admSys.forceWebViewer;
 }
 
 // ── TABS ─────────────────────────────────────────────────────
@@ -2343,8 +2480,11 @@ function admApplyLinks() {
 }
 
 function admApplySystem() {
-  _admSys.req         = document.getElementById('adm-req').value.trim();
-  _admSys.passwordKey = document.getElementById('adm-password-key').value.trim();
+  _admSys.req            = document.getElementById('adm-req').value.trim();
+  _admSys.passwordKey    = document.getElementById('adm-password-key').value.trim();
+  _admSys.forceWebViewer = document.getElementById('adm-force-web-viewer').checked;
+  // Apply immediately to live CONFIG so current session respects the change
+  FORCE_WEB_VIEWER = _admSys.forceWebViewer;
   admSetDirty(true);
   document.getElementById('adm-system-alert').innerHTML =
     '<div class="adm-alert adm-alert-ok">&#10003; Changes staged — save file to write to disk.</div>';
