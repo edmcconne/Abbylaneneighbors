@@ -458,6 +458,7 @@
       <span style="font-size:0.75rem;color:var(--muted);font-style:italic;align-self:center;">Send to save your progress between sessions</span>
       <button id="btn-admin" class="btn btn-gold" onclick="openAdmin()" style="display:none;font-size:0.82rem;padding:9px 18px;">&#9881; Admin Panel</button>
       <button id="btn-represent" class="btn btn-gold" onclick="openRepresentPicker()" style="display:none;font-size:0.82rem;padding:9px 18px;">&#128100; Represent User</button>
+      <button id="btn-quick-save" class="btn btn-gold" onclick="quickSave()" style="display:none;font-size:0.82rem;padding:9px 18px;" title="Quick Save">&#128190; Quick Save</button>
     </div>
   </div>
 </div>
@@ -864,6 +865,8 @@ function verifyPassword(plain, stored) {
       }
     }
   } catch(e) {}
+  // Restore file handle from previous session — deferred so second script block is loaded first
+  if (window.showOpenFilePicker) setTimeout(function(){ try{ fhRestoreHandle(); }catch(e){} }, 0);
 })();
 
 // ============================================================
@@ -1260,6 +1263,9 @@ function buildReturningView(user) {
   // Show/hide Represent button — only for owner when NOT in represent mode
   var btnRep = document.getElementById('btn-represent');
   if (btnRep) btnRep.style.display = (isOwner && _representingIdx < 0) ? 'inline-block' : 'none';
+  // Show quick-save for any user when file handle is available
+  var btnQS = document.getElementById('btn-quick-save');
+  if (btnQS) btnQS.style.display = _admFileHandle ? 'inline-block' : 'none';
   var role = getUserRole(user);
   var tasks = TASK_LISTS[role] || [];
   var status = user.taskStatus || [];
@@ -1528,6 +1534,7 @@ function switchRepresent(idxStr) {
   // Hide admin/represent buttons while representing
   document.getElementById('btn-admin').style.display = 'none';
   document.getElementById('btn-represent').style.display = 'none';
+  document.getElementById('btn-quick-save').style.display = 'none';
 
   // Build checklist for represented user (reads live USERS array)
   buildReturningView(USERS[idx]);
@@ -1544,6 +1551,65 @@ function exitRepresent() {
     buildReturningView(_ownerUser);
     document.getElementById('btn-admin').style.display = 'inline-block';
     document.getElementById('btn-represent').style.display = 'inline-block';
+    if (_admFileHandle) document.getElementById('btn-quick-save').style.display = 'inline-block';
+  }
+}
+
+// Quick Save — saves current checklist state to file without opening Admin Panel
+async function quickSave() {
+  if (!_admFileHandle) {
+    admShowToast('No file loaded — use Admin Panel → Load File first', 'err');
+    return;
+  }
+  try {
+    var perm = await _admFileHandle.queryPermission({ mode: 'readwrite' });
+    if (perm !== 'granted') {
+      perm = await _admFileHandle.requestPermission({ mode: 'readwrite' });
+    }
+    if (perm !== 'granted') { admShowToast('File write permission denied', 'err'); return; }
+
+    // Sync current checklist UI state into live USERS array
+    var user = _reviewerUser;
+    if (user) {
+      var role  = getUserRole(user);
+      var tasks = TASK_LISTS[role] || [];
+      var userIdx = USERS.findIndex(function(u){ return u.email === user.email; });
+      if (userIdx >= 0) {
+        var ts = [];
+        for (var i = 0; i < tasks.length; i++) {
+          var cb = document.getElementById('task-done-' + i);
+          var cm = document.getElementById('task-comment-' + i);
+          ts.push({ done: cb ? cb.checked : false, comment: cm ? cm.value.trim() : '' });
+        }
+        USERS[userIdx].taskStatus = ts;
+      }
+    }
+
+    // Rebuild and save
+    // We need _admSys/_admLinks populated — copy from live CONFIG if admin wasn't opened
+    if (!_admSys.req) _admSys = { req: REQ, passwordKey: PASSWORD_KEY, forceWebViewer: FORCE_WEB_VIEWER };
+    if (!_admLinks.docLink) _admLinks = { docLink: DOC_LINK, docName: DOC_NAME, extLink: EXT_LINK, extExpiry: EXT_EXPIRY, tokenLookup: TOKEN_LOOKUP_LINK };
+    if (!_admTasks) _admTasks = null; // use live TASK_LISTS
+
+    // Sync USERS to _admUsers for rebuild
+    _admUsers = USERS.map(function(u) {
+      return Object.assign({}, u, {taskStatus: (u.taskStatus||[]).map(function(s){ return Object.assign({},s); })});
+    });
+
+    var file    = await _admFileHandle.getFile();
+    var html    = await file.text();
+    var newHtml = admRebuildConfig(html);
+    var writable = await _admFileHandle.createWritable();
+    await writable.write(newHtml);
+    await writable.close();
+
+    // Show brief confirmation on checklist
+    var msg = document.getElementById('checklist-done-msg');
+    msg.textContent = 'Progress saved to file.';
+    msg.style.display = 'block';
+    setTimeout(function(){ msg.style.display = 'none'; }, 3000);
+  } catch(e) {
+    admShowToast('Quick Save error: ' + e.message, 'err');
   }
 }
 
@@ -2088,6 +2154,76 @@ document.getElementById('admin-login-modal').addEventListener('click',    functi
 <script>
 // ── ADMIN STATE ────────────────────────────────────────────────
 var _admFileHandle = null;
+
+// ── FILE HANDLE PERSISTENCE (IndexedDB) ──────────────────────
+var _FH_DB_NAME    = 'aln_portal';
+var _FH_STORE_NAME = 'fileHandles';
+var _FH_KEY        = 'portalFile';
+
+function fhOpenDb() {
+  return new Promise(function(resolve, reject) {
+    var req = indexedDB.open(_FH_DB_NAME, 1);
+    req.onupgradeneeded = function(e) {
+      e.target.result.createObjectStore(_FH_STORE_NAME);
+    };
+    req.onsuccess = function(e) { resolve(e.target.result); };
+    req.onerror   = function(e) { reject(e.target.error); };
+  });
+}
+
+async function fhSaveHandle(handle) {
+  try {
+    var db = await fhOpenDb();
+    var tx = db.transaction(_FH_STORE_NAME, 'readwrite');
+    tx.objectStore(_FH_STORE_NAME).put(handle, _FH_KEY);
+  } catch(e) { /* silent — IndexedDB may not be available on file:// in all browsers */ }
+}
+
+async function fhLoadHandle() {
+  try {
+    var db = await fhOpenDb();
+    return new Promise(function(resolve) {
+      var tx  = db.transaction(_FH_STORE_NAME, 'readonly');
+      var req = tx.objectStore(_FH_STORE_NAME).get(_FH_KEY);
+      req.onsuccess = function(e) { resolve(e.target.result || null); };
+      req.onerror   = function()  { resolve(null); };
+    });
+  } catch(e) { return null; }
+}
+
+async function fhRestoreHandle() {
+  var handle = await fhLoadHandle();
+  if (!handle) return;
+  try {
+    // Verify permission — may need user gesture to re-grant
+    var perm = await handle.queryPermission({ mode: 'readwrite' });
+    if (perm === 'granted') {
+      _admFileHandle = handle;
+      var file = await handle.getFile();
+      _updateFileStatus(file.name);
+    } else {
+      // Permission not yet granted — store handle, will re-request on next save
+      _admFileHandle = handle;
+      var file2 = await handle.getFile();
+      _updateFileStatus(file2.name + ' (click Save to re-authorize)');
+    }
+  } catch(e) { /* handle may be stale — ignore */ }
+}
+
+function _updateFileStatus(name) {
+  // Update status in admin panel header
+  var el = document.getElementById('adm-file-status');
+  if (el) el.textContent = '\uD83D\uDCC4 ' + name;
+  // Update quick-save button in checklist footer
+  var qs = document.getElementById('btn-quick-save');
+  if (qs) {
+    qs.style.display = 'inline-block';
+    qs.title = 'Save to: ' + name;
+  }
+  // Enable save button in admin panel
+  var sb = document.getElementById('adm-btn-save');
+  if (sb) sb.disabled = false;
+}
 var _admDirty      = false;
 // Live working copies — loaded from running CONFIG on panel open
 var _admUsers  = [];
@@ -2124,8 +2260,8 @@ async function admOpenFile() {
     });
     _admFileHandle = handles[0];
     var file = await _admFileHandle.getFile();
-    document.getElementById('adm-file-status').textContent = '&#128196; ' + file.name;
-    document.getElementById('adm-btn-save').disabled = false;
+    _updateFileStatus(file.name);
+    await fhSaveHandle(_admFileHandle);  // persist for future sessions
     admShowToast('File loaded: ' + file.name, 'ok');
   } catch(e) {
     if (e.name !== 'AbortError') admShowToast('Error: ' + e.message, 'err');
@@ -2135,6 +2271,12 @@ async function admOpenFile() {
 async function admSaveFile() {
   if (!_admFileHandle) { admShowToast('Load the portal file first using Load File', 'err'); return; }
   try {
+    // Re-request permission if needed (required after page reload)
+    var perm = await _admFileHandle.queryPermission({ mode: 'readwrite' });
+    if (perm !== 'granted') {
+      perm = await _admFileHandle.requestPermission({ mode: 'readwrite' });
+    }
+    if (perm !== 'granted') { admShowToast('File write permission denied', 'err'); return; }
     admReadTasksFromUI(); // capture any unsaved UI edits before writing
     var file = await _admFileHandle.getFile();
     var html  = await file.text();
